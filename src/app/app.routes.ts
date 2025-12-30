@@ -23,6 +23,10 @@ export const routes: Routes = [
       {
         path: 'pagos',
         loadChildren: () => import('./features/pagos/pagos.routes').then(m => m.PAGOS_ROUTES)
+      },
+      {
+        path: 'unidades',
+        loadChildren: () => import('./features/unidades/unidades.routes').then(m => m.UNIDADES_ROUTES)
       }
     ]
   },

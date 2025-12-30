@@ -1,6 +1,15 @@
+export enum UnitStatus {
+  DISPONIBLE = 'DISPONIBLE',
+  OCUPADA = 'OCUPADA',
+  EN_MANTENIMIENTO = 'EN_MANTENIMIENTO',
+  RESERVADA = 'RESERVADA',
+  FUERA_SERVICIO = 'FUERA_SERVICIO'
+}
+
 export interface IUnit {
   id: string;
-  unitNumber: string;
+  building: string; // Edificio
+  unitNumber: string; // Número de departamento
   floor: number;
   block?: string;
   area: number; // square meters
@@ -9,13 +18,15 @@ export interface IUnit {
   parkingSpots: number;
   storageUnits: number;
   currentResidentId?: string;
-  isOccupied: boolean;
+  status: UnitStatus;
+  isOccupied: boolean; // Deprecated - mantener por compatibilidad
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface ICreateUnitDto {
-  unitNumber: string;
+  building: string; // Edificio
+  unitNumber: string; // Número de departamento
   floor: number;
   block?: string;
   area: number;
