@@ -31,6 +31,24 @@ Este documento describe las funcionalidades actuales, en desarrollo y planificad
 
 ### Funcionalidades Planificadas
 
+#### Módulo de Conserjería y Control de Acceso
+- [ ] Registro de visitas en tiempo real
+- [ ] Control de entrada y salida de visitantes
+- [ ] Registro de datos del visitante (nombre, documento, vehículo)
+- [ ] Asociación de visitas a unidades/residentes
+- [ ] Notificación automática a residentes sobre visitas
+- [ ] Registro de entregas y paquetes
+- [ ] Control de vehículos visitantes (placa, modelo)
+- [ ] Historial completo de visitas por unidad
+- [ ] Búsqueda y filtrado de visitas (por fecha, residente, visitante)
+- [ ] Reportes de visitas (diario, semanal, mensual)
+- [ ] Lista de visitantes frecuentes
+- [ ] Registro de visitas programadas
+- [ ] Código QR para visitas autorizadas
+- [ ] Control de horarios de visitas
+- [ ] Registro de personal de servicio (domésticas, jardineros, etc.)
+- [ ] Permisos especiales y autorizaciones
+
 #### Módulo de Comunicaciones
 - [ ] Tablón de anuncios
 - [ ] Notificaciones push
@@ -146,8 +164,8 @@ Este documento describe las funcionalidades actuales, en desarrollo y planificad
 ## Ideas Futuras (Sin Fecha Definida)
 
 - App móvil nativa (iOS/Android)
-- Integración con sistemas de control de acceso
-- Sistema de parking y visitantes
+- Integración con sistemas de control de acceso físico
+- Sistema de parking inteligente
 - Marketplace de servicios
 - Integración con contabilidad externa
 - API pública para integraciones
@@ -155,6 +173,9 @@ Este documento describe las funcionalidades actuales, en desarrollo y planificad
 - Chat en tiempo real
 - Reconocimiento facial para accesos
 - IoT para lectura de medidores
+- Integración con cámaras de seguridad
+- Sistema de alertas de emergencia
+- Control de acceso mediante app móvil
 
 ## Contribuciones
 
