@@ -1,0 +1,92 @@
+<aside
+  [class.w-64]="isOpen"
+  [class.w-20]="!isOpen"
+  class="bg-white border-r border-gray-200 transition-all duration-300 flex flex-col"
+>
+  <!-- Logo Section -->
+  <div class="p-6 border-b border-gray-200">
+    @if (isOpen) {
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+          </svg>
+        </div>
+        <span class="text-lg font-bold text-gray-800">Condominio</span>
+      </div>
+    } @else {
+      <div class="flex justify-center">
+        <div class="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+          </svg>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Navigation Menu -->
+  <nav class="flex-1 py-4">
+    <ul class="space-y-1 px-3">
+      @for (item of menuItems; track item.route) {
+        <li>
+          <a
+            [routerLink]="item.route"
+            routerLinkActive="bg-primary-50 text-primary-700 border-primary-700"
+            class="flex items-center px-3 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors group border-l-4 border-transparent"
+          >
+            <!-- Icon -->
+            <span class="flex-shrink-0">
+              @switch (item.icon) {
+                @case ('dashboard') {
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                  </svg>
+                }
+                @case ('people') {
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                }
+                @case ('payments') {
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                }
+                @case ('apartment') {
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                }
+              }
+            </span>
+
+            @if (isOpen) {
+              <span class="ml-3 flex-1 font-medium">{{ item.label }}</span>
+              @if (item.badge && item.badge > 0) {
+                <span class="ml-auto bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
+                  {{ item.badge }}
+                </span>
+              }
+            }
+          </a>
+        </li>
+      }
+    </ul>
+  </nav>
+
+  <!-- Footer -->
+  <div class="p-4 border-t border-gray-200">
+    @if (isOpen) {
+      <div class="text-xs text-gray-500 text-center">
+        Versión 0.1.0
+      </div>
+    }
+  </div>
+</aside>

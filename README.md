@@ -1,59 +1,102 @@
-# GestionCondominios
+# Sistema de Gestión de Condominios
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.0.4.
+Sistema web moderno para la gestión integral de condominios, desarrollado con Angular 18 y Tailwind CSS.
 
-## Development server
+## Descripción
 
-To start a local development server, run:
+Esta aplicación permite administrar de manera eficiente las operaciones diarias de un condominio, incluyendo la gestión de residentes, control de pagos y gastos comunes, y comunicación entre administración y propietarios.
 
+## Características Principales
+
+- **Gestión de Residentes**: Registro y administración de propietarios y arrendatarios
+- **Pagos y Gastos Comunes**: Control de cuotas, pagos y estados de cuenta
+- **Dashboard Interactivo**: Visualización de métricas y estados importantes
+- **Interfaz Moderna**: Diseño responsive con Tailwind CSS
+
+## Tecnologías
+
+- **Frontend**: Angular 18 (Standalone Components)
+- **UI Framework**: Tailwind CSS
+- **Estilos**: SCSS + Tailwind
+- **Testing**: Vitest
+- **Version Control**: Git
+
+## Requisitos Previos
+
+- Node.js (v18 o superior)
+- npm (v9 o superior)
+- Angular CLI v21+
+
+## Instalación
+
+1. Clonar el repositorio:
+```bash
+git clone <repository-url>
+cd gestion-condominios
+```
+
+2. Instalar dependencias:
+```bash
+npm install
+```
+
+3. Iniciar servidor de desarrollo:
 ```bash
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+4. Abrir navegador en `http://localhost:4200/`
 
-## Code scaffolding
+## Estructura del Proyecto
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+```
+src/
+├── app/
+│   ├── core/           # Servicios singleton, guards, interceptors
+│   ├── shared/         # Componentes, directivas y pipes compartidos
+│   ├── features/       # Módulos de características
+│   │   ├── residentes/ # Gestión de residentes
+│   │   └── pagos/      # Gestión de pagos
+│   └── layout/         # Componentes de layout
+├── assets/            # Recursos estáticos
+└── environments/      # Configuraciones de entorno
+```
+
+## Scripts Disponibles
 
 ```bash
+# Desarrollo
+ng serve
+
+# Build de producción
+ng build
+
+# Tests unitarios
+ng test
+
+# Linting
+ng lint
+
+# Generar componente
 ng generate component component-name
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Contribución
 
-```bash
-ng generate --help
-```
+Por favor lee [CONTRIBUTING.md](CONTRIBUTING.md) para detalles sobre el proceso de contribución.
 
-## Building
+## Roadmap
 
-To build the project run:
+Consulta [ROADMAP.md](ROADMAP.md) para ver las funcionalidades planificadas y mejoras futuras.
 
-```bash
-ng build
-```
+## Arquitectura
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+Para más detalles sobre la arquitectura del proyecto, consulta [ARCHITECTURE.md](ARCHITECTURE.md).
 
-## Running unit tests
+## Licencia
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+Este proyecto es privado y está protegido por derechos de autor.
 
-```bash
-ng test
-```
+## Contacto
 
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Para más información o soporte, contacta al equipo de desarrollo.

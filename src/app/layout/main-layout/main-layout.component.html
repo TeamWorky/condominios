@@ -1,0 +1,19 @@
+<div class="flex h-screen bg-gray-50">
+  <!-- Sidebar -->
+  <app-sidebar
+    [isOpen]="isSidebarOpen"
+    (toggle)="toggleSidebar()"
+    class="transition-all duration-300"
+  />
+
+  <!-- Main Content -->
+  <div class="flex-1 flex flex-col overflow-hidden">
+    <!-- Header -->
+    <app-header (toggleSidebar)="toggleSidebar()" />
+
+    <!-- Page Content -->
+    <main class="flex-1 overflow-y-auto p-6">
+      <router-outlet />
+    </main>
+  </div>
+</div>
