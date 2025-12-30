@@ -16,9 +16,9 @@ El sistema está construido con Angular 18 utilizando una arquitectura modular b
 
 ### Frontend
 - **Framework**: Angular 18
-- **UI Library**: Tailwind CSS 3
+- **UI Library**: Angular Material 21
 - **Lenguaje**: TypeScript 5.5+
-- **Estilos**: SCSS + Tailwind CSS
+- **Estilos**: SCSS + Material Design 3
 - **Testing**: Vitest
 - **Build Tool**: Angular CLI 21
 
@@ -446,7 +446,7 @@ trackByResidentId(index: number, resident: IResident): string {
 ### Preparado para:
 
 1. **Micro-frontends**: Arquitectura modular facilita división
-2. **Múltiples temas**: Sistema de theming con Tailwind CSS
+2. **Múltiples temas**: Sistema de theming con Angular Material (light/dark)
 3. **Multi-tenant**: Servicios diseñados para soportar múltiples condominios
 4. **Internacionalización**: Estructura lista para i18n
 
@@ -463,7 +463,8 @@ trackByResidentId(index: number, resident: IResident): string {
 ## Referencias
 
 - [Angular Style Guide](https://angular.dev/style-guide)
-- [Tailwind CSS](https://tailwindcss.com/docs)
+- [Angular Material](https://material.angular.io/)
+- [Material Design 3](https://m3.material.io/)
 - [RxJS Best Practices](https://rxjs.dev/guide/overview)
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/)
 

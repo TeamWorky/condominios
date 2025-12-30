@@ -1,1 +1,20 @@
-// Component-specific styles can be added here if needed
+.layout-container {
+  height: 100vh;
+}
+
+.sidebar-drawer {
+  width: 250px;
+}
+
+.main-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.content-wrapper {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  background-color: var(--mat-sys-background);
+}

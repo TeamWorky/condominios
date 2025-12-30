@@ -1,6 +1,6 @@
 # Sistema de Gestión de Condominios
 
-Sistema web moderno para la gestión integral de condominios, desarrollado con Angular 18 y Tailwind CSS.
+Sistema web moderno para la gestión integral de condominios, desarrollado con Angular 18 y Angular Material.
 
 ## Descripción
 
@@ -11,13 +11,13 @@ Esta aplicación permite administrar de manera eficiente las operaciones diarias
 - **Gestión de Residentes**: Registro y administración de propietarios y arrendatarios
 - **Pagos y Gastos Comunes**: Control de cuotas, pagos y estados de cuenta
 - **Dashboard Interactivo**: Visualización de métricas y estados importantes
-- **Interfaz Moderna**: Diseño responsive con Tailwind CSS
+- **Interfaz Moderna**: Diseño responsive con Angular Material y Material Design 3
 
 ## Tecnologías
 
 - **Frontend**: Angular 18 (Standalone Components)
-- **UI Framework**: Tailwind CSS
-- **Estilos**: SCSS + Tailwind
+- **UI Framework**: Angular Material 21
+- **Estilos**: SCSS + Material Design
 - **Testing**: Vitest
 - **Version Control**: Git
 

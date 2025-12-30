@@ -1,6 +1,12 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatListModule } from '@angular/material/list';
+import { MatDividerModule } from '@angular/material/divider';
 
 interface DashboardCard {
   title: string;
@@ -14,7 +20,16 @@ interface DashboardCard {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [
+    CommonModule,
+    RouterLink,
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatChipsModule,
+    MatListModule,
+    MatDividerModule
+  ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
@@ -24,7 +39,7 @@ export class DashboardComponent {
       title: 'Total Residentes',
       value: 124,
       icon: 'people',
-      color: 'blue',
+      color: 'primary',
       change: '+5',
       changeType: 'increase'
     },
@@ -32,7 +47,7 @@ export class DashboardComponent {
       title: 'Pagos Pendientes',
       value: 12,
       icon: 'pending',
-      color: 'yellow',
+      color: 'warn',
       change: '-3',
       changeType: 'decrease'
     },
@@ -40,7 +55,7 @@ export class DashboardComponent {
       title: 'Pagos del Mes',
       value: '$2,450,000',
       icon: 'payments',
-      color: 'green',
+      color: 'accent',
       change: '+12%',
       changeType: 'increase'
     },
@@ -48,7 +63,7 @@ export class DashboardComponent {
       title: 'Unidades Ocupadas',
       value: '98%',
       icon: 'apartment',
-      color: 'purple',
+      color: 'primary',
       change: '+2%',
       changeType: 'increase'
     }
