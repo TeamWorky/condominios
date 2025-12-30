@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -9,6 +9,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ResidentService } from '../../services/resident.service';
 import { IResident } from '../../../../core/models/resident.model';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-resident-list',
@@ -168,31 +169,44 @@ import { IResident } from '../../../../core/models/resident.model';
     }
   `]
 })
-export class ResidentListComponent implements OnInit {
+export class ResidentListComponent implements OnInit, OnDestroy {
   dataSource = new MatTableDataSource<IResident>([]);
   displayedColumns: string[] = ['unitNumber', 'fullName', 'email', 'phone', 'residentType', 'status', 'actions'];
-  loading = false;
+  loading = true;
   error: string | null = null;
+  private destroy$ = new Subject<void>();
 
-  constructor(private residentService: ResidentService) {}
+  constructor(
+    private residentService: ResidentService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
+    // Cargar datos al inicializar el componente
     this.loadResidents();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   loadResidents(): void {
     this.loading = true;
     this.error = null;
+    this.cdr.detectChanges();
 
-    this.residentService.getResidents().subscribe({
+    this.residentService.getResidents().pipe(takeUntil(this.destroy$)).subscribe({
       next: (residents) => {
         this.dataSource.data = residents;
         this.loading = false;
+        this.cdr.detectChanges();
         console.log('Residents loaded:', residents);
       },
       error: (err) => {
         this.error = 'Error al cargar los residentes. Por favor, verifica que el servidor mock esté ejecutándose.';
         this.loading = false;
+        this.cdr.detectChanges();
         console.error('Error loading residents:', err);
       }
     });

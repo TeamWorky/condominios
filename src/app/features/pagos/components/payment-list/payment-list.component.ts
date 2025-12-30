@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -9,6 +9,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { PaymentService } from '../../services/payment.service';
 import { IPayment } from '../../../../core/models/payment.model';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-payment-list',
@@ -178,31 +179,44 @@ import { IPayment } from '../../../../core/models/payment.model';
     }
   `]
 })
-export class PaymentListComponent implements OnInit {
+export class PaymentListComponent implements OnInit, OnDestroy {
   dataSource = new MatTableDataSource<IPayment>([]);
   displayedColumns: string[] = ['unitNumber', 'residentName', 'period', 'amount', 'dueDate', 'status', 'paidDate', 'actions'];
-  loading = false;
+  loading = true;
   error: string | null = null;
+  private destroy$ = new Subject<void>();
 
-  constructor(private paymentService: PaymentService) {}
+  constructor(
+    private paymentService: PaymentService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
+    // Cargar datos al inicializar el componente
     this.loadPayments();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   loadPayments(): void {
     this.loading = true;
     this.error = null;
+    this.cdr.detectChanges();
 
-    this.paymentService.getPayments().subscribe({
+    this.paymentService.getPayments().pipe(takeUntil(this.destroy$)).subscribe({
       next: (payments) => {
         this.dataSource.data = payments;
         this.loading = false;
+        this.cdr.detectChanges();
         console.log('Payments loaded:', payments);
       },
       error: (err) => {
         this.error = 'Error al cargar los pagos. Por favor, verifica que el servidor mock esté ejecutándose.';
         this.loading = false;
+        this.cdr.detectChanges();
         console.error('Error loading payments:', err);
       }
     });
