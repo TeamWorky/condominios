@@ -27,6 +27,10 @@ export const routes: Routes = [
       {
         path: 'unidades',
         loadChildren: () => import('./features/unidades/unidades.routes').then(m => m.UNIDADES_ROUTES)
+      },
+      {
+        path: 'espacios-comunes',
+        loadChildren: () => import('./features/espacios-comunes/espacios-comunes.routes').then(m => m.ESPACIOS_COMUNES_ROUTES)
       }
     ]
   },

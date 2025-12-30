@@ -1,0 +1,35 @@
+export enum ReservationStatus {
+  PENDING = 'PENDING',
+  CONFIRMED = 'CONFIRMED',
+  CANCELLED = 'CANCELLED',
+  COMPLETED = 'COMPLETED'
+}
+
+export interface IReservation {
+  id: string;
+  commonSpaceId: string;
+  residentId: string;
+  residentName: string;
+  unitNumber: string;
+  date: Date; // Fecha de la reserva
+  startTime: string; // Hora de inicio (formato HH:mm)
+  endTime: string; // Hora de término (formato HH:mm)
+  status: ReservationStatus;
+  numberOfGuests?: number;
+  purpose?: string; // Propósito de la reserva
+  notes?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface ICreateReservationDto {
+  commonSpaceId: string;
+  residentId: string;
+  date: Date;
+  startTime: string;
+  endTime: string;
+  numberOfGuests?: number;
+  purpose?: string;
+  notes?: string;
+}
+

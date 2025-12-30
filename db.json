@@ -458,5 +458,264 @@
       "createdAt": "2022-01-01T00:00:00.000Z",
       "updatedAt": "2022-01-01T00:00:00.000Z"
     }
+  ],
+  "commonSpaces": [
+    {
+      "id": "1",
+      "buildingId": "1",
+      "name": "Salón de Eventos Torre A",
+      "type": "SALON_EVENTOS",
+      "description": "Amplio salón para celebraciones y reuniones",
+      "location": "Piso 1",
+      "capacity": 150,
+      "area": 200,
+      "amenities": [
+        "WiFi",
+        "Aire acondicionado",
+        "Cocina",
+        "Sistema de sonido",
+        "Proyector"
+      ],
+      "isReservable": true,
+      "reservationStartTime": "08:00",
+      "reservationEndTime": "23:00",
+      "isExclusive": true,
+      "isActive": true,
+      "createdAt": "2022-01-01T00:00:00.000Z",
+      "updatedAt": "2022-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "2",
+      "buildingId": "1",
+      "name": "Gimnasio Torre A",
+      "type": "GIMNASIO",
+      "description": "Gimnasio completamente equipado",
+      "location": "Piso 2",
+      "capacity": 20,
+      "area": 120,
+      "amenities": [
+        "Equipos de ejercicio",
+        "Vestuarios",
+        "Duchas",
+        "Aire acondicionado"
+      ],
+      "isReservable": true,
+      "reservationStartTime": "06:00",
+      "reservationEndTime": "22:00",
+      "isExclusive": false,
+      "isActive": true,
+      "createdAt": "2022-01-01T00:00:00.000Z",
+      "updatedAt": "2022-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "3",
+      "buildingId": "1",
+      "name": "Piscina Torre A",
+      "type": "PISCINA",
+      "description": "Piscina temperada con área de descanso",
+      "location": "Terraza",
+      "capacity": 30,
+      "area": 150,
+      "amenities": [
+        "Duchas",
+        "Vestuarios",
+        "Área de descanso",
+        "Quincho"
+      ],
+      "isReservable": true,
+      "reservationStartTime": "07:00",
+      "reservationEndTime": "21:00",
+      "isExclusive": false,
+      "isActive": true,
+      "createdAt": "2022-01-01T00:00:00.000Z",
+      "updatedAt": "2022-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "4",
+      "buildingId": "2",
+      "name": "Salón de Eventos Torre B",
+      "type": "SALON_EVENTOS",
+      "description": "Salón para eventos y reuniones",
+      "location": "Piso 1",
+      "capacity": 100,
+      "area": 150,
+      "amenities": [
+        "WiFi",
+        "Aire acondicionado",
+        "Cocina"
+      ],
+      "isReservable": true,
+      "reservationStartTime": "09:00",
+      "reservationEndTime": "23:00",
+      "isExclusive": true,
+      "isActive": true,
+      "createdAt": "2022-01-01T00:00:00.000Z",
+      "updatedAt": "2022-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "5",
+      "buildingId": "2",
+      "name": "Quincho Torre B",
+      "type": "QUINCHO",
+      "description": "Área de asados y parrillas",
+      "location": "Terraza",
+      "capacity": 25,
+      "area": 80,
+      "amenities": [
+        "Parrilla",
+        "Mesas",
+        "Sillas",
+        "Lavamanos"
+      ],
+      "isReservable": true,
+      "reservationStartTime": "10:00",
+      "reservationEndTime": "22:00",
+      "isActive": true,
+      "createdAt": "2022-01-01T00:00:00.000Z",
+      "updatedAt": "2022-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "6",
+      "buildingId": "3",
+      "name": "Sala Multiuso Torre C",
+      "type": "SALA_MULTIUSO",
+      "description": "Sala flexible para diversas actividades",
+      "location": "Piso 1",
+      "capacity": 50,
+      "area": 100,
+      "amenities": [
+        "WiFi",
+        "Proyector",
+        "Pizarra"
+      ],
+      "isReservable": true,
+      "reservationStartTime": "08:00",
+      "reservationEndTime": "22:00",
+      "isExclusive": false,
+      "isActive": true,
+      "createdAt": "2022-01-01T00:00:00.000Z",
+      "updatedAt": "2022-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "7",
+      "buildingId": "3",
+      "name": "Cancha Deportiva",
+      "type": "CANCHA_DEPORTIVA",
+      "description": "Cancha multiuso para fútbol y básquetbol",
+      "location": "Exterior",
+      "capacity": 40,
+      "area": 400,
+      "amenities": [
+        "Iluminación",
+        "Vestuarios"
+      ],
+      "isReservable": true,
+      "reservationStartTime": "07:00",
+      "reservationEndTime": "23:00",
+      "isExclusive": false,
+      "isActive": true,
+      "createdAt": "2022-01-01T00:00:00.000Z",
+      "updatedAt": "2022-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "8",
+      "buildingId": "4",
+      "name": "Jardín Común Edificio 1",
+      "type": "JARDIN",
+      "description": "Área verde con jardines y caminos",
+      "location": "Exterior",
+      "capacity": 50,
+      "area": 300,
+      "amenities": [
+        "Área de descanso",
+        "Juegos infantiles"
+      ],
+      "isReservable": false,
+      "isExclusive": false,
+      "isActive": true,
+      "createdAt": "2022-01-01T00:00:00.000Z",
+      "updatedAt": "2022-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "9",
+      "buildingId": "5",
+      "name": "Playground Edificio 2",
+      "type": "PLAYGROUND",
+      "description": "Área de juegos para niños",
+      "location": "Exterior",
+      "capacity": 20,
+      "area": 150,
+      "amenities": [
+        "Juegos infantiles",
+        "Área de descanso para adultos"
+      ],
+      "isReservable": false,
+      "isExclusive": false,
+      "isActive": true,
+      "createdAt": "2022-01-01T00:00:00.000Z",
+      "updatedAt": "2022-01-01T00:00:00.000Z"
+    }
+  ],
+  "reservations": [
+    {
+      "id": "1",
+      "commonSpaceId": "1",
+      "residentId": "1",
+      "residentName": "Juan Pérez García",
+      "unitNumber": "101",
+      "date": "2025-01-15T00:00:00.000Z",
+      "startTime": "14:00",
+      "endTime": "18:00",
+      "status": "CONFIRMED",
+      "numberOfGuests": 50,
+      "purpose": "Cumpleaños",
+      "notes": "Se requiere sistema de sonido",
+      "createdAt": "2025-01-10T10:00:00.000Z",
+      "updatedAt": "2025-01-10T10:00:00.000Z"
+    },
+    {
+      "id": "2",
+      "commonSpaceId": "2",
+      "residentId": "2",
+      "residentName": "María González López",
+      "unitNumber": "205",
+      "date": "2025-01-16T00:00:00.000Z",
+      "startTime": "07:00",
+      "endTime": "08:00",
+      "status": "CONFIRMED",
+      "numberOfGuests": 1,
+      "purpose": "Ejercicio personal",
+      "createdAt": "2025-01-11T09:00:00.000Z",
+      "updatedAt": "2025-01-11T09:00:00.000Z"
+    },
+    {
+      "id": "3",
+      "commonSpaceId": "3",
+      "residentId": "3",
+      "residentName": "Carlos Rodríguez Martínez",
+      "unitNumber": "301",
+      "date": "2025-01-17T00:00:00.000Z",
+      "startTime": "10:00",
+      "endTime": "14:00",
+      "status": "CONFIRMED",
+      "numberOfGuests": 8,
+      "purpose": "Día familiar en piscina",
+      "createdAt": "2025-01-12T14:00:00.000Z",
+      "updatedAt": "2025-01-12T14:00:00.000Z"
+    },
+    {
+      "id": "e92f",
+      "commonSpaceId": "2",
+      "residentId": "1",
+      "date": "2025-12-30T23:54:03.110Z",
+      "startTime": "07:00",
+      "endTime": "08:30",
+      "numberOfGuests": 10,
+      "purpose": "Pruebas",
+      "notes": "Vienen niños chicos",
+      "status": "CONFIRMED",
+      "createdAt": "2025-12-30T23:54:25.847Z",
+      "updatedAt": "2025-12-30T23:54:25.847Z"
+    }
   ]
 }
