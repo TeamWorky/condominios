@@ -435,7 +435,8 @@ export class ReservationCalendarComponent implements OnInit, OnDestroy {
     const today = new Date();
     const dayOfWeek = today.getDay();
     const diff = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); // Lunes
-    this.currentWeekStart = new Date(today.setDate(diff));
+    this.currentWeekStart = new Date(today);
+    this.currentWeekStart.setDate(diff);
     this.currentWeekStart.setHours(0, 0, 0, 0);
   }
 
