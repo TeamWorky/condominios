@@ -45,6 +45,12 @@ interface GroupedSpaces {
           <h1 class="mat-headline-4">Espacios Comunes</h1>
           <p class="mat-body-1">Gestión de espacios comunes por torre</p>
         </div>
+        <div class="header-actions">
+          <button mat-raised-button color="primary" routerLink="/espacios-comunes/calendario">
+            <mat-icon>calendar_view_week</mat-icon>
+            Ver Calendario
+          </button>
+        </div>
       </div>
 
       @if (loading) {
@@ -174,6 +180,9 @@ interface GroupedSpaces {
     }
 
     .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 24px;
 
       h1 {
@@ -183,6 +192,11 @@ interface GroupedSpaces {
       p {
         margin: 0;
         color: var(--mat-sys-on-surface-variant);
+      }
+
+      .header-actions {
+        display: flex;
+        gap: 12px;
       }
     }
 
