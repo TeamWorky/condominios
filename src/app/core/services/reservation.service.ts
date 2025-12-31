@@ -26,13 +26,41 @@ export class ReservationService {
   }
 
   getReservationsByDate(date: Date): Observable<IReservation[]> {
-    const dateStr = date.toISOString().split('T')[0];
-    return this.http.get<IReservation[]>(`${this.apiUrl}?date=${dateStr}`);
+    // Normalizar la fecha a UTC para evitar problemas de zona horaria
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const dateStr = `${year}-${month}-${day}`;
+    
+    return this.http.get<IReservation[]>(this.apiUrl).pipe(
+      map(reservations => {
+        return reservations.filter(reservation => {
+          // Convertir la fecha de la reserva a string para comparar
+          const reservationDate = new Date(reservation.date);
+          const reservationDateStr = `${reservationDate.getFullYear()}-${String(reservationDate.getMonth() + 1).padStart(2, '0')}-${String(reservationDate.getDate()).padStart(2, '0')}`;
+          return reservationDateStr === dateStr;
+        });
+      })
+    );
   }
 
   getReservationsBySpaceAndDate(spaceId: string, date: Date): Observable<IReservation[]> {
-    const dateStr = date.toISOString().split('T')[0];
-    return this.http.get<IReservation[]>(`${this.apiUrl}?commonSpaceId=${spaceId}&date=${dateStr}`);
+    // Normalizar la fecha a UTC para evitar problemas de zona horaria
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const dateStr = `${year}-${month}-${day}`;
+    
+    return this.http.get<IReservation[]>(`${this.apiUrl}?commonSpaceId=${spaceId}`).pipe(
+      map(reservations => {
+        return reservations.filter(reservation => {
+          // Convertir la fecha de la reserva a string para comparar
+          const reservationDate = new Date(reservation.date);
+          const reservationDateStr = `${reservationDate.getFullYear()}-${String(reservationDate.getMonth() + 1).padStart(2, '0')}-${String(reservationDate.getDate()).padStart(2, '0')}`;
+          return reservationDateStr === dateStr;
+        });
+      })
+    );
   }
 
   checkAvailability(spaceId: string, date: Date, startTime: string, endTime: string): Observable<boolean> {
@@ -40,20 +68,27 @@ export class ReservationService {
     return this.getReservationsBySpaceAndDate(spaceId, date).pipe(
       map(reservations => {
         // Filtrar solo reservas confirmadas
-        const activeReservations = reservations.filter(r => r.status === 'CONFIRMED');
+        const activeReservations = reservations.filter(r => r.status === ReservationStatus.CONFIRMED);
+        
+        // Convertir horarios a minutos para comparación precisa
+        const reqStartMinutes = this.timeToMinutes(startTime);
+        const reqEndMinutes = this.timeToMinutes(endTime);
         
         // Verificar si hay conflictos de horario
         return !activeReservations.some(reservation => {
-          const resStart = this.parseTime(reservation.startTime);
-          const resEnd = this.parseTime(reservation.endTime);
-          const reqStart = this.parseTime(startTime);
-          const reqEnd = this.parseTime(endTime);
+          const resStartMinutes = this.timeToMinutes(reservation.startTime);
+          const resEndMinutes = this.timeToMinutes(reservation.endTime);
           
-          // Verificar solapamiento de horarios
-          return (reqStart < resEnd && reqEnd > resStart);
+          // Verificar solapamiento de horarios: hay conflicto si los rangos se superponen
+          return (reqStartMinutes < resEndMinutes && reqEndMinutes > resStartMinutes);
         });
       })
     );
+  }
+
+  private timeToMinutes(timeStr: string): number {
+    const [hour, minute] = timeStr.split(':').map(Number);
+    return hour * 60 + minute;
   }
 
   private parseTime(timeStr: string): { hour: number; minute: number } {

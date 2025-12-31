@@ -296,12 +296,21 @@ export class ReservationDialogComponent implements OnInit, OnDestroy {
     
     // Si el endTime actual es menor o igual al startTime, resetearlo
     const currentEndTime = this.reservationForm.get('endTime')?.value;
-    if (currentEndTime && this.parseTime(currentEndTime) <= start) {
-      this.reservationForm.patchValue({ endTime: slots[0] || '' });
+    if (currentEndTime) {
+      const currentEndMinutes = this.timeToMinutes(currentEndTime);
+      const startMinutes = this.timeToMinutes(startTime);
+      if (currentEndMinutes <= startMinutes) {
+        this.reservationForm.patchValue({ endTime: slots[0] || '' });
+      }
     }
   }
 
-  parseTime(timeStr: string): { hour: number; minute: number } {
+  private timeToMinutes(timeStr: string): number {
+    const [hour, minute] = timeStr.split(':').map(Number);
+    return hour * 60 + minute;
+  }
+
+  private parseTime(timeStr: string): { hour: number; minute: number } {
     const [hour, minute] = timeStr.split(':').map(Number);
     return { hour, minute };
   }
