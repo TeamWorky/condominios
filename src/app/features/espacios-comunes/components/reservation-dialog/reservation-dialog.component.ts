@@ -362,20 +362,56 @@ export class ReservationDialogComponent implements OnInit, OnDestroy {
         notes: formValue.notes || undefined
       };
 
-      this.reservationService.createReservation(reservationData).pipe(takeUntil(this.destroy$)).subscribe({
-        next: () => {
-          this.snackBar.open('Reserva creada exitosamente', 'Cerrar', {
-            duration: 3000,
-            horizontalPosition: 'end',
-            verticalPosition: 'top',
-            panelClass: ['success-snackbar']
+      // Verificar disponibilidad antes de crear la reserva
+      this.reservationService.checkAvailability(
+        this.data.space.id,
+        formValue.date,
+        formValue.startTime,
+        formValue.endTime,
+        this.data.space.isExclusive
+      ).pipe(takeUntil(this.destroy$)).subscribe({
+        next: (isAvailable) => {
+          if (!isAvailable) {
+            this.loading = false;
+            const message = this.data.space.isExclusive
+              ? 'El espacio ya está reservado en este horario. Los espacios exclusivos solo permiten una reserva a la vez.'
+              : 'El espacio ya tiene una reserva confirmada en este horario que genera conflicto.';
+            this.snackBar.open(message, 'Cerrar', {
+              duration: 6000,
+              horizontalPosition: 'end',
+              verticalPosition: 'top',
+              panelClass: ['error-snackbar']
+            });
+            return;
+          }
+
+          // Si está disponible, crear la reserva
+          this.reservationService.createReservation(reservationData).pipe(takeUntil(this.destroy$)).subscribe({
+            next: () => {
+              this.snackBar.open('Reserva creada exitosamente', 'Cerrar', {
+                duration: 3000,
+                horizontalPosition: 'end',
+                verticalPosition: 'top',
+                panelClass: ['success-snackbar']
+              });
+              this.dialogRef.close(true);
+            },
+            error: (err) => {
+              console.error('Error creating reservation:', err);
+              this.loading = false;
+              this.snackBar.open('Error al crear la reserva. Por favor, intenta nuevamente.', 'Cerrar', {
+                duration: 5000,
+                horizontalPosition: 'end',
+                verticalPosition: 'top',
+                panelClass: ['error-snackbar']
+              });
+            }
           });
-          this.dialogRef.close(true);
         },
         error: (err) => {
-          console.error('Error creating reservation:', err);
+          console.error('Error checking availability:', err);
           this.loading = false;
-          this.snackBar.open('Error al crear la reserva. Verifica que no haya conflictos de horario.', 'Cerrar', {
+          this.snackBar.open('Error al verificar disponibilidad. Por favor, intenta nuevamente.', 'Cerrar', {
             duration: 5000,
             horizontalPosition: 'end',
             verticalPosition: 'top',

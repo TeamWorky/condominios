@@ -63,25 +63,43 @@ export class ReservationService {
     );
   }
 
-  checkAvailability(spaceId: string, date: Date, startTime: string, endTime: string): Observable<boolean> {
+  checkAvailability(spaceId: string, date: Date, startTime: string, endTime: string, isExclusive: boolean = true): Observable<boolean> {
     // Este método verifica si hay conflictos de horario
     return this.getReservationsBySpaceAndDate(spaceId, date).pipe(
       map(reservations => {
         // Filtrar solo reservas confirmadas
         const activeReservations = reservations.filter(r => r.status === ReservationStatus.CONFIRMED);
         
+        // Si no hay reservas activas, está disponible
+        if (activeReservations.length === 0) {
+          return true;
+        }
+        
         // Convertir horarios a minutos para comparación precisa
         const reqStartMinutes = this.timeToMinutes(startTime);
         const reqEndMinutes = this.timeToMinutes(endTime);
         
-        // Verificar si hay conflictos de horario
-        return !activeReservations.some(reservation => {
-          const resStartMinutes = this.timeToMinutes(reservation.startTime);
-          const resEndMinutes = this.timeToMinutes(reservation.endTime);
-          
-          // Verificar solapamiento de horarios: hay conflicto si los rangos se superponen
-          return (reqStartMinutes < resEndMinutes && reqEndMinutes > resStartMinutes);
-        });
+        if (isExclusive) {
+          // Para espacios exclusivos: no puede haber ninguna reserva que se solape
+          return !activeReservations.some(reservation => {
+            const resStartMinutes = this.timeToMinutes(reservation.startTime);
+            const resEndMinutes = this.timeToMinutes(reservation.endTime);
+            
+            // Verificar solapamiento de horarios: hay conflicto si los rangos se superponen
+            return (reqStartMinutes < resEndMinutes && reqEndMinutes > resStartMinutes);
+          });
+        } else {
+          // Para espacios compartidos: permitir múltiples reservas simultáneas
+          // Por ahora, también verificamos solapamiento para evitar conflictos
+          // En el futuro, podríamos permitir múltiples reservas siempre que no excedan la capacidad
+          return !activeReservations.some(reservation => {
+            const resStartMinutes = this.timeToMinutes(reservation.startTime);
+            const resEndMinutes = this.timeToMinutes(reservation.endTime);
+            
+            // Verificar solapamiento de horarios: hay conflicto si los rangos se superponen
+            return (reqStartMinutes < resEndMinutes && reqEndMinutes > resStartMinutes);
+          });
+        }
       })
     );
   }
