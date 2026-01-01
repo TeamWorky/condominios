@@ -189,6 +189,232 @@ Filtrar unidades ocupadas
 curl http://localhost:3000/units?isOccupied=true
 ```
 
+#### GET /units?building=Torre A
+Filtrar unidades por edificio
+
+```bash
+curl http://localhost:3000/units?building=Torre%20A
+```
+
+#### GET /units?status=DISPONIBLE
+Filtrar unidades por estado
+
+```bash
+curl http://localhost:3000/units?status=DISPONIBLE
+```
+
+#### POST /units
+Crear una nueva unidad
+
+```bash
+curl -X POST http://localhost:3000/units \
+  -H "Content-Type: application/json" \
+  -d '{
+    "building": "Torre A",
+    "unitNumber": "501",
+    "floor": 5,
+    "area": 85,
+    "bedrooms": 2,
+    "bathrooms": 2,
+    "parkingSpots": 1,
+    "storageUnits": 1,
+    "status": "DISPONIBLE"
+  }'
+```
+
+#### PATCH /units/:id
+Actualizar una unidad
+
+```bash
+curl -X PATCH http://localhost:3000/units/1 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "status": "OCUPADA"
+  }'
+```
+
+### Edificios
+
+**Base URL**: `http://localhost:3000/buildings`
+
+#### GET /buildings
+Obtener todos los edificios
+
+```bash
+curl http://localhost:3000/buildings
+```
+
+#### GET /buildings?isActive=true
+Filtrar edificios activos
+
+```bash
+curl http://localhost:3000/buildings?isActive=true
+```
+
+#### GET /buildings/:id
+Obtener un edificio específico
+
+```bash
+curl http://localhost:3000/buildings/1
+```
+
+#### POST /buildings
+Crear un nuevo edificio
+
+```bash
+curl -X POST http://localhost:3000/buildings \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Torre D",
+    "description": "Nueva torre del condominio",
+    "address": "Av. Principal 123",
+    "totalFloors": 10,
+    "totalUnits": 40,
+    "isActive": true
+  }'
+```
+
+### Espacios Comunes
+
+**Base URL**: `http://localhost:3000/commonSpaces`
+
+#### GET /commonSpaces
+Obtener todos los espacios comunes
+
+```bash
+curl http://localhost:3000/commonSpaces
+```
+
+#### GET /commonSpaces?buildingId=1
+Filtrar espacios por edificio
+
+```bash
+curl http://localhost:3000/commonSpaces?buildingId=1
+```
+
+#### GET /commonSpaces?isReservable=true
+Filtrar espacios reservables
+
+```bash
+curl http://localhost:3000/commonSpaces?isReservable=true
+```
+
+#### GET /commonSpaces?type=SALON_EVENTOS
+Filtrar espacios por tipo
+
+```bash
+curl http://localhost:3000/commonSpaces?type=SALON_EVENTOS
+```
+
+#### GET /commonSpaces/:id
+Obtener un espacio común específico
+
+```bash
+curl http://localhost:3000/commonSpaces/1
+```
+
+#### POST /commonSpaces
+Crear un nuevo espacio común
+
+```bash
+curl -X POST http://localhost:3000/commonSpaces \
+  -H "Content-Type: application/json" \
+  -d '{
+    "buildingId": "1",
+    "name": "Sala de Juegos",
+    "type": "SALA_DE_JUEGOS",
+    "description": "Sala con mesas de billar y ping pong",
+    "location": "Piso 3",
+    "capacity": 20,
+    "area": 80,
+    "amenities": ["Mesas de billar", "Ping pong", "WiFi"],
+    "isReservable": true,
+    "reservationStartTime": "10:00",
+    "reservationEndTime": "22:00",
+    "isExclusive": false
+  }'
+```
+
+#### PATCH /commonSpaces/:id
+Actualizar un espacio común
+
+```bash
+curl -X PATCH http://localhost:3000/commonSpaces/1 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "capacity": 200
+  }'
+```
+
+### Reservas
+
+**Base URL**: `http://localhost:3000/reservations`
+
+#### GET /reservations
+Obtener todas las reservas
+
+```bash
+curl http://localhost:3000/reservations
+```
+
+#### GET /reservations?commonSpaceId=1
+Filtrar reservas por espacio común
+
+```bash
+curl http://localhost:3000/reservations?commonSpaceId=1
+```
+
+#### GET /reservations?status=CONFIRMED
+Filtrar reservas por estado
+
+```bash
+curl http://localhost:3000/reservations?status=CONFIRMED
+```
+
+#### GET /reservations/:id
+Obtener una reserva específica
+
+```bash
+curl http://localhost:3000/reservations/1
+```
+
+#### POST /reservations
+Crear una nueva reserva
+
+```bash
+curl -X POST http://localhost:3000/reservations \
+  -H "Content-Type: application/json" \
+  -d '{
+    "commonSpaceId": "1",
+    "residentId": "1",
+    "date": "2026-01-10T00:00:00.000Z",
+    "startTime": "14:00",
+    "endTime": "18:00",
+    "type": "CUMPLEANOS",
+    "numberOfGuests": 50,
+    "purpose": "Celebración de cumpleaños",
+    "notes": "Se requiere sistema de sonido"
+  }'
+```
+
+#### PATCH /reservations/:id
+Actualizar una reserva
+
+```bash
+curl -X PATCH http://localhost:3000/reservations/1 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "status": "CANCELLED"
+  }'
+```
+
+#### DELETE /reservations/:id
+Eliminar una reserva
+
+```bash
+curl -X DELETE http://localhost:3000/reservations/1
+```
+
 ### Gastos Comunes
 
 **Base URL**: `http://localhost:3000/commonExpenses`
@@ -262,7 +488,10 @@ El archivo `db.json` contiene:
 
 - **5 residentes** de ejemplo con diferentes tipos (propietarios y arrendatarios)
 - **6 pagos** con diferentes estados (pagado, pendiente, atrasado)
-- **5 unidades** con información detallada
+- **Múltiples unidades** con información detallada y estados (DISPONIBLE, OCUPADA, EN_MANTENIMIENTO, etc.)
+- **6 edificios** (Torres A, B, C y Edificios 1, 2, 3)
+- **9 espacios comunes** distribuidos en diferentes edificios
+- **22 reservas** de ejemplo con diferentes tipos y estados
 - **2 períodos de gastos comunes**
 
 ## Estados de Pago
@@ -291,6 +520,45 @@ El archivo `db.json` contiene:
 - `RUT`: RUT chileno
 - `PASSPORT`: Pasaporte
 - `DNI`: DNI
+
+## Estados de Unidad
+
+- `DISPONIBLE`: Disponible para ocupar
+- `OCUPADA`: Actualmente ocupada
+- `EN_MANTENIMIENTO`: En mantenimiento
+- `RESERVADA`: Reservada
+- `FUERA_SERVICIO`: Fuera de servicio
+
+## Tipos de Espacios Comunes
+
+- `SALON_EVENTOS`: Salón de Eventos
+- `GIMNASIO`: Gimnasio
+- `PISCINA`: Piscina
+- `QUINCHO`: Quincho
+- `SALA_MULTIUSO`: Sala Multiuso
+- `CANCHA_DEPORTIVA`: Cancha Deportiva
+- `JARDIN`: Jardín
+- `PLAYGROUND`: Playground
+- `BIBLIOTECA`: Biblioteca
+- `SALA_DE_JUEGOS`: Sala de Juegos
+- `OTRO`: Otro
+
+## Estados de Reserva
+
+- `PENDING`: Pendiente
+- `CONFIRMED`: Confirmada
+- `CANCELLED`: Cancelada
+- `COMPLETED`: Completada
+
+## Tipos de Reserva
+
+- `CUMPLEANOS`: Cumpleaños
+- `REUNION_FAMILIAR`: Reunión Familiar
+- `EVENTO_CORPORATIVO`: Evento Corporativo
+- `CELEBRACION`: Celebración
+- `DEPORTE`: Deporte
+- `TRABAJO`: Trabajo
+- `OTRO`: Otro
 
 ## Notas
 

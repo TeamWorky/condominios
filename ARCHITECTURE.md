@@ -38,7 +38,10 @@ gestion-condominios/
 │   │   │   ├── services/           # Servicios de negocio
 │   │   │   │   ├── api.service.ts
 │   │   │   │   ├── auth.service.ts
-│   │   │   │   └── storage.service.ts
+│   │   │   │   ├── storage.service.ts
+│   │   │   │   ├── building.service.ts
+│   │   │   │   ├── common-space.service.ts
+│   │   │   │   └── reservation.service.ts
 │   │   │   ├── guards/             # Route guards
 │   │   │   │   ├── auth.guard.ts
 │   │   │   │   └── role.guard.ts
@@ -47,7 +50,13 @@ gestion-condominios/
 │   │   │   │   └── error.interceptor.ts
 │   │   │   ├── models/             # Interfaces y tipos
 │   │   │   │   ├── user.model.ts
-│   │   │   │   └── api-response.model.ts
+│   │   │   │   ├── api-response.model.ts
+│   │   │   │   ├── resident.model.ts
+│   │   │   │   ├── payment.model.ts
+│   │   │   │   ├── unit.model.ts
+│   │   │   │   ├── building.model.ts
+│   │   │   │   ├── common-space.model.ts
+│   │   │   │   └── reservation.model.ts
 │   │   │   └── constants/          # Constantes globales
 │   │   │       └── app.constants.ts
 │   │   │
@@ -87,6 +96,27 @@ gestion-condominios/
 │   │   │       ├── models/
 │   │   │       │   └── payment.model.ts
 │   │   │       └── pagos.routes.ts
+│   │   │
+│   │   │   ├── unidades/
+│   │   │   │   ├── components/
+│   │   │   │   │   ├── unit-list/
+│   │   │   │   │   ├── unit-grid/
+│   │   │   │   │   ├── unit-detail/
+│   │   │   │   │   └── unit-form/
+│   │   │   │   ├── services/
+│   │   │   │   │   └── unit.service.ts
+│   │   │   │   └── unidades.routes.ts
+│   │   │   │
+│   │   │   └── espacios-comunes/
+│   │   │       ├── components/
+│   │   │       │   ├── space-list/
+│   │   │       │   ├── space-detail/
+│   │   │       │   ├── reservation-dialog/
+│   │   │       │   └── reservation-calendar/
+│   │   │       ├── servicios/
+│   │   │       │   ├── common-space.service.ts
+│   │   │       │   └── reservation.service.ts
+│   │   │       └── espacios-comunes.routes.ts
 │   │   │
 │   │   ├── layout/                  # Componentes de layout
 │   │   │   ├── header/
