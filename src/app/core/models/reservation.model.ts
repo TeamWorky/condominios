@@ -5,6 +5,16 @@ export enum ReservationStatus {
   COMPLETED = 'COMPLETED'
 }
 
+export enum ReservationType {
+  CUMPLEANOS = 'CUMPLEANOS',
+  REUNION_FAMILIAR = 'REUNION_FAMILIAR',
+  EVENTO_CORPORATIVO = 'EVENTO_CORPORATIVO',
+  CELEBRACION = 'CELEBRACION',
+  DEPORTE = 'DEPORTE',
+  TRABAJO = 'TRABAJO',
+  OTRO = 'OTRO'
+}
+
 export interface IReservation {
   id: string;
   commonSpaceId: string;
@@ -15,6 +25,7 @@ export interface IReservation {
   startTime: string; // Hora de inicio (formato HH:mm)
   endTime: string; // Hora de término (formato HH:mm)
   status: ReservationStatus;
+  type?: ReservationType; // Tipo de reserva para colores
   numberOfGuests?: number;
   purpose?: string; // Propósito de la reserva
   notes?: string;
@@ -28,6 +39,7 @@ export interface ICreateReservationDto {
   date: Date;
   startTime: string;
   endTime: string;
+  type?: ReservationType;
   numberOfGuests?: number;
   purpose?: string;
   notes?: string;

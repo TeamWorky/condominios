@@ -13,7 +13,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ReservationService } from '../../../../core/services/reservation.service';
 import { ICommonSpace } from '../../../../core/models/common-space.model';
-import { ICreateReservationDto } from '../../../../core/models/reservation.model';
+import { ICreateReservationDto, ReservationType } from '../../../../core/models/reservation.model';
 import { Subject, takeUntil } from 'rxjs';
 
 export interface ReservationDialogData {
@@ -21,6 +21,9 @@ export interface ReservationDialogData {
   residentId: string;
   residentName: string;
   unitNumber: string;
+  prefillDate?: Date;
+  prefillStartTime?: string;
+  prefillEndTime?: string;
 }
 
 @Component({
@@ -83,6 +86,19 @@ export interface ReservationDialogData {
             <mat-icon matPrefix>schedule</mat-icon>
             @if (reservationForm.get('endTime')?.hasError('required') && reservationForm.get('endTime')?.touched) {
               <mat-error>La hora de término es requerida</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Tipo de Reserva</mat-label>
+            <mat-select formControlName="type">
+              @for (type of reservationTypes; track type.value) {
+                <mat-option [value]="type.value">{{ type.label }}</mat-option>
+              }
+            </mat-select>
+            <mat-icon matPrefix>category</mat-icon>
+            @if (reservationForm.get('type')?.hasError('required') && reservationForm.get('type')?.touched) {
+              <mat-error>El tipo de reserva es requerido</mat-error>
             }
           </mat-form-field>
 
@@ -210,6 +226,15 @@ export class ReservationDialogComponent implements OnInit, OnDestroy {
   minDate = new Date();
   availableStartTimes: string[] = [];
   availableEndTimes: string[] = [];
+  reservationTypes = [
+    { value: ReservationType.CUMPLEANOS, label: 'Cumpleaños' },
+    { value: ReservationType.REUNION_FAMILIAR, label: 'Reunión Familiar' },
+    { value: ReservationType.EVENTO_CORPORATIVO, label: 'Evento Corporativo' },
+    { value: ReservationType.CELEBRACION, label: 'Celebración' },
+    { value: ReservationType.DEPORTE, label: 'Deporte' },
+    { value: ReservationType.TRABAJO, label: 'Trabajo' },
+    { value: ReservationType.OTRO, label: 'Otro' }
+  ];
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -220,9 +245,10 @@ export class ReservationDialogComponent implements OnInit, OnDestroy {
     private snackBar: MatSnackBar
   ) {
     this.reservationForm = this.fb.group({
-      date: [new Date(), [Validators.required]],
-      startTime: ['', [Validators.required]],
-      endTime: ['', [Validators.required]],
+      date: [data.prefillDate || new Date(), [Validators.required]],
+      startTime: [data.prefillStartTime || '', [Validators.required]],
+      endTime: [data.prefillEndTime || '', [Validators.required]],
+      type: [ReservationType.OTRO, [Validators.required]],
       numberOfGuests: [null],
       purpose: [''],
       notes: ['']
@@ -330,6 +356,7 @@ export class ReservationDialogComponent implements OnInit, OnDestroy {
         date: formValue.date,
         startTime: formValue.startTime,
         endTime: formValue.endTime,
+        type: formValue.type || ReservationType.OTRO,
         numberOfGuests: formValue.numberOfGuests || undefined,
         purpose: formValue.purpose || undefined,
         notes: formValue.notes || undefined

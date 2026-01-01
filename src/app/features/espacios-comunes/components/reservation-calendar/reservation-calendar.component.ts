@@ -8,10 +8,13 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { CommonSpaceService } from '../../../../core/services/common-space.service';
 import { ReservationService } from '../../../../core/services/reservation.service';
 import { ICommonSpace } from '../../../../core/models/common-space.model';
-import { IReservation, ReservationStatus } from '../../../../core/models/reservation.model';
+import { IReservation, ReservationStatus, ReservationType } from '../../../../core/models/reservation.model';
+import { ReservationDialogComponent, ReservationDialogData } from '../reservation-dialog/reservation-dialog.component';
 import { Subject, takeUntil } from 'rxjs';
 
 interface TimeSlot {
@@ -49,7 +52,9 @@ interface ReservationBlock {
     MatSelectModule,
     MatFormFieldModule,
     MatProgressSpinnerModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatDialogModule,
+    MatSnackBarModule
   ],
   template: `
     <div class="page-container">
@@ -137,11 +142,18 @@ interface ReservationBlock {
                   @for (slot of timeSlots; track slot.time) {
                     <div class="time-cell" 
                          [class.reserved]="isTimeSlotReserved(day, slot)"
-                         [class.outside-hours]="isOutsideReservationHours(slot)">
+                         [class.outside-hours]="isOutsideReservationHours(slot)"
+                         [class.selectable]="!isTimeSlotReserved(day, slot) && !isOutsideReservationHours(slot)"
+                         [class.selected]="isSlotSelected(day, slot)"
+                         (click)="onTimeSlotClick(day, slot)"
+                         (mouseenter)="onTimeSlotHover(day, slot)"
+                         (mouseleave)="onTimeSlotLeave()">
                       @for (block of getReservationBlocksForSlot(day, slot); track block.reservation.id) {
                         <div class="reservation-block" 
+                             [class]="'reservation-type-' + getReservationTypeClass(block.reservation)"
                              [style.top.%]="block.top"
                              [style.height.%]="block.height"
+                             [style.background-color]="getReservationColor(block.reservation)"
                              [matTooltip]="getReservationTooltip(block.reservation)"
                              matTooltipPosition="above">
                           <div class="reservation-info">
@@ -164,9 +176,19 @@ interface ReservationBlock {
             <span>Disponible</span>
           </div>
           <div class="legend-item">
+            <div class="legend-color selected"></div>
+            <span>Seleccionado</span>
+          </div>
+          <div class="legend-item">
             <div class="legend-color reserved"></div>
             <span>Reservado</span>
           </div>
+          @for (type of reservationTypes; track type.value) {
+            <div class="legend-item">
+              <div class="legend-color" [style.background-color]="getTypeColor(type.value)"></div>
+              <span>{{ type.label }}</span>
+            </div>
+          }
         </div>
       }
     </div>
@@ -329,6 +351,19 @@ interface ReservationBlock {
           background: #eeeeee;
         }
       }
+
+      &.selectable {
+        cursor: pointer;
+
+        &:hover {
+          background: #e3f2fd;
+        }
+      }
+
+      &.selected {
+        background: #bbdefb;
+        border-left: 3px solid #2196f3;
+      }
     }
 
     .reservation-block {
@@ -398,6 +433,11 @@ interface ReservationBlock {
         background: #ffebee;
         border-left: 3px solid #c62828;
       }
+
+      &.selected {
+        background: #bbdefb;
+        border-left: 3px solid #2196f3;
+      }
     }
   `]
 })
@@ -411,12 +451,26 @@ export class ReservationCalendarComponent implements OnInit, OnDestroy {
   currentWeekStart: Date = new Date();
   loading = true;
   error: string | null = null;
+  selectedStart: { day: DayReservations; slot: TimeSlot } | null = null;
+  selectedEnd: { day: DayReservations; slot: TimeSlot } | null = null;
+  hoveredSlot: { day: DayReservations; slot: TimeSlot } | null = null;
+  reservationTypes = [
+    { value: ReservationType.CUMPLEANOS, label: 'Cumpleaños' },
+    { value: ReservationType.REUNION_FAMILIAR, label: 'Reunión Familiar' },
+    { value: ReservationType.EVENTO_CORPORATIVO, label: 'Evento Corporativo' },
+    { value: ReservationType.CELEBRACION, label: 'Celebración' },
+    { value: ReservationType.DEPORTE, label: 'Deporte' },
+    { value: ReservationType.TRABAJO, label: 'Trabajo' },
+    { value: ReservationType.OTRO, label: 'Otro' }
+  ];
   private destroy$ = new Subject<void>();
 
   constructor(
     private commonSpaceService: CommonSpaceService,
     private reservationService: ReservationService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private dialog: MatDialog,
+    private snackBar: MatSnackBar
   ) {
     this.initializeWeek();
     this.generateTimeSlots();
@@ -628,6 +682,156 @@ export class ReservationCalendarComponent implements OnInit, OnDestroy {
     const startStr = `${start.getDate()}/${start.getMonth() + 1}`;
     const endStr = `${end.getDate()}/${end.getMonth() + 1}/${end.getFullYear()}`;
     return `${startStr} - ${endStr}`;
+  }
+
+  onTimeSlotClick(day: DayReservations, slot: TimeSlot): void {
+    if (this.isTimeSlotReserved(day, slot) || this.isOutsideReservationHours(slot)) {
+      return;
+    }
+
+    if (!this.selectedStart) {
+      // Primera selección
+      this.selectedStart = { day, slot };
+      this.selectedEnd = null;
+    } else if (this.selectedStart.day.dateStr === day.dateStr) {
+      // Mismo día - seleccionar rango
+      const startMinutes = this.timeToMinutes(this.selectedStart.slot.time);
+      const slotMinutes = this.timeToMinutes(slot.time);
+
+      if (slotMinutes < startMinutes) {
+        // Selección antes del inicio - resetear
+        this.selectedStart = { day, slot };
+        this.selectedEnd = null;
+      } else {
+        // Selección después del inicio - establecer fin
+        this.selectedEnd = { day, slot };
+        this.openReservationDialog();
+      }
+    } else {
+      // Día diferente - resetear y empezar nuevo
+      this.selectedStart = { day, slot };
+      this.selectedEnd = null;
+    }
+    this.cdr.detectChanges();
+  }
+
+  onTimeSlotHover(day: DayReservations, slot: TimeSlot): void {
+    if (this.selectedStart && !this.isTimeSlotReserved(day, slot) && !this.isOutsideReservationHours(slot)) {
+      this.hoveredSlot = { day, slot };
+      this.cdr.detectChanges();
+    }
+  }
+
+  onTimeSlotLeave(): void {
+    this.hoveredSlot = null;
+    this.cdr.detectChanges();
+  }
+
+  isSlotSelected(day: DayReservations, slot: TimeSlot): boolean {
+    if (!this.selectedStart || this.selectedStart.day.dateStr !== day.dateStr) {
+      return false;
+    }
+
+    const startMinutes = this.timeToMinutes(this.selectedStart.slot.time);
+    const slotMinutes = this.timeToMinutes(slot.time);
+    const endMinutes = this.selectedEnd ? this.timeToMinutes(this.selectedEnd.slot.time) : slotMinutes;
+
+    return slotMinutes >= startMinutes && slotMinutes <= endMinutes;
+  }
+
+  openReservationDialog(): void {
+    if (!this.selectedStart || !this.selectedEnd || !this.selectedSpace) {
+      return;
+    }
+
+    const startTime = this.selectedStart.slot.time;
+    const endTime = this.getNextTimeSlot(this.selectedEnd.slot.time);
+    const selectedDate = this.selectedStart.day.date;
+
+    const dialogData: ReservationDialogData = {
+      space: this.selectedSpace,
+      residentId: '1', // TODO: Obtener del servicio de autenticación
+      residentName: 'Usuario Actual', // TODO: Obtener del servicio de autenticación
+      unitNumber: '101', // TODO: Obtener del servicio de autenticación
+      prefillDate: selectedDate,
+      prefillStartTime: startTime,
+      prefillEndTime: endTime
+    };
+
+    const dialogRef = this.dialog.open(ReservationDialogComponent, {
+      width: '600px',
+      data: dialogData
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.selectedStart = null;
+        this.selectedEnd = null;
+        this.loadReservations();
+        this.snackBar.open('Reserva creada exitosamente', 'Cerrar', {
+          duration: 3000,
+          horizontalPosition: 'end',
+          verticalPosition: 'top',
+          panelClass: ['success-snackbar']
+        });
+      }
+    });
+  }
+
+  getNextTimeSlot(time: string): string {
+    const [hour, minute] = time.split(':').map(Number);
+    const totalMinutes = hour * 60 + minute + 30;
+    const newHour = Math.floor(totalMinutes / 60);
+    const newMinute = totalMinutes % 60;
+    return `${String(newHour).padStart(2, '0')}:${String(newMinute).padStart(2, '0')}`;
+  }
+
+  getReservationColor(reservation: IReservation): string {
+    const type = reservation.type || this.inferReservationType(reservation.purpose);
+    return this.getTypeColor(type);
+  }
+
+  getReservationTypeClass(reservation: IReservation): string {
+    const type = reservation.type || this.inferReservationType(reservation.purpose);
+    return type.toLowerCase();
+  }
+
+  inferReservationType(purpose?: string): ReservationType {
+    if (!purpose) return ReservationType.OTRO;
+    
+    const purposeLower = purpose.toLowerCase();
+    if (purposeLower.includes('cumpleaños') || purposeLower.includes('cumple')) {
+      return ReservationType.CUMPLEANOS;
+    }
+    if (purposeLower.includes('familiar') || purposeLower.includes('familia')) {
+      return ReservationType.REUNION_FAMILIAR;
+    }
+    if (purposeLower.includes('corporativo') || purposeLower.includes('empresa') || purposeLower.includes('trabajo')) {
+      return ReservationType.EVENTO_CORPORATIVO;
+    }
+    if (purposeLower.includes('celebración') || purposeLower.includes('celebrar') || purposeLower.includes('aniversario')) {
+      return ReservationType.CELEBRACION;
+    }
+    if (purposeLower.includes('deporte') || purposeLower.includes('ejercicio') || purposeLower.includes('gimnasio')) {
+      return ReservationType.DEPORTE;
+    }
+    if (purposeLower.includes('reunión') || purposeLower.includes('reunion')) {
+      return ReservationType.TRABAJO;
+    }
+    return ReservationType.OTRO;
+  }
+
+  getTypeColor(type: ReservationType): string {
+    const colors: { [key in ReservationType]: string } = {
+      [ReservationType.CUMPLEANOS]: '#e91e63', // Rosa
+      [ReservationType.REUNION_FAMILIAR]: '#4caf50', // Verde
+      [ReservationType.EVENTO_CORPORATIVO]: '#2196f3', // Azul
+      [ReservationType.CELEBRACION]: '#ff9800', // Naranja
+      [ReservationType.DEPORTE]: '#9c27b0', // Morado
+      [ReservationType.TRABAJO]: '#00bcd4', // Cyan
+      [ReservationType.OTRO]: '#c62828' // Rojo (default)
+    };
+    return colors[type] || colors[ReservationType.OTRO];
   }
 }
 
