@@ -779,11 +779,10 @@ export class ReservationCalendarComponent implements OnInit, OnDestroy {
   }
 
   getNextTimeSlot(time: string): string {
-    const [hour, minute] = time.split(':').map(Number);
-    const totalMinutes = hour * 60 + minute + 30;
-    const newHour = Math.floor(totalMinutes / 60);
-    const newMinute = totalMinutes % 60;
-    return `${String(newHour).padStart(2, '0')}:${String(newMinute).padStart(2, '0')}`;
+    // Devolver la siguiente hora entera
+    const [hour] = time.split(':').map(Number);
+    const nextHour = hour + 1;
+    return `${String(nextHour).padStart(2, '0')}:00`;
   }
 
   getReservationColor(reservation: IReservation): string {

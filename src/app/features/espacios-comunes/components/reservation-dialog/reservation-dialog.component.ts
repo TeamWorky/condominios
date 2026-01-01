@@ -279,14 +279,14 @@ export class ReservationDialogComponent implements OnInit, OnDestroy {
     const end = this.parseTime(space.reservationEndTime);
     const slots: string[] = [];
 
+    // Generar solo horas enteras (sin minutos)
     for (let hour = start.hour; hour <= end.hour; hour++) {
-      for (let minute = 0; minute < 60; minute += 30) {
-        if (hour === start.hour && minute < start.minute) continue;
-        if (hour === end.hour && minute > end.minute) break;
-        
-        const timeStr = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-        slots.push(timeStr);
-      }
+      // Solo agregar si la hora está dentro del rango permitido
+      if (hour === start.hour && start.minute > 0) continue; // Si la hora de inicio tiene minutos, saltar esa hora
+      if (hour === end.hour && end.minute === 0) break; // Si la hora de fin es exacta, no incluirla
+      
+      const timeStr = `${hour.toString().padStart(2, '0')}:00`;
+      slots.push(timeStr);
     }
 
     this.availableStartTimes = slots.slice(0, -1); // Excluir la última hora como inicio
@@ -309,13 +309,13 @@ export class ReservationDialogComponent implements OnInit, OnDestroy {
     const end = this.parseTime(space.reservationEndTime);
     const slots: string[] = [];
 
-    for (let hour = start.hour; hour <= end.hour; hour++) {
-      for (let minute = (hour === start.hour ? start.minute + 30 : 0); minute < 60; minute += 30) {
-        if (hour === end.hour && minute > end.minute) break;
-        
-        const timeStr = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-        slots.push(timeStr);
-      }
+    // Generar solo horas enteras (sin minutos), empezando desde la hora siguiente a la de inicio
+    for (let hour = start.hour + 1; hour <= end.hour; hour++) {
+      // Solo agregar si la hora está dentro del rango permitido
+      if (hour === end.hour && end.minute === 0) break; // Si la hora de fin es exacta, no incluirla
+      
+      const timeStr = `${hour.toString().padStart(2, '0')}:00`;
+      slots.push(timeStr);
     }
 
     this.availableEndTimes = slots;
