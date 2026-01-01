@@ -375,6 +375,14 @@ export const routes: Routes = [
       {
         path: 'pagos',
         loadChildren: () => import('./features/pagos/pagos.routes')
+      },
+      {
+        path: 'unidades',
+        loadChildren: () => import('./features/unidades/unidades.routes')
+      },
+      {
+        path: 'espacios-comunes',
+        loadChildren: () => import('./features/espacios-comunes/espacios-comunes.routes')
       }
     ]
   }
@@ -479,6 +487,61 @@ trackByResidentId(index: number, resident: IResident): string {
 2. **Múltiples temas**: Sistema de theming con Angular Material (light/dark)
 3. **Multi-tenant**: Servicios diseñados para soportar múltiples condominios
 4. **Internacionalización**: Estructura lista para i18n
+
+## Modelos de Datos
+
+### Core Models
+
+El sistema utiliza interfaces TypeScript para definir los modelos de datos:
+
+#### Residentes (`resident.model.ts`)
+- `IResident`: Información completa del residente
+- `ICreateResidentDto`: DTO para crear residentes
+- Tipos: OWNER, TENANT
+
+#### Pagos (`payment.model.ts`)
+- `IPayment`: Información de pago
+- `ICommonExpense`: Gastos comunes
+- Estados: PENDING, PAID, OVERDUE, PARTIAL, CANCELLED
+
+#### Unidades (`unit.model.ts`)
+- `IUnit`: Información de unidad/departamento
+- `ICreateUnitDto`: DTO para crear unidades
+- Estados: DISPONIBLE, OCUPADA, EN_MANTENIMIENTO, RESERVADA, FUERA_SERVICIO
+
+#### Edificios (`building.model.ts`)
+- `IBuilding`: Información del edificio/torre
+- `ICreateBuildingDto`: DTO para crear edificios
+
+#### Espacios Comunes (`common-space.model.ts`)
+- `ICommonSpace`: Información del espacio común
+- `ICreateCommonSpaceDto`: DTO para crear espacios
+- Tipos: SALON_EVENTOS, GIMNASIO, PISCINA, QUINCHO, SALA_MULTIUSO, CANCHA_DEPORTIVA, JARDIN, PLAYGROUND, BIBLIOTECA, SALA_DE_JUEGOS, OTRO
+- Configuración de horarios de reserva y tipo de uso (exclusivo/compartido)
+
+#### Reservas (`reservation.model.ts`)
+- `IReservation`: Información de reserva
+- `ICreateReservationDto`: DTO para crear reservas
+- Estados: PENDING, CONFIRMED, CANCELLED, COMPLETED
+- Tipos: CUMPLEANOS, REUNION_FAMILIAR, EVENTO_CORPORATIVO, CELEBRACION, DEPORTE, TRABAJO, OTRO
+
+## Servicios Core
+
+### BuildingService
+- Gestión de edificios/torres
+- Filtrado por estado activo
+- Obtención de nombres de edificios
+
+### CommonSpaceService
+- CRUD de espacios comunes
+- Filtrado por edificio y tipo
+- Obtención de espacios reservables
+
+### ReservationService
+- CRUD de reservas
+- Verificación de disponibilidad
+- Filtrado por espacio, fecha y combinaciones
+- Validación de conflictos de horario
 
 ## Mejores Prácticas
 
