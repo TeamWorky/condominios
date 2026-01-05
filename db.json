@@ -1007,6 +1007,83 @@
       "notes": "Celebración religiosa y familiar",
       "createdAt": "2026-01-03T09:00:00.000Z",
       "updatedAt": "2026-01-03T09:00:00.000Z"
+    },
+    {
+      "id": "b901",
+      "commonSpaceId": "1",
+      "residentId": "1",
+      "date": "2026-01-04T03:00:00.000Z",
+      "startTime": "13:00",
+      "endTime": "14:30",
+      "type": "OTRO",
+      "status": "CONFIRMED",
+      "createdAt": "2026-01-01T00:15:48.547Z",
+      "updatedAt": "2026-01-01T00:15:48.547Z"
+    },
+    {
+      "id": "19aa",
+      "commonSpaceId": "1",
+      "residentId": "1",
+      "date": "2026-01-04T03:00:00.000Z",
+      "startTime": "14:00",
+      "endTime": "16:30",
+      "type": "OTRO",
+      "purpose": "asdasd",
+      "status": "CONFIRMED",
+      "createdAt": "2026-01-01T00:16:04.809Z",
+      "updatedAt": "2026-01-01T00:16:04.809Z"
+    },
+    {
+      "id": "0194",
+      "commonSpaceId": "1",
+      "residentId": "1",
+      "date": "2026-01-04T03:00:00.000Z",
+      "startTime": "12:00",
+      "endTime": "18:30",
+      "type": "REUNION_FAMILIAR",
+      "numberOfGuests": 132,
+      "purpose": "Prueba Bug",
+      "notes": "asdasd",
+      "status": "CONFIRMED",
+      "createdAt": "2026-01-01T00:16:35.858Z",
+      "updatedAt": "2026-01-01T00:16:35.858Z"
+    },
+    {
+      "id": "8849",
+      "commonSpaceId": "1",
+      "residentId": "1",
+      "date": "2026-01-01T03:00:00.000Z",
+      "startTime": "13:00",
+      "endTime": "20:30",
+      "type": "OTRO",
+      "purpose": "sadas",
+      "status": "CONFIRMED",
+      "createdAt": "2026-01-01T00:18:26.857Z",
+      "updatedAt": "2026-01-01T00:18:26.857Z"
+    },
+    {
+      "id": "b9ff",
+      "commonSpaceId": "1",
+      "residentId": "1",
+      "date": "2025-12-31T03:00:00.000Z",
+      "startTime": "09:00",
+      "endTime": "10:00",
+      "type": "OTRO",
+      "status": "CONFIRMED",
+      "createdAt": "2026-01-01T00:18:37.056Z",
+      "updatedAt": "2026-01-01T00:18:37.056Z"
+    },
+    {
+      "id": "32c8",
+      "commonSpaceId": "1",
+      "residentId": "1",
+      "date": "2025-12-31T03:00:00.000Z",
+      "startTime": "18:00",
+      "endTime": "19:30",
+      "type": "OTRO",
+      "status": "CONFIRMED",
+      "createdAt": "2026-01-01T00:23:05.064Z",
+      "updatedAt": "2026-01-01T00:23:05.064Z"
     }
   ]
 }
