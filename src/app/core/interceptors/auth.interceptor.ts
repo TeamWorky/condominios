@@ -11,8 +11,8 @@ const refreshTokenSubject: BehaviorSubject<string | null> = new BehaviorSubject<
 function isAuthEndpoint(url: string): boolean {
   return url.includes('/auth/login') ||
          url.includes('/auth/register') ||
-         url.includes('/auth/refresh') ||
-         url.includes('/auth/select-condominio');
+         url.includes('/auth/refresh');
+  // select-condominio NO está aquí porque requiere autenticación
 }
 
 function addToken(request: any, token: string) {

@@ -153,10 +153,15 @@ export class AuthService {
   }
 
   logout(): void {
-    // Llamar al endpoint de logout (opcional)
-    this.http.post(`${this.API_URL}/logout`, {}).subscribe();
+    // Llamar al endpoint de logout (opcional, no bloquea si falla)
+    this.http.post(`${this.API_URL}/logout`, {}).subscribe({
+      error: () => {
+        // Si falla el logout en el servidor, continuar con el logout local
+        console.warn('Logout endpoint failed, continuing with local logout');
+      }
+    });
 
-    // Limpiar localStorage
+    // Limpiar localStorage siempre
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.REFRESH_TOKEN_KEY);
     localStorage.removeItem(this.USER_KEY);

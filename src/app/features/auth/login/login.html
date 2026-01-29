@@ -1,89 +1,120 @@
-<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-  <div class="max-w-md w-full space-y-8">
-    <div>
-      <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-        Gestión de Condominios
-      </h2>
-      <p class="mt-2 text-center text-sm text-gray-600">
-        Inicia sesión para continuar
-      </p>
+<div class="login-container">
+  <div class="login-card">
+    <!-- Logo y Título -->
+    <div class="login-header">
+      <div class="logo-wrapper">
+        <mat-icon class="logo-icon">apartment</mat-icon>
+      </div>
+      <h1 class="login-title">Gestión de Condominios</h1>
+      <p class="login-subtitle">Inicia sesión para acceder al sistema</p>
     </div>
 
-    <form class="mt-8 space-y-6" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-      <div class="rounded-md shadow-sm -space-y-px">
-        <div>
-          <label for="email" class="sr-only">Email</label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            formControlName="email"
-            autocomplete="email"
-            required
-            class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-            [class.border-red-500]="email?.invalid && email?.touched"
-            placeholder="Correo electrónico"
-          >
-          <div *ngIf="email?.invalid && email?.touched" class="text-red-500 text-xs mt-1 px-3">
-            <span *ngIf="email?.errors?.['required']">El email es requerido</span>
-            <span *ngIf="email?.errors?.['email']">Email inválido</span>
-          </div>
-        </div>
-        <div>
-          <label for="password" class="sr-only">Contraseña</label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            formControlName="password"
-            autocomplete="current-password"
-            required
-            class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-            [class.border-red-500]="password?.invalid && password?.touched"
-            placeholder="Contraseña"
-          >
-          <div *ngIf="password?.invalid && password?.touched" class="text-red-500 text-xs mt-1 px-3">
-            <span *ngIf="password?.errors?.['required']">La contraseña es requerida</span>
-            <span *ngIf="password?.errors?.['minlength']">Mínimo 6 caracteres</span>
-          </div>
-        </div>
-      </div>
-
-      <div *ngIf="errorMessage" class="rounded-md bg-red-50 p-4">
-        <div class="flex">
-          <div class="ml-3">
-            <h3 class="text-sm font-medium text-red-800">
-              {{ errorMessage }}
-            </h3>
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <button
-          type="submit"
-          [disabled]="loading"
-          class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+    <!-- Formulario -->
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+      <!-- Campo Email -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Correo electrónico</mat-label>
+        <input
+          matInput
+          type="email"
+          formControlName="email"
+          autocomplete="email"
+          placeholder="usuario@ejemplo.com"
         >
-          <span *ngIf="!loading">Iniciar Sesión</span>
-          <span *ngIf="loading" class="flex items-center">
-            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            Cargando...
-          </span>
-        </button>
-      </div>
+        <mat-icon matPrefix>email</mat-icon>
+        <mat-error *ngIf="email?.invalid && email?.touched">
+          <span *ngIf="email?.errors?.['required']">El email es requerido</span>
+          <span *ngIf="email?.errors?.['email']">Email inválido</span>
+        </mat-error>
+      </mat-form-field>
 
-      <div class="text-center text-sm text-gray-600">
-        <p>Usuarios de prueba:</p>
-        <ul class="mt-2 space-y-1">
-          <li><strong>Super Admin:</strong> superadmin@condominios.cl / Admin123!</li>
-          <li><strong>Admin Torres del Sol:</strong> admin@torresdelsol.cl / Admin123!</li>
-          <li><strong>Admin Jardines:</strong> admin@jardinesdeleste.cl / Admin123!</li>
-        </ul>
-      </div>
+      <!-- Campo Contraseña -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Contraseña</mat-label>
+        <input
+          matInput
+          [type]="hidePassword ? 'password' : 'text'"
+          formControlName="password"
+          autocomplete="current-password"
+          placeholder="••••••••"
+        >
+        <mat-icon matPrefix>lock</mat-icon>
+        <button
+          mat-icon-button
+          matSuffix
+          (click)="hidePassword = !hidePassword"
+          [attr.aria-label]="'Ocultar contraseña'"
+          [attr.aria-pressed]="hidePassword"
+          type="button"
+        >
+          <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+        </button>
+        <mat-error *ngIf="password?.invalid && password?.touched">
+          <span *ngIf="password?.errors?.['required']">La contraseña es requerida</span>
+          <span *ngIf="password?.errors?.['minlength']">Mínimo 6 caracteres</span>
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Mensaje de Error -->
+      <mat-error *ngIf="errorMessage" class="error-message">
+        <mat-icon>error_outline</mat-icon>
+        <span>{{ errorMessage }}</span>
+      </mat-error>
+
+      <!-- Botón de Login -->
+      <button
+        mat-raised-button
+        color="primary"
+        type="submit"
+        [disabled]="loading || loginForm.invalid"
+        class="login-button"
+      >
+        <mat-icon *ngIf="!loading">login</mat-icon>
+        <mat-spinner *ngIf="loading" diameter="20" class="spinner"></mat-spinner>
+        <span>{{ loading ? 'Iniciando sesión...' : 'Iniciar Sesión' }}</span>
+      </button>
     </form>
+
+    <!-- Usuarios de Prueba -->
+    <div class="test-users-section">
+      <mat-divider></mat-divider>
+      <div class="test-users-header">
+        <mat-icon>info</mat-icon>
+        <span>Usuarios de prueba</span>
+      </div>
+      <div class="test-users-list">
+        <div class="test-user-item" (click)="fillCredentials('superadmin@condominios.cl', 'Admin123!')">
+          <div class="test-user-info">
+            <mat-icon class="user-icon">admin_panel_settings</mat-icon>
+            <div>
+              <strong>Super Admin</strong>
+              <p>superadmin@condominios.cl</p>
+            </div>
+          </div>
+          <mat-icon class="copy-icon">content_copy</mat-icon>
+        </div>
+        <div class="test-user-item" (click)="fillCredentials('admin@torresdelsol.cl', 'Admin123!')">
+          <div class="test-user-info">
+            <mat-icon class="user-icon">person</mat-icon>
+            <div>
+              <strong>Admin Torres del Sol</strong>
+              <p>admin@torresdelsol.cl</p>
+            </div>
+          </div>
+          <mat-icon class="copy-icon">content_copy</mat-icon>
+        </div>
+        <div class="test-user-item" (click)="fillCredentials('admin@jardinesdeleste.cl', 'Admin123!')">
+          <div class="test-user-info">
+            <mat-icon class="user-icon">person</mat-icon>
+            <div>
+              <strong>Admin Jardines</strong>
+              <p>admin@jardinesdeleste.cl</p>
+            </div>
+          </div>
+          <mat-icon class="copy-icon">content_copy</mat-icon>
+        </div>
+      </div>
+      <p class="test-users-note">Contraseña para todos: <strong>Admin123!</strong></p>
+    </div>
   </div>
 </div>

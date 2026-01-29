@@ -3,11 +3,26 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { CommonModule } from '@angular/common';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDividerModule } from '@angular/material/divider';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    MatDividerModule
+  ],
   templateUrl: './login.html',
   styleUrls: ['./login.scss']
 })
@@ -15,6 +30,7 @@ export class LoginComponent implements OnInit {
   loginForm!: FormGroup;
   loading = false;
   errorMessage = '';
+  hidePassword = true;
 
   constructor(
     private fb: FormBuilder,
@@ -44,14 +60,7 @@ export class LoginComponent implements OnInit {
         console.log('Condominios count:', response.condominios.length);
         console.log('Response data:', response);
 
-        // Si es SUPER_ADMIN, redirigir directamente al dashboard
-        if (response.user.role === 'SUPER_ADMIN') {
-          this.loading = false;
-          console.log('SUPER_ADMIN detected, navigating to dashboard');
-          this.router.navigate(['/dashboard']);
-          return;
-        }
-
+        // Todos los usuarios (incluyendo SUPER_ADMIN) siguen el mismo flujo basado en cantidad de condominios
         // Si tiene múltiples condominios, ir a selección
         if (response.condominios.length > 1) {
           this.loading = false;
@@ -73,7 +82,9 @@ export class LoginComponent implements OnInit {
               console.error('Error selecting condominio:', error);
             }
           });
-        } else {
+        } 
+        // Si no tiene condominios, mostrar error
+        else {
           this.loading = false;
           this.errorMessage = 'No tienes acceso a ningún condominio';
           console.error('No condominios assigned to user');
@@ -93,5 +104,11 @@ export class LoginComponent implements OnInit {
 
   get password() {
     return this.loginForm.get('password');
+  }
+
+  fillCredentials(email: string, password: string): void {
+    this.loginForm.patchValue({ email, password });
+    // Opcional: mostrar un mensaje de confirmación
+    console.log(`Credenciales cargadas: ${email}`);
   }
 }
