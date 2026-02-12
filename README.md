@@ -10,6 +10,9 @@ Esta aplicación permite administrar de manera eficiente las operaciones diarias
 
 - **Gestión de Residentes**: Registro y administración de propietarios y arrendatarios
 - **Pagos y Gastos Comunes**: Control de cuotas, pagos y estados de cuenta
+- **Gestión de Unidades**: Administración de departamentos con estados y organización por torre/piso
+- **Espacios Comunes**: Gestión de espacios comunes del condominio (salones, gimnasios, piscinas, etc.)
+- **Sistema de Reservas**: Reserva de espacios comunes con calendario semanal y validación de disponibilidad
 - **Dashboard Interactivo**: Visualización de métricas y estados importantes
 - **Interfaz Moderna**: Diseño responsive con Angular Material y Material Design 3
 
@@ -56,7 +59,9 @@ src/
 │   ├── shared/         # Componentes, directivas y pipes compartidos
 │   ├── features/       # Módulos de características
 │   │   ├── residentes/ # Gestión de residentes
-│   │   └── pagos/      # Gestión de pagos
+│   │   ├── pagos/      # Gestión de pagos
+│   │   ├── unidades/  # Gestión de unidades/departamentos
+│   │   └── espacios-comunes/ # Gestión de espacios comunes y reservas
 │   └── layout/         # Componentes de layout
 ├── assets/            # Recursos estáticos
 └── environments/      # Configuraciones de entorno

@@ -16,6 +16,23 @@
   </button>
 
   <mat-menu #userMenu="matMenu">
+    <div class="menu-header" *ngIf="selectedCondominio">
+      <div class="condominio-info">
+        <mat-icon class="condominio-icon">apartment</mat-icon>
+        <div class="condominio-details">
+          <span class="condominio-name">{{ selectedCondominio.name }}</span>
+          <span class="condominio-location">{{ selectedCondominio.city }}, {{ selectedCondominio.country }}</span>
+        </div>
+      </div>
+    </div>
+    
+    <mat-divider *ngIf="selectedCondominio"></mat-divider>
+    
+    <button mat-menu-item *ngIf="hasMultipleCondominios" (click)="onChangeCondominio()">
+      <mat-icon>swap_horiz</mat-icon>
+      <span>Cambiar Condominio</span>
+    </button>
+    
     <button mat-menu-item>
       <mat-icon>person</mat-icon>
       <span>Perfil</span>
@@ -25,7 +42,7 @@
       <span>Configuración</span>
     </button>
     <mat-divider></mat-divider>
-    <button mat-menu-item>
+    <button mat-menu-item (click)="onLogout()">
       <mat-icon>logout</mat-icon>
       <span>Cerrar Sesión</span>
     </button>

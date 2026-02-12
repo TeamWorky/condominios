@@ -1,0 +1,75 @@
+<div class="select-condominio-container">
+  <div class="select-condominio-card">
+    <div class="header-section">
+      <div class="icon-wrapper">
+        <mat-icon class="header-icon">apartment</mat-icon>
+      </div>
+      <h1 class="title">Selecciona un Condominio</h1>
+      <p class="subtitle">
+        Tienes acceso a {{ condominios.length }} condominio{{ condominios.length > 1 ? 's' : '' }}
+      </p>
+    </div>
+
+    <mat-divider class="divider"></mat-divider>
+
+    <div *ngIf="errorMessage" class="error-message">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ errorMessage }}</span>
+    </div>
+
+    <div class="condominios-grid">
+      <mat-card 
+        *ngFor="let condominio of condominios"
+        class="condominio-card"
+        [class.loading]="loading"
+        (click)="!loading && selectCondominio(condominio)">
+        <mat-card-content>
+          <div class="condominio-header">
+            <mat-icon class="condominio-icon">apartment</mat-icon>
+            <h3 class="condominio-name">{{ condominio.name }}</h3>
+          </div>
+          
+          <p class="condominio-description" *ngIf="condominio.description">
+            {{ condominio.description }}
+          </p>
+
+          <div class="condominio-details">
+            <div class="detail-item" *ngIf="condominio.city || condominio.country">
+              <mat-icon class="detail-icon">location_on</mat-icon>
+              <span>{{ condominio.city }}{{ condominio.city && condominio.country ? ', ' : '' }}{{ condominio.country }}</span>
+            </div>
+            
+            <div class="detail-item" *ngIf="condominio.phone">
+              <mat-icon class="detail-icon">phone</mat-icon>
+              <span>{{ condominio.phone }}</span>
+            </div>
+            
+            <div class="detail-item" *ngIf="condominio.email">
+              <mat-icon class="detail-icon">email</mat-icon>
+              <span class="email-text">{{ condominio.email }}</span>
+            </div>
+          </div>
+
+          <div class="condominio-footer">
+            <mat-chip [class.active-chip]="condominio.isActive" [class.inactive-chip]="!condominio.isActive">
+              <mat-icon class="chip-icon">{{ condominio.isActive ? 'check_circle' : 'cancel' }}</mat-icon>
+              {{ condominio.isActive ? 'Activo' : 'Inactivo' }}
+            </mat-chip>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div *ngIf="loading" class="loading-overlay">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p class="loading-text">Seleccionando condominio...</p>
+    </div>
+
+    <div class="footer-section">
+      <button mat-button color="primary" (click)="logout()" [disabled]="loading">
+        <mat-icon>logout</mat-icon>
+        <span>Cerrar sesión</span>
+      </button>
+    </div>
+  </div>
+</div>
