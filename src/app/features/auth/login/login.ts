@@ -56,20 +56,40 @@ export class LoginComponent implements OnInit {
 
     this.authService.login(this.loginForm.value).subscribe({
       next: (response) => {
-        console.log('Login successful. User role:', response.user.role);
-        console.log('Condominios count:', response.condominios.length);
-        console.log('Response data:', response);
+        console.log('🔍 [Login] Login successful. User role:', response.user.role);
+        console.log('🔍 [Login] Condominios count:', response.condominios.length);
+        console.log('🔍 [Login] Condominios names:', response.condominios.map(c => c.name));
+        console.log('🔍 [Login] Full response data:', response);
+
+        // Verificar que los condominios se guardaron correctamente
+        setTimeout(() => {
+          const stored = localStorage.getItem('condominios_data');
+          if (stored) {
+            try {
+              const parsed = JSON.parse(stored);
+              console.log('🔍 [Login] Verified stored condominios after login:', {
+                count: parsed?.length,
+                names: parsed?.map((c: any) => c?.name)
+              });
+            } catch (e) {
+              console.error('🔍 [Login] Error verifying stored condominios:', e);
+            }
+          }
+        }, 100);
 
         // Todos los usuarios (incluyendo SUPER_ADMIN) siguen el mismo flujo basado en cantidad de condominios
         // Si tiene múltiples condominios, ir a selección
         if (response.condominios.length > 1) {
           this.loading = false;
-          console.log('Multiple condominios, navigating to selection');
-          this.router.navigate(['/auth/select-condominio']);
+          console.log('🔍 [Login] Multiple condominios, navigating to selection');
+          // Pequeño delay para asegurar que el estado se actualice
+          setTimeout(() => {
+            this.router.navigate(['/auth/select-condominio']);
+          }, 50);
         }
         // Si solo tiene uno, seleccionarlo automáticamente
         else if (response.condominios.length === 1) {
-          console.log('One condominio found, auto-selecting:', response.condominios[0]);
+          console.log('🔍 [Login] One condominio found, auto-selecting:', response.condominios[0]);
           this.authService.selectCondominio(response.condominios[0].id).subscribe({
             next: () => {
               this.loading = false;

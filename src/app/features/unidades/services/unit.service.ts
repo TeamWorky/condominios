@@ -1,64 +1,79 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { IUnit, ICreateUnitDto, UnitStatus } from '../../../core/models/unit.model';
+import { map } from 'rxjs/operators';
+import { IUnit, ICreateUnitDto, IUpdateUnitDto, ApiResponse, UnitStatus } from '../../../core/models/unit.model';
 import { environment } from '../../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UnitService {
-  private apiUrl = `${environment.apiUrl}/units`;
+  private apiUrl = `${environment.apiUrl}/api/v1`;
 
   constructor(private http: HttpClient) {}
 
-  getUnits(): Observable<IUnit[]> {
-    return this.http.get<IUnit[]>(this.apiUrl);
+  getUnitsByCondominium(condoId: string, page: number = 1, limit: number = 10): Observable<{ data: IUnit[]; total: number }> {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('limit', limit.toString());
+
+    return this.http.get<ApiResponse<IUnit[]>>(
+      `${this.apiUrl}/condominiums/${condoId}/units`,
+      { params }
+    ).pipe(
+      map(response => ({
+        data: response.data || [],
+        total: response.meta?.total || 0
+      }))
+    );
+  }
+
+  getUnitsByBuilding(buildingId: string, page: number = 1, limit: number = 10): Observable<{ data: IUnit[]; total: number }> {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('limit', limit.toString());
+
+    return this.http.get<ApiResponse<IUnit[]>>(
+      `${this.apiUrl}/buildings/${buildingId}/units`,
+      { params }
+    ).pipe(
+      map(response => ({
+        data: response.data || [],
+        total: response.meta?.total || 0
+      }))
+    );
   }
 
   getUnitById(id: string): Observable<IUnit> {
-    return this.http.get<IUnit>(`${this.apiUrl}/${id}`);
+    return this.http.get<ApiResponse<IUnit>>(`${this.apiUrl}/units/${id}`).pipe(
+      map(response => response.data as IUnit)
+    );
   }
 
-  getUnitsByBuilding(building: string): Observable<IUnit[]> {
-    return this.http.get<IUnit[]>(`${this.apiUrl}?building=${building}`);
+  createUnit(buildingId: string, unit: ICreateUnitDto): Observable<IUnit> {
+    return this.http.post<ApiResponse<IUnit>>(
+      `${this.apiUrl}/buildings/${buildingId}/units`,
+      unit
+    ).pipe(
+      map(response => response.data as IUnit)
+    );
   }
 
-  createUnit(unit: ICreateUnitDto): Observable<IUnit> {
-    return this.http.post<IUnit>(this.apiUrl, {
-      ...unit,
-      status: UnitStatus.DISPONIBLE,
-      isOccupied: false, // Mantener por compatibilidad
-      createdAt: new Date(),
-      updatedAt: new Date()
-    });
-  }
-
-  updateUnit(id: string, unit: Partial<IUnit>): Observable<IUnit> {
-    return this.http.patch<IUnit>(`${this.apiUrl}/${id}`, {
-      ...unit,
-      updatedAt: new Date()
-    });
+  updateUnit(id: string, unit: IUpdateUnitDto): Observable<IUnit> {
+    return this.http.patch<ApiResponse<IUnit>>(
+      `${this.apiUrl}/units/${id}`,
+      unit
+    ).pipe(
+      map(response => response.data as IUnit)
+    );
   }
 
   deleteUnit(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
-  }
-
-  toggleUnitStatus(id: string, isOccupied: boolean): Observable<IUnit> {
-    return this.http.patch<IUnit>(`${this.apiUrl}/${id}`, {
-      isOccupied,
-      status: isOccupied ? UnitStatus.OCUPADA : UnitStatus.DISPONIBLE,
-      updatedAt: new Date()
-    });
+    return this.http.delete<void>(`${this.apiUrl}/units/${id}`);
   }
 
   updateUnitStatus(id: string, status: UnitStatus): Observable<IUnit> {
-    return this.http.patch<IUnit>(`${this.apiUrl}/${id}`, {
-      status,
-      isOccupied: status === UnitStatus.OCUPADA, // Mantener por compatibilidad
-      updatedAt: new Date()
-    });
+    return this.updateUnit(id, { status, isOccupied: status === UnitStatus.OCCUPIED });
   }
 }
-

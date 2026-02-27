@@ -66,6 +66,11 @@
     </div>
 
     <div class="footer-section">
+      <!-- Botón de debug temporal -->
+      <button mat-button color="accent" (click)="debugInfo()" style="margin-right: 10px;">
+        <mat-icon>bug_report</mat-icon>
+        <span>Debug Info</span>
+      </button>
       <button mat-button color="primary" (click)="logout()" [disabled]="loading">
         <mat-icon>logout</mat-icon>
         <span>Cerrar sesión</span>

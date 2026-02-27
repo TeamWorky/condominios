@@ -12,7 +12,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { UnitService } from '../../services/unit.service';
 import { BuildingService } from '../../../../core/services/building.service';
-import { ICreateUnitDto, UnitStatus } from '../../../../core/models/unit.model';
+import { AuthService } from '../../../../core/services/auth.service';
+import { ICreateUnitDto, UnitStatus, UnitStatusLabels, UnitType, UnitTypeLabels } from '../../../../core/models/unit.model';
+import { IBuilding } from '../../../../core/models/building.model';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
@@ -44,26 +46,30 @@ import { Subject, takeUntil } from 'rxjs';
             <div class="form-grid">
               <mat-form-field appearance="outline">
                 <mat-label>Edificio</mat-label>
-                <mat-select formControlName="building" [disabled]="loadingBuildings">
+                <mat-select formControlName="buildingId" [disabled]="loadingBuildings">
                   @if (loadingBuildings) {
                     <mat-option disabled>Cargando edificios...</mat-option>
                   } @else {
-                    @for (building of buildings; track building) {
-                      <mat-option [value]="building">{{ building }}</mat-option>
+                    @if (getBuildingsArray().length > 0) {
+                      @for (building of getBuildingsArray(); track building.id) {
+                        <mat-option [value]="building.id">{{ building.name }}</mat-option>
+                      }
+                    } @else {
+                      <mat-option disabled>No hay edificios disponibles</mat-option>
                     }
                   }
                 </mat-select>
                 <mat-icon matPrefix>apartment</mat-icon>
-                @if (unitForm.get('building')?.hasError('required') && unitForm.get('building')?.touched) {
+                @if (unitForm.get('buildingId')?.hasError('required') && unitForm.get('buildingId')?.touched) {
                   <mat-error>El edificio es requerido</mat-error>
                 }
               </mat-form-field>
 
               <mat-form-field appearance="outline">
                 <mat-label>Número de Departamento</mat-label>
-                <input matInput formControlName="unitNumber" placeholder="Ej: 101, 205">
+                <input matInput formControlName="number" placeholder="Ej: 101, 205">
                 <mat-icon matPrefix>tag</mat-icon>
-                @if (unitForm.get('unitNumber')?.hasError('required') && unitForm.get('unitNumber')?.touched) {
+                @if (unitForm.get('number')?.hasError('required') && unitForm.get('number')?.touched) {
                   <mat-error>El número de departamento es requerido</mat-error>
                 }
               </mat-form-field>
@@ -88,14 +94,24 @@ import { Subject, takeUntil } from 'rxjs';
 
               <mat-form-field appearance="outline">
                 <mat-label>Área (m²)</mat-label>
-                <input matInput type="number" formControlName="area" placeholder="Ej: 75.5">
+                <input matInput type="number" formControlName="areaM2" placeholder="Ej: 75.5">
                 <mat-icon matPrefix>square_foot</mat-icon>
-                @if (unitForm.get('area')?.hasError('required') && unitForm.get('area')?.touched) {
+                @if (unitForm.get('areaM2')?.hasError('required') && unitForm.get('areaM2')?.touched) {
                   <mat-error>El área es requerida</mat-error>
                 }
-                @if (unitForm.get('area')?.hasError('min') && unitForm.get('area')?.touched) {
+                @if (unitForm.get('areaM2')?.hasError('min') && unitForm.get('areaM2')?.touched) {
                   <mat-error>El área debe ser mayor a 0</mat-error>
                 }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Tipo de Unidad</mat-label>
+                <mat-select formControlName="unitType">
+                  @for (type of unitTypes; track type.value) {
+                    <mat-option [value]="type.value">{{ type.label }}</mat-option>
+                  }
+                </mat-select>
+                <mat-icon matPrefix>category</mat-icon>
               </mat-form-field>
 
               <mat-form-field appearance="outline">
@@ -229,15 +245,30 @@ export class UnitFormComponent implements OnInit, OnDestroy {
   unitForm: FormGroup;
   isEditMode = false;
   loading = false;
-  buildings: string[] = [];
+  error: string | null = null;
+  buildings: IBuilding[] = []; // Siempre inicializado como array vacío
   loadingBuildings = false;
+
+  // Función helper para obtener edificios de forma segura
+  getBuildingsArray(): IBuilding[] {
+    return Array.isArray(this.buildings) ? this.buildings : [];
+  }
   UnitStatus = UnitStatus;
+  UnitType = UnitType;
   unitStatuses = [
-    { value: UnitStatus.DISPONIBLE, label: 'Disponible' },
-    { value: UnitStatus.OCUPADA, label: 'Ocupada' },
-    { value: UnitStatus.EN_MANTENIMIENTO, label: 'En Mantenimiento' },
-    { value: UnitStatus.RESERVADA, label: 'Reservada' },
-    { value: UnitStatus.FUERA_SERVICIO, label: 'Fuera de Servicio' }
+    { value: UnitStatus.AVAILABLE, label: UnitStatusLabels[UnitStatus.AVAILABLE] },
+    { value: UnitStatus.OCCUPIED, label: UnitStatusLabels[UnitStatus.OCCUPIED] },
+    { value: UnitStatus.MAINTENANCE, label: UnitStatusLabels[UnitStatus.MAINTENANCE] },
+    { value: UnitStatus.RESERVED, label: UnitStatusLabels[UnitStatus.RESERVED] },
+    { value: UnitStatus.OUT_OF_SERVICE, label: UnitStatusLabels[UnitStatus.OUT_OF_SERVICE] }
+  ];
+  unitTypes = [
+    { value: UnitType.APARTMENT, label: UnitTypeLabels[UnitType.APARTMENT] },
+    { value: UnitType.HOUSE, label: UnitTypeLabels[UnitType.HOUSE] },
+    { value: UnitType.OFFICE, label: UnitTypeLabels[UnitType.OFFICE] },
+    { value: UnitType.COMMERCIAL, label: UnitTypeLabels[UnitType.COMMERCIAL] },
+    { value: UnitType.PARKING, label: UnitTypeLabels[UnitType.PARKING] },
+    { value: UnitType.STORAGE, label: UnitTypeLabels[UnitType.STORAGE] }
   ];
   private destroy$ = new Subject<void>();
 
@@ -245,22 +276,24 @@ export class UnitFormComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private unitService: UnitService,
     private buildingService: BuildingService,
+    private authService: AuthService,
     private router: Router,
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef,
     private snackBar: MatSnackBar
   ) {
     this.unitForm = this.fb.group({
-      building: ['', [Validators.required]],
-      unitNumber: ['', [Validators.required]],
-      floor: [1, [Validators.required, Validators.min(1)]],
+      buildingId: ['', [Validators.required]],
+      number: ['', [Validators.required]],
+      floor: [null],
       block: [''],
-      area: [0, [Validators.required, Validators.min(0.1)]],
-      bedrooms: [1, [Validators.required, Validators.min(1)]],
-      bathrooms: [1, [Validators.required, Validators.min(1)]],
-      parkingSpots: [0, [Validators.required, Validators.min(0)]],
-      storageUnits: [0, [Validators.required, Validators.min(0)]],
-      status: [UnitStatus.DISPONIBLE] // Solo se usa en modo edición
+      unitType: [UnitType.APARTMENT],
+      areaM2: [null],
+      bedrooms: [null],
+      bathrooms: [null],
+      parkingSpots: [0],
+      storageUnits: [0],
+      status: [UnitStatus.AVAILABLE] // Solo se usa en modo edición
     });
   }
 
@@ -274,19 +307,32 @@ export class UnitFormComponent implements OnInit, OnDestroy {
   }
 
   loadBuildings(): void {
+    const selectedCondominio = this.authService.getSelectedCondominio();
+    if (!selectedCondominio) {
+      this.error = 'No hay condominio seleccionado';
+      this.loadingBuildings = false;
+      this.cdr.detectChanges();
+      return;
+    }
+
     this.loadingBuildings = true;
-    this.buildingService.getBuildingNames().pipe(takeUntil(this.destroy$)).subscribe({
-      next: (buildingNames) => {
-        this.buildings = buildingNames;
+    this.buildingService.getBuildingNames(selectedCondominio.id).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (buildings) => {
+        this.buildings = Array.isArray(buildings) ? buildings : [];
         this.loadingBuildings = false;
         this.cdr.detectChanges();
       },
-      error: (err) => {
-        console.error('Error loading buildings:', err);
-        // Fallback a lista estática si falla el servicio
-        this.buildings = ['Torre A', 'Torre B', 'Torre C', 'Edificio 1', 'Edificio 2', 'Edificio 3'];
+      error: () => {
+        // Asegurar que siempre sea un array incluso en caso de error
+        this.buildings = [];
         this.loadingBuildings = false;
         this.cdr.detectChanges();
+        this.snackBar.open('Error al cargar los edificios', 'Cerrar', {
+          duration: 3000,
+          horizontalPosition: 'end',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar']
+        });
       }
     });
   }
@@ -303,22 +349,22 @@ export class UnitFormComponent implements OnInit, OnDestroy {
     this.unitService.getUnitById(id).pipe(takeUntil(this.destroy$)).subscribe({
       next: (unit) => {
         this.unitForm.patchValue({
-          building: unit.building,
-          unitNumber: unit.unitNumber,
-          floor: unit.floor,
+          buildingId: unit.buildingId,
+          number: unit.number,
+          floor: unit.floor || null,
           block: unit.block || '',
-          area: unit.area,
-          bedrooms: unit.bedrooms,
-          bathrooms: unit.bathrooms,
-          parkingSpots: unit.parkingSpots,
-          storageUnits: unit.storageUnits,
-          status: unit.status || (unit.isOccupied ? UnitStatus.OCUPADA : UnitStatus.DISPONIBLE)
+          unitType: unit.unitType || UnitType.APARTMENT,
+          areaM2: unit.areaM2 || null,
+          bedrooms: unit.bedrooms || null,
+          bathrooms: unit.bathrooms || null,
+          parkingSpots: unit.parkingSpots || 0,
+          storageUnits: unit.storageUnits || 0,
+          status: unit.status || UnitStatus.AVAILABLE
         });
         this.loading = false;
         this.cdr.detectChanges();
       },
-      error: (err) => {
-        console.error('Error loading unit:', err);
+      error: () => {
         this.loading = false;
         this.cdr.detectChanges();
         this.snackBar.open('Error al cargar la unidad', 'Cerrar', {
@@ -341,11 +387,20 @@ export class UnitFormComponent implements OnInit, OnDestroy {
       const formValue = this.unitForm.value;
       
       if (this.isEditMode) {
-        // En modo edición, incluir el estado
-        const updateData = {
-          ...formValue,
-          status: formValue.status || UnitStatus.DISPONIBLE,
-          isOccupied: formValue.status === UnitStatus.OCUPADA
+        // En modo edición
+        const updateData: ICreateUnitDto = {
+          buildingId: formValue.buildingId,
+          number: formValue.number,
+          floor: formValue.floor,
+          block: formValue.block,
+          unitType: formValue.unitType,
+          areaM2: formValue.areaM2,
+          bedrooms: formValue.bedrooms,
+          bathrooms: formValue.bathrooms,
+          parkingSpots: formValue.parkingSpots,
+          storageUnits: formValue.storageUnits,
+          status: formValue.status || UnitStatus.AVAILABLE,
+          isOccupied: formValue.status === UnitStatus.OCCUPIED
         };
         const operation = this.unitService.updateUnit(this.route.snapshot.paramMap.get('id')!, updateData);
         
@@ -363,12 +418,11 @@ export class UnitFormComponent implements OnInit, OnDestroy {
             );
             this.router.navigate(['/unidades']);
           },
-          error: (err) => {
-            console.error('Error saving unit:', err);
+          error: () => {
             this.loading = false;
             this.cdr.detectChanges();
             this.snackBar.open(
-              'Error al guardar la unidad. Por favor, verifica que el servidor mock esté ejecutándose.',
+              'Error al guardar la unidad',
               'Cerrar',
               {
                 duration: 5000,
@@ -380,19 +434,20 @@ export class UnitFormComponent implements OnInit, OnDestroy {
           }
         });
       } else {
-        // En modo creación, no incluir estado (se asigna por defecto)
+        // En modo creación
         const unitData: ICreateUnitDto = {
-          building: formValue.building,
-          unitNumber: formValue.unitNumber,
+          buildingId: formValue.buildingId,
+          number: formValue.number,
           floor: formValue.floor,
           block: formValue.block,
-          area: formValue.area,
+          unitType: formValue.unitType,
+          areaM2: formValue.areaM2,
           bedrooms: formValue.bedrooms,
           bathrooms: formValue.bathrooms,
-          parkingSpots: formValue.parkingSpots,
-          storageUnits: formValue.storageUnits
+          parkingSpots: formValue.parkingSpots || 0,
+          storageUnits: formValue.storageUnits || 0
         };
-        const operation = this.unitService.createUnit(unitData);
+        const operation = this.unitService.createUnit(formValue.buildingId, unitData);
         
         operation.pipe(takeUntil(this.destroy$)).subscribe({
           next: () => {
@@ -408,12 +463,11 @@ export class UnitFormComponent implements OnInit, OnDestroy {
             );
             this.router.navigate(['/unidades']);
           },
-          error: (err) => {
-            console.error('Error saving unit:', err);
+          error: () => {
             this.loading = false;
             this.cdr.detectChanges();
             this.snackBar.open(
-              'Error al guardar la unidad. Por favor, verifica que el servidor mock esté ejecutándose.',
+              'Error al guardar la unidad',
               'Cerrar',
               {
                 duration: 5000,
