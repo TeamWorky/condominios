@@ -128,7 +128,7 @@ interface GroupedUnits {
                               <mat-icon>visibility</mat-icon>
                               Ver
                             </button>
-                            <button mat-button [routerLink]="['/unidades', unit.id, 'editar']">
+                            <button mat-button [routerLink]="['/unidades/editar', unit.id]">
                               <mat-icon>edit</mat-icon>
                               Editar
                             </button>

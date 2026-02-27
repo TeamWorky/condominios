@@ -107,7 +107,7 @@ import { Subject, takeUntil } from 'rxjs';
                   <button mat-icon-button [routerLink]="['/unidades', unit.id]">
                     <mat-icon>visibility</mat-icon>
                   </button>
-                  <button mat-icon-button [routerLink]="['/unidades', unit.id, 'editar']">
+                  <button mat-icon-button [routerLink]="['/unidades/editar', unit.id]">
                     <mat-icon>edit</mat-icon>
                   </button>
                   <button mat-icon-button color="warn" (click)="onDelete(unit.id)">

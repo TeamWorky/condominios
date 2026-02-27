@@ -385,20 +385,21 @@ export class UnitFormComponent implements OnInit, OnDestroy {
       this.cdr.detectChanges();
       
       const formValue = this.unitForm.value;
-      
+      const toInt = (v: any) => (v !== null && v !== '' && v !== undefined) ? parseInt(String(v), 10) : undefined;
+      const toFloat = (v: any) => (v !== null && v !== '' && v !== undefined) ? parseFloat(String(v)) : undefined;
+
       if (this.isEditMode) {
         // En modo edición
-        const updateData: ICreateUnitDto = {
-          buildingId: formValue.buildingId,
+        const updateData = {
           number: formValue.number,
-          floor: formValue.floor,
-          block: formValue.block,
+          floor: toInt(formValue.floor),
+          block: formValue.block || undefined,
           unitType: formValue.unitType,
-          areaM2: formValue.areaM2,
-          bedrooms: formValue.bedrooms,
-          bathrooms: formValue.bathrooms,
-          parkingSpots: formValue.parkingSpots,
-          storageUnits: formValue.storageUnits,
+          areaM2: toFloat(formValue.areaM2),
+          bedrooms: toInt(formValue.bedrooms),
+          bathrooms: toInt(formValue.bathrooms),
+          parkingSpots: toInt(formValue.parkingSpots) ?? 0,
+          storageUnits: toInt(formValue.storageUnits) ?? 0,
           status: formValue.status || UnitStatus.AVAILABLE,
           isOccupied: formValue.status === UnitStatus.OCCUPIED
         };
@@ -418,19 +419,18 @@ export class UnitFormComponent implements OnInit, OnDestroy {
             );
             this.router.navigate(['/unidades']);
           },
-          error: () => {
+          error: (err: any) => {
             this.loading = false;
             this.cdr.detectChanges();
-            this.snackBar.open(
-              'Error al guardar la unidad',
-              'Cerrar',
-              {
-                duration: 5000,
-                horizontalPosition: 'end',
-                verticalPosition: 'top',
-                panelClass: ['error-snackbar']
-              }
-            );
+            const msg = err?.error?.message
+              ? (Array.isArray(err.error.message) ? err.error.message.join(', ') : err.error.message)
+              : `Error ${err?.status || ''} al guardar la unidad`;
+            this.snackBar.open(msg, 'Cerrar', {
+              duration: 8000,
+              horizontalPosition: 'end',
+              verticalPosition: 'top',
+              panelClass: ['error-snackbar']
+            });
           }
         });
       } else {
@@ -438,14 +438,14 @@ export class UnitFormComponent implements OnInit, OnDestroy {
         const unitData: ICreateUnitDto = {
           buildingId: formValue.buildingId,
           number: formValue.number,
-          floor: formValue.floor,
-          block: formValue.block,
+          floor: toInt(formValue.floor),
+          block: formValue.block || undefined,
           unitType: formValue.unitType,
-          areaM2: formValue.areaM2,
-          bedrooms: formValue.bedrooms,
-          bathrooms: formValue.bathrooms,
-          parkingSpots: formValue.parkingSpots || 0,
-          storageUnits: formValue.storageUnits || 0
+          areaM2: toFloat(formValue.areaM2),
+          bedrooms: toInt(formValue.bedrooms),
+          bathrooms: toInt(formValue.bathrooms),
+          parkingSpots: toInt(formValue.parkingSpots) ?? 0,
+          storageUnits: toInt(formValue.storageUnits) ?? 0
         };
         const operation = this.unitService.createUnit(formValue.buildingId, unitData);
         
