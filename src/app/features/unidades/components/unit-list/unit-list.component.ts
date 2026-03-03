@@ -8,8 +8,10 @@ import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { UnitService } from '../../services/unit.service';
-import { IUnit, UnitStatus } from '../../../../core/models/unit.model';
+import { IUnit, UnitStatus, UnitStatusLabels } from '../../../../core/models/unit.model';
+import { AuthService } from '../../../../core/services/auth.service';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
@@ -24,7 +26,8 @@ import { Subject, takeUntil } from 'rxjs';
     MatTableModule,
     MatChipsModule,
     MatProgressSpinnerModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatPaginatorModule
   ],
   template: `
     <div class="page-container">
@@ -61,12 +64,12 @@ import { Subject, takeUntil } from 'rxjs';
 
               <ng-container matColumnDef="building">
                 <th mat-header-cell *matHeaderCellDef>Edificio</th>
-                <td mat-cell *matCellDef="let unit">{{ unit.building }}</td>
+                <td mat-cell *matCellDef="let unit">{{ unit.building?.name || '-' }}</td>
               </ng-container>
 
               <ng-container matColumnDef="unitNumber">
                 <th mat-header-cell *matHeaderCellDef>N° Depto</th>
-                <td mat-cell *matCellDef="let unit">{{ unit.unitNumber }}</td>
+                <td mat-cell *matCellDef="let unit">{{ unit.number }}</td>
               </ng-container>
 
               <ng-container matColumnDef="floor">
@@ -81,7 +84,7 @@ import { Subject, takeUntil } from 'rxjs';
 
               <ng-container matColumnDef="area">
                 <th mat-header-cell *matHeaderCellDef>Área (m²)</th>
-                <td mat-cell *matCellDef="let unit">{{ unit.area }}</td>
+                <td mat-cell *matCellDef="let unit">{{ unit.areaM2 || '-' }}</td>
               </ng-container>
 
               <ng-container matColumnDef="bedrooms">
@@ -92,8 +95,8 @@ import { Subject, takeUntil } from 'rxjs';
               <ng-container matColumnDef="status">
                 <th mat-header-cell *matHeaderCellDef>Estado</th>
                 <td mat-cell *matCellDef="let unit">
-                  <mat-chip [class]="getStatusClass(unit.status || (unit.isOccupied ? UnitStatus.OCUPADA : UnitStatus.DISPONIBLE))">
-                    {{ getStatusLabel(unit.status || (unit.isOccupied ? UnitStatus.OCUPADA : UnitStatus.DISPONIBLE)) }}
+                  <mat-chip [class]="getStatusClass(unit.status || UnitStatus.AVAILABLE)">
+                    {{ getStatusLabel(unit.status || UnitStatus.AVAILABLE) }}
                   </mat-chip>
                 </td>
               </ng-container>
@@ -104,7 +107,7 @@ import { Subject, takeUntil } from 'rxjs';
                   <button mat-icon-button [routerLink]="['/unidades', unit.id]">
                     <mat-icon>visibility</mat-icon>
                   </button>
-                  <button mat-icon-button [routerLink]="['/unidades', unit.id, 'editar']">
+                  <button mat-icon-button [routerLink]="['/unidades/editar', unit.id]">
                     <mat-icon>edit</mat-icon>
                   </button>
                   <button mat-icon-button color="warn" (click)="onDelete(unit.id)">
@@ -116,6 +119,17 @@ import { Subject, takeUntil } from 'rxjs';
               <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
               <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
             </table>
+
+            @if (total > 0) {
+              <mat-paginator
+                [length]="total"
+                [pageSize]="pageSize"
+                [pageSizeOptions]="[10, 25, 50, 100]"
+                [pageIndex]="currentPage - 1"
+                (page)="onPageChange($event)"
+                showFirstLastButtons>
+              </mat-paginator>
+            }
           }
         </mat-card-content>
       </mat-card>
@@ -163,27 +177,27 @@ import { Subject, takeUntil } from 'rxjs';
 
 
 
-    .chip-disponible {
+    .chip-available {
       background-color: #e8f5e9;
       color: #2e7d32;
     }
 
-    .chip-ocupada {
+    .chip-occupied {
       background-color: #ffebee;
       color: #c62828;
     }
 
-    .chip-en-mantenimiento {
+    .chip-maintenance {
       background-color: #fff3e0;
       color: #e65100;
     }
 
-    .chip-reservada {
+    .chip-reserved {
       background-color: #e3f2fd;
       color: #1976d2;
     }
 
-    .chip-fuera-servicio {
+    .chip-out_of_service {
       background-color: #f5f5f5;
       color: #616161;
     }
@@ -195,17 +209,21 @@ export class UnitListComponent implements OnInit, OnDestroy {
   loading = true;
   error: string | null = null;
   UnitStatus = UnitStatus;
-  unitStatuses = [
-    { value: UnitStatus.DISPONIBLE, label: 'Disponible' },
-    { value: UnitStatus.OCUPADA, label: 'Ocupada' },
-    { value: UnitStatus.EN_MANTENIMIENTO, label: 'En Mantenimiento' },
-    { value: UnitStatus.RESERVADA, label: 'Reservada' },
-    { value: UnitStatus.FUERA_SERVICIO, label: 'Fuera de Servicio' }
-  ];
+  private readonly statusClassMap: { [key in UnitStatus]: string } = {
+    [UnitStatus.AVAILABLE]: 'chip-available',
+    [UnitStatus.OCCUPIED]: 'chip-occupied',
+    [UnitStatus.MAINTENANCE]: 'chip-maintenance',
+    [UnitStatus.RESERVED]: 'chip-reserved',
+    [UnitStatus.OUT_OF_SERVICE]: 'chip-out_of_service'
+  };
+  currentPage = 1;
+  pageSize = 10;
+  total = 0;
   private destroy$ = new Subject<void>();
 
   constructor(
     private unitService: UnitService,
+    private authService: AuthService,
     private cdr: ChangeDetectorRef,
     private snackBar: MatSnackBar
   ) {}
@@ -220,24 +238,47 @@ export class UnitListComponent implements OnInit, OnDestroy {
   }
 
   loadUnits(): void {
+    const selectedCondominio = this.authService.getSelectedCondominio();
+    if (!selectedCondominio) {
+      this.error = 'No hay condominio seleccionado';
+      this.loading = false;
+      this.cdr.detectChanges();
+      return;
+    }
+
     this.loading = true;
     this.error = null;
     this.cdr.detectChanges();
 
-    this.unitService.getUnits().pipe(takeUntil(this.destroy$)).subscribe({
-      next: (units) => {
-        this.dataSource.data = units;
+    this.unitService.getUnitsByCondominium(
+      selectedCondominio.id,
+      this.currentPage,
+      this.pageSize
+    ).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (result) => {
+        this.dataSource.data = result.data;
+        this.total = result.total;
         this.loading = false;
         this.cdr.detectChanges();
-        console.log('Units loaded:', units);
       },
-      error: (err) => {
-        this.error = 'Error al cargar las unidades. Por favor, verifica que el servidor mock esté ejecutándose.';
+      error: () => {
+        this.error = 'Error al cargar las unidades. Por favor, verifica la conexión con el servidor.';
         this.loading = false;
         this.cdr.detectChanges();
-        console.error('Error loading units:', err);
+        this.snackBar.open('Error al cargar las unidades', 'Cerrar', {
+          duration: 3000,
+          horizontalPosition: 'end',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar']
+        });
       }
     });
+  }
+
+  onPageChange(event: PageEvent): void {
+    this.currentPage = event.pageIndex + 1;
+    this.pageSize = event.pageSize;
+    this.loadUnits();
   }
 
   onDelete(id: string): void {
@@ -251,8 +292,7 @@ export class UnitListComponent implements OnInit, OnDestroy {
           });
           this.loadUnits();
         },
-        error: (err) => {
-          console.error('Error deleting unit:', err);
+        error: () => {
           this.snackBar.open('Error al eliminar la unidad', 'Cerrar', {
             duration: 3000,
             horizontalPosition: 'end',
@@ -265,25 +305,11 @@ export class UnitListComponent implements OnInit, OnDestroy {
   }
 
   getStatusLabel(status: UnitStatus): string {
-    const statusMap: { [key in UnitStatus]: string } = {
-      [UnitStatus.DISPONIBLE]: 'Disponible',
-      [UnitStatus.OCUPADA]: 'Ocupada',
-      [UnitStatus.EN_MANTENIMIENTO]: 'En Mantenimiento',
-      [UnitStatus.RESERVADA]: 'Reservada',
-      [UnitStatus.FUERA_SERVICIO]: 'Fuera de Servicio'
-    };
-    return statusMap[status] || status;
+    return UnitStatusLabels[status] || status;
   }
 
   getStatusClass(status: UnitStatus): string {
-    const classMap: { [key in UnitStatus]: string } = {
-      [UnitStatus.DISPONIBLE]: 'chip-disponible',
-      [UnitStatus.OCUPADA]: 'chip-ocupada',
-      [UnitStatus.EN_MANTENIMIENTO]: 'chip-en-mantenimiento',
-      [UnitStatus.RESERVADA]: 'chip-reservada',
-      [UnitStatus.FUERA_SERVICIO]: 'chip-fuera-servicio'
-    };
-    return classMap[status] || 'chip-disponible';
+    return this.statusClassMap[status] || 'chip-available';
   }
 
 }

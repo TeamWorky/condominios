@@ -45,22 +45,18 @@ export class AuthService {
       const accessToken = localStorage.getItem(this.TOKEN_KEY);
       const refreshToken = localStorage.getItem(this.REFRESH_TOKEN_KEY);
       const userData = localStorage.getItem(this.USER_KEY);
-      const condominiosData = localStorage.getItem(this.CONDOMINIOS_KEY);
       const selectedCondominioData = localStorage.getItem(this.SELECTED_CONDOMINIO_KEY);
 
-      // Validar que los datos no sean null, undefined, o strings 'undefined'/'null'
       if (accessToken && userData && userData !== 'undefined' && userData !== 'null') {
         this.authState$.next({
           user: JSON.parse(userData),
-          condominios: condominiosData && condominiosData !== 'undefined' && condominiosData !== 'null' ? JSON.parse(condominiosData) : [],
+          condominios: [],
           selectedCondominio: selectedCondominioData && selectedCondominioData !== 'undefined' && selectedCondominioData !== 'null' ? JSON.parse(selectedCondominioData) : null,
           tokens: { accessToken, refreshToken: refreshToken || '' },
           isAuthenticated: true
         });
       }
     } catch (error) {
-      // Si hay error parseando, limpiar el localStorage
-      console.error('Error loading stored auth state, clearing localStorage:', error);
       this.logout();
     }
   }
@@ -92,23 +88,21 @@ export class AuthService {
   login(credentials: LoginRequest): Observable<LoginResponse> {
     return this.http.post<{ success: boolean; data: LoginResponse }>(`${this.API_URL}/login`, credentials)
       .pipe(
-        tap(fullResponse => console.log('Full backend response:', fullResponse)),
         map(response => response.data),
-        tap(data => console.log('Mapped data:', data)),
         tap(data => {
-          // Guardar tokens
+          localStorage.removeItem(this.CONDOMINIOS_KEY);
+          localStorage.removeItem(this.SELECTED_CONDOMINIO_KEY);
+
           localStorage.setItem(this.TOKEN_KEY, data.accessToken);
           localStorage.setItem(this.REFRESH_TOKEN_KEY, data.refreshToken);
-
-          // Guardar datos de usuario y condominios
           localStorage.setItem(this.USER_KEY, JSON.stringify(data.user));
-          localStorage.setItem(this.CONDOMINIOS_KEY, JSON.stringify(data.condominios));
 
-          // Actualizar estado
+          const condominiosArray = Array.isArray(data.condominios) ? data.condominios : [];
+
           this.authState$.next({
             user: data.user,
-            condominios: data.condominios,
-            selectedCondominio: null, // No hay condominio seleccionado aún
+            condominios: condominiosArray,
+            selectedCondominio: null,
             tokens: {
               accessToken: data.accessToken,
               refreshToken: data.refreshToken
@@ -153,12 +147,8 @@ export class AuthService {
   }
 
   logout(): void {
-    // Llamar al endpoint de logout (opcional, no bloquea si falla)
     this.http.post(`${this.API_URL}/logout`, {}).subscribe({
-      error: () => {
-        // Si falla el logout en el servidor, continuar con el logout local
-        console.warn('Logout endpoint failed, continuing with local logout');
-      }
+      error: () => {}
     });
 
     // Limpiar localStorage siempre
@@ -191,5 +181,14 @@ export class AuthService {
         });
       })
     );
+  }
+
+  clearAllData(): void {
+    localStorage.removeItem(this.TOKEN_KEY);
+    localStorage.removeItem(this.REFRESH_TOKEN_KEY);
+    localStorage.removeItem(this.USER_KEY);
+    localStorage.removeItem(this.CONDOMINIOS_KEY);
+    localStorage.removeItem(this.SELECTED_CONDOMINIO_KEY);
+    this.authState$.next(this.getInitialState());
   }
 }

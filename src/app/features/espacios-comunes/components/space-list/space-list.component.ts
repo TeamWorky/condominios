@@ -12,6 +12,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { CommonSpaceService } from '../../../../core/services/common-space.service';
 import { BuildingService } from '../../../../core/services/building.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { ICommonSpace, CommonSpaceType } from '../../../../core/models/common-space.model';
 import { IBuilding } from '../../../../core/models/building.model';
 import { ReservationDialogComponent, ReservationDialogData } from '../reservation-dialog/reservation-dialog.component';
@@ -316,6 +317,7 @@ export class SpaceListComponent implements OnInit, OnDestroy {
   constructor(
     private commonSpaceService: CommonSpaceService,
     private buildingService: BuildingService,
+    private authService: AuthService,
     private cdr: ChangeDetectorRef,
     private dialog: MatDialog,
     private snackBar: MatSnackBar
@@ -331,12 +333,20 @@ export class SpaceListComponent implements OnInit, OnDestroy {
   }
 
   loadData(): void {
+    const selectedCondominio = this.authService.getSelectedCondominio();
+    if (!selectedCondominio) {
+      this.error = 'No hay condominio seleccionado';
+      this.loading = false;
+      this.cdr.detectChanges();
+      return;
+    }
+
     this.loading = true;
     this.error = null;
     this.cdr.detectChanges();
 
     // Cargar edificios y espacios en paralelo
-    const buildings$ = this.buildingService.getActiveBuildings();
+    const buildings$ = this.buildingService.getActiveBuildings(selectedCondominio.id);
     const spaces$ = this.commonSpaceService.getCommonSpaces();
 
     buildings$.pipe(takeUntil(this.destroy$)).subscribe({

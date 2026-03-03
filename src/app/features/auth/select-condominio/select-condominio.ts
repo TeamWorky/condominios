@@ -42,20 +42,18 @@ export class SelectCondominioComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(state => {
         if (!state.isAuthenticated) {
-          // Si no está autenticado, redirigir al login
           this.router.navigate(['/auth/login']);
           return;
         }
 
-        if (state.condominios && state.condominios.length > 0) {
-          this.condominios = state.condominios;
-          
-          // Si solo hay un condominio, seleccionarlo automáticamente
-          if (state.condominios.length === 1 && !state.selectedCondominio) {
-            this.selectCondominio(state.condominios[0]);
+        if (state.condominios && Array.isArray(state.condominios) && state.condominios.length > 0) {
+          this.condominios = state.condominios.filter(c => c && c.id && c.name);
+
+          if (this.condominios.length === 1 && !state.selectedCondominio) {
+            this.selectCondominio(this.condominios[0]);
           }
         } else {
-          // Si no hay condominios, redirigir al login
+          this.errorMessage = 'No se encontraron condominios asignados';
           this.router.navigate(['/auth/login']);
         }
       });
@@ -75,10 +73,9 @@ export class SelectCondominioComponent implements OnInit, OnDestroy {
         this.loading = false;
         this.router.navigate(['/dashboard']);
       },
-      error: (error) => {
+      error: () => {
         this.loading = false;
         this.errorMessage = 'Error al seleccionar condominio';
-        console.error('Error selecting condominio:', error);
       }
     });
   }

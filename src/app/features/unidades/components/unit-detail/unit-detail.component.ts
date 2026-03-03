@@ -11,7 +11,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { UnitService } from '../../services/unit.service';
-import { IUnit, UnitStatus } from '../../../../core/models/unit.model';
+import { IUnit, UnitStatus, UnitStatusLabels, UnitType, UnitTypeLabels } from '../../../../core/models/unit.model';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
@@ -42,7 +42,7 @@ import { Subject, takeUntil } from 'rxjs';
             <mat-icon>arrow_back</mat-icon>
             Volver
           </button>
-          <button mat-raised-button color="primary" [routerLink]="['/unidades', unit?.id, 'editar']">
+          <button mat-raised-button color="primary" [routerLink]="['/unidades/editar', unit?.id]">
             <mat-icon>edit</mat-icon>
             Editar
           </button>
@@ -75,12 +75,18 @@ import { Subject, takeUntil } from 'rxjs';
             <mat-card-content>
               <div class="detail-item">
                 <span class="label">Edificio:</span>
-                <span class="value">{{ unit.building }}</span>
+                <span class="value">{{ unit.building?.name || '-' }}</span>
               </div>
               <div class="detail-item">
                 <span class="label">Número de Departamento:</span>
-                <span class="value">{{ unit.unitNumber }}</span>
+                <span class="value">{{ unit.number }}</span>
               </div>
+              @if (unit.unitType) {
+                <div class="detail-item">
+                  <span class="label">Tipo:</span>
+                  <span class="value">{{ UnitTypeLabels[unit.unitType] || unit.unitType }}</span>
+                </div>
+              }
               <div class="detail-item">
                 <span class="label">Piso:</span>
                 <span class="value">{{ unit.floor }}</span>
@@ -94,20 +100,34 @@ import { Subject, takeUntil } from 'rxjs';
               <div class="detail-item">
                 <span class="label">Estado:</span>
                 <div class="status-control">
-                  <mat-chip [class]="getStatusClass(unit.status || (unit.isOccupied ? UnitStatus.OCUPADA : UnitStatus.DISPONIBLE))">
-                    {{ getStatusLabel(unit.status || (unit.isOccupied ? UnitStatus.OCUPADA : UnitStatus.DISPONIBLE)) }}
-                  </mat-chip>
-                  <mat-form-field appearance="outline" class="status-select">
-                    <mat-select 
-                      [value]="unit.status || (unit.isOccupied ? UnitStatus.OCUPADA : UnitStatus.DISPONIBLE)"
-                      (selectionChange)="onStatusChange($event.value)"
-                      [matTooltip]="'Cambiar estado de la unidad'"
-                      matTooltipPosition="above">
-                      @for (status of unitStatuses; track status.value) {
-                        <mat-option [value]="status.value">{{ status.label }}</mat-option>
-                      }
-                    </mat-select>
-                  </mat-form-field>
+                  @if (!editingStatus) {
+                    <mat-chip [class]="getStatusClass(unit.status || UnitStatus.AVAILABLE)">
+                      {{ getStatusLabel(unit.status || UnitStatus.AVAILABLE) }}
+                    </mat-chip>
+                    <button mat-icon-button
+                            (click)="editingStatus = true"
+                            matTooltip="Cambiar estado"
+                            matTooltipPosition="right"
+                            class="edit-status-btn">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                  } @else {
+                    <mat-form-field appearance="outline" class="status-select">
+                      <mat-select
+                        [value]="unit.status || UnitStatus.AVAILABLE"
+                        (selectionChange)="onStatusChange($event.value)">
+                        @for (status of unitStatuses; track status.value) {
+                          <mat-option [value]="status.value">{{ status.label }}</mat-option>
+                        }
+                      </mat-select>
+                    </mat-form-field>
+                    <button mat-icon-button
+                            (click)="editingStatus = false"
+                            matTooltip="Cancelar"
+                            matTooltipPosition="right">
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  }
                 </div>
               </div>
             </mat-card-content>
@@ -121,7 +141,7 @@ import { Subject, takeUntil } from 'rxjs';
               <div class="detail-item">
                 <mat-icon>square_foot</mat-icon>
                 <span class="label">Área:</span>
-                <span class="value">{{ unit.area }} m²</span>
+                <span class="value">{{ unit.areaM2 || '-' }} m²</span>
               </div>
               <div class="detail-item">
                 <mat-icon>bed</mat-icon>
@@ -225,7 +245,7 @@ import { Subject, takeUntil } from 'rxjs';
     }
 
     .status-select {
-      width: 200px;
+      width: 180px;
       margin: 0;
     }
 
@@ -233,27 +253,36 @@ import { Subject, takeUntil } from 'rxjs';
       display: none;
     }
 
-    .chip-disponible {
+    .edit-status-btn {
+      opacity: 0.5;
+      transition: opacity 0.2s;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+
+    .chip-available {
       background-color: #e8f5e9;
       color: #2e7d32;
     }
 
-    .chip-ocupada {
+    .chip-occupied {
       background-color: #ffebee;
       color: #c62828;
     }
 
-    .chip-en-mantenimiento {
+    .chip-maintenance {
       background-color: #fff3e0;
       color: #e65100;
     }
 
-    .chip-reservada {
+    .chip-reserved {
       background-color: #e3f2fd;
       color: #1976d2;
     }
 
-    .chip-fuera-servicio {
+    .chip-out_of_service {
       background-color: #f5f5f5;
       color: #616161;
     }
@@ -263,14 +292,25 @@ export class UnitDetailComponent implements OnInit, OnDestroy {
   unit: IUnit | null = null;
   loading = true;
   error: string | null = null;
+  editingStatus = false;
   UnitStatus = UnitStatus;
+  UnitType = UnitType;
+  UnitStatusLabels = UnitStatusLabels;
+  UnitTypeLabels = UnitTypeLabels;
   unitStatuses = [
-    { value: UnitStatus.DISPONIBLE, label: 'Disponible' },
-    { value: UnitStatus.OCUPADA, label: 'Ocupada' },
-    { value: UnitStatus.EN_MANTENIMIENTO, label: 'En Mantenimiento' },
-    { value: UnitStatus.RESERVADA, label: 'Reservada' },
-    { value: UnitStatus.FUERA_SERVICIO, label: 'Fuera de Servicio' }
+    { value: UnitStatus.AVAILABLE, label: UnitStatusLabels[UnitStatus.AVAILABLE] },
+    { value: UnitStatus.OCCUPIED, label: UnitStatusLabels[UnitStatus.OCCUPIED] },
+    { value: UnitStatus.MAINTENANCE, label: UnitStatusLabels[UnitStatus.MAINTENANCE] },
+    { value: UnitStatus.RESERVED, label: UnitStatusLabels[UnitStatus.RESERVED] },
+    { value: UnitStatus.OUT_OF_SERVICE, label: UnitStatusLabels[UnitStatus.OUT_OF_SERVICE] }
   ];
+  private readonly statusClassMap: { [key in UnitStatus]: string } = {
+    [UnitStatus.AVAILABLE]: 'chip-available',
+    [UnitStatus.OCCUPIED]: 'chip-occupied',
+    [UnitStatus.MAINTENANCE]: 'chip-maintenance',
+    [UnitStatus.RESERVED]: 'chip-reserved',
+    [UnitStatus.OUT_OF_SERVICE]: 'chip-out_of_service'
+  };
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -299,19 +339,17 @@ export class UnitDetailComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.error = null;
     this.unit = null;
+    this.editingStatus = false;
     this.cdr.detectChanges();
 
-    console.log('Loading unit with id:', id);
     this.unitService.getUnitById(id).pipe(takeUntil(this.destroy$)).subscribe({
-      next: (unit) => {
-        console.log('Unit loaded successfully:', unit);
+      next: (unit: IUnit) => {
         this.unit = unit;
         this.loading = false;
         this.cdr.detectChanges();
       },
-      error: (err) => {
-        console.error('Error loading unit:', err);
-        this.error = 'Error al cargar la unidad. Por favor, verifica que el servidor mock esté ejecutándose.';
+      error: () => {
+        this.error = 'Error al cargar la unidad. Por favor, verifica la conexión con el servidor.';
         this.loading = false;
         this.cdr.detectChanges();
       }
@@ -319,25 +357,11 @@ export class UnitDetailComponent implements OnInit, OnDestroy {
   }
 
   getStatusLabel(status: UnitStatus): string {
-    const statusMap: { [key in UnitStatus]: string } = {
-      [UnitStatus.DISPONIBLE]: 'Disponible',
-      [UnitStatus.OCUPADA]: 'Ocupada',
-      [UnitStatus.EN_MANTENIMIENTO]: 'En Mantenimiento',
-      [UnitStatus.RESERVADA]: 'Reservada',
-      [UnitStatus.FUERA_SERVICIO]: 'Fuera de Servicio'
-    };
-    return statusMap[status] || status;
+    return UnitStatusLabels[status] || status;
   }
 
   getStatusClass(status: UnitStatus): string {
-    const classMap: { [key in UnitStatus]: string } = {
-      [UnitStatus.DISPONIBLE]: 'chip-disponible',
-      [UnitStatus.OCUPADA]: 'chip-ocupada',
-      [UnitStatus.EN_MANTENIMIENTO]: 'chip-en-mantenimiento',
-      [UnitStatus.RESERVADA]: 'chip-reservada',
-      [UnitStatus.FUERA_SERVICIO]: 'chip-fuera-servicio'
-    };
-    return classMap[status] || 'chip-disponible';
+    return this.statusClassMap[status] || 'chip-available';
   }
 
   onStatusChange(newStatus: UnitStatus): void {
@@ -346,6 +370,7 @@ export class UnitDetailComponent implements OnInit, OnDestroy {
     this.unitService.updateUnitStatus(this.unit.id, newStatus).pipe(takeUntil(this.destroy$)).subscribe({
       next: (updatedUnit) => {
         this.unit = updatedUnit;
+        this.editingStatus = false;
         this.cdr.detectChanges();
         this.snackBar.open(
           `Unidad marcada como ${this.getStatusLabel(newStatus)}`,
@@ -357,8 +382,7 @@ export class UnitDetailComponent implements OnInit, OnDestroy {
           }
         );
       },
-      error: (err) => {
-        console.error('Error updating unit status:', err);
+      error: () => {
         this.snackBar.open('Error al actualizar el estado de la unidad', 'Cerrar', {
           duration: 3000,
           horizontalPosition: 'end',

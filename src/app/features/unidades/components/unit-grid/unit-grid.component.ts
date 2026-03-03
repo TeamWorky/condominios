@@ -9,7 +9,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { UnitService } from '../../services/unit.service';
-import { IUnit, UnitStatus } from '../../../../core/models/unit.model';
+import { IUnit, UnitStatus, UnitStatusLabels } from '../../../../core/models/unit.model';
+import { AuthService } from '../../../../core/services/auth.service';
 import { Subject, takeUntil } from 'rxjs';
 
 interface GroupedUnits {
@@ -85,11 +86,11 @@ interface GroupedUnits {
                     
                     <div class="units-grid">
                       @for (unit of floorGroup.units; track unit.id) {
-                        <mat-card class="unit-card" [class]="getStatusClass(unit.status || (unit.isOccupied ? UnitStatus.OCUPADA : UnitStatus.DISPONIBLE))">
+                        <mat-card class="unit-card" [class]="getStatusClass(unit.status || UnitStatus.AVAILABLE)">
                           <mat-card-header>
                             <mat-card-title>
                               <mat-icon>apartment</mat-icon>
-                              {{ unit.unitNumber }}
+                              {{ unit.number }}
                             </mat-card-title>
                             <mat-card-subtitle>
                               @if (unit.block) {
@@ -101,7 +102,7 @@ interface GroupedUnits {
                             <div class="unit-info">
                               <div class="info-item">
                                 <mat-icon>square_foot</mat-icon>
-                                <span>{{ unit.area }} m²</span>
+                                <span>{{ unit.areaM2 }} m²</span>
                               </div>
                               <div class="info-item">
                                 <mat-icon>bed</mat-icon>
@@ -113,12 +114,12 @@ interface GroupedUnits {
                               </div>
                               <div class="info-item">
                                 <mat-icon>directions_car</mat-icon>
-                                <span>{{ unit.parkingSpots }} estac.</span>
+                                <span>{{ unit.parkingSpots || 0 }} estac.</span>
                               </div>
                             </div>
                             <div class="status-chip">
-                              <mat-chip [class]="getStatusClass(unit.status || (unit.isOccupied ? UnitStatus.OCUPADA : UnitStatus.DISPONIBLE))">
-                                {{ getStatusLabel(unit.status || (unit.isOccupied ? UnitStatus.OCUPADA : UnitStatus.DISPONIBLE)) }}
+                              <mat-chip [class]="getStatusClass(unit.status || UnitStatus.AVAILABLE)">
+                                {{ getStatusLabel(unit.status || UnitStatus.AVAILABLE) }}
                               </mat-chip>
                             </div>
                           </mat-card-content>
@@ -127,7 +128,7 @@ interface GroupedUnits {
                               <mat-icon>visibility</mat-icon>
                               Ver
                             </button>
-                            <button mat-button [routerLink]="['/unidades', unit.id, 'editar']">
+                            <button mat-button [routerLink]="['/unidades/editar', unit.id]">
                               <mat-icon>edit</mat-icon>
                               Editar
                             </button>
@@ -301,10 +302,18 @@ export class UnitGridComponent implements OnInit, OnDestroy {
   loading = true;
   error: string | null = null;
   UnitStatus = UnitStatus;
+  private readonly statusClassMap: { [key in UnitStatus]: string } = {
+    [UnitStatus.AVAILABLE]: 'chip-disponible status-disponible',
+    [UnitStatus.OCCUPIED]: 'chip-ocupada status-ocupada',
+    [UnitStatus.MAINTENANCE]: 'chip-en-mantenimiento status-en-mantenimiento',
+    [UnitStatus.RESERVED]: 'chip-reservada status-reservada',
+    [UnitStatus.OUT_OF_SERVICE]: 'chip-fuera-servicio status-fuera-servicio'
+  };
   private destroy$ = new Subject<void>();
 
   constructor(
     private unitService: UnitService,
+    private authService: AuthService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -318,22 +327,30 @@ export class UnitGridComponent implements OnInit, OnDestroy {
   }
 
   loadUnits(): void {
+    const selectedCondominio = this.authService.getSelectedCondominio();
+
+    if (!selectedCondominio) {
+      this.error = 'No hay condominio seleccionado';
+      this.loading = false;
+      this.cdr.detectChanges();
+      return;
+    }
+
     this.loading = true;
     this.error = null;
     this.cdr.detectChanges();
 
-    this.unitService.getUnits().pipe(takeUntil(this.destroy$)).subscribe({
-      next: (units) => {
-        this.units = units;
+    this.unitService.getUnitsByCondominium(selectedCondominio.id, 1, 100).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (result) => {
+        this.units = result.data;
         this.groupUnits();
         this.loading = false;
         this.cdr.detectChanges();
       },
-      error: (err) => {
-        this.error = 'Error al cargar las unidades. Por favor, verifica que el servidor mock esté ejecutándose.';
+      error: () => {
+        this.error = 'Error al cargar las unidades. Por favor, verifica la conexión con el servidor.';
         this.loading = false;
         this.cdr.detectChanges();
-        console.error('Error loading units:', err);
       }
     });
   }
@@ -343,11 +360,11 @@ export class UnitGridComponent implements OnInit, OnDestroy {
     const byBuilding = new Map<string, IUnit[]>();
     
     this.units.forEach(unit => {
-      const building = unit.building;
-      if (!byBuilding.has(building)) {
-        byBuilding.set(building, []);
+      const buildingName = unit.building?.name || 'Sin Edificio';
+      if (!byBuilding.has(buildingName)) {
+        byBuilding.set(buildingName, []);
       }
-      byBuilding.get(building)!.push(unit);
+      byBuilding.get(buildingName)!.push(unit);
     });
 
     // Convertir a estructura agrupada
@@ -356,7 +373,7 @@ export class UnitGridComponent implements OnInit, OnDestroy {
       const byFloor = new Map<number, IUnit[]>();
       
       units.forEach(unit => {
-        const floor = unit.floor;
+        const floor = unit.floor || 0;
         if (!byFloor.has(floor)) {
           byFloor.set(floor, []);
         }
@@ -367,7 +384,7 @@ export class UnitGridComponent implements OnInit, OnDestroy {
       const floors = Array.from(byFloor.entries())
         .map(([floor, floorUnits]) => ({
           floor,
-          units: floorUnits.sort((a, b) => a.unitNumber.localeCompare(b.unitNumber))
+          units: floorUnits.sort((a, b) => (a.number || '').localeCompare(b.number || ''))
         }))
         .sort((a, b) => b.floor - a.floor); // Pisos más altos primero
 
@@ -379,25 +396,11 @@ export class UnitGridComponent implements OnInit, OnDestroy {
   }
 
   getStatusLabel(status: UnitStatus): string {
-    const statusMap: { [key in UnitStatus]: string } = {
-      [UnitStatus.DISPONIBLE]: 'Disponible',
-      [UnitStatus.OCUPADA]: 'Ocupada',
-      [UnitStatus.EN_MANTENIMIENTO]: 'En Mantenimiento',
-      [UnitStatus.RESERVADA]: 'Reservada',
-      [UnitStatus.FUERA_SERVICIO]: 'Fuera de Servicio'
-    };
-    return statusMap[status] || status;
+    return UnitStatusLabels[status] || status;
   }
 
   getStatusClass(status: UnitStatus): string {
-    const classMap: { [key in UnitStatus]: string } = {
-      [UnitStatus.DISPONIBLE]: 'chip-disponible status-disponible',
-      [UnitStatus.OCUPADA]: 'chip-ocupada status-ocupada',
-      [UnitStatus.EN_MANTENIMIENTO]: 'chip-en-mantenimiento status-en-mantenimiento',
-      [UnitStatus.RESERVADA]: 'chip-reservada status-reservada',
-      [UnitStatus.FUERA_SERVICIO]: 'chip-fuera-servicio status-fuera-servicio'
-    };
-    return classMap[status] || 'chip-disponible status-disponible';
+    return this.statusClassMap[status] || 'chip-disponible status-disponible';
   }
 }
 
