@@ -304,6 +304,13 @@ export class UnitDetailComponent implements OnInit, OnDestroy {
     { value: UnitStatus.RESERVED, label: UnitStatusLabels[UnitStatus.RESERVED] },
     { value: UnitStatus.OUT_OF_SERVICE, label: UnitStatusLabels[UnitStatus.OUT_OF_SERVICE] }
   ];
+  private readonly statusClassMap: { [key in UnitStatus]: string } = {
+    [UnitStatus.AVAILABLE]: 'chip-available',
+    [UnitStatus.OCCUPIED]: 'chip-occupied',
+    [UnitStatus.MAINTENANCE]: 'chip-maintenance',
+    [UnitStatus.RESERVED]: 'chip-reserved',
+    [UnitStatus.OUT_OF_SERVICE]: 'chip-out_of_service'
+  };
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -354,14 +361,7 @@ export class UnitDetailComponent implements OnInit, OnDestroy {
   }
 
   getStatusClass(status: UnitStatus): string {
-    const classMap: { [key in UnitStatus]: string } = {
-      [UnitStatus.AVAILABLE]: 'chip-available',
-      [UnitStatus.OCCUPIED]: 'chip-occupied',
-      [UnitStatus.MAINTENANCE]: 'chip-maintenance',
-      [UnitStatus.RESERVED]: 'chip-reserved',
-      [UnitStatus.OUT_OF_SERVICE]: 'chip-out_of_service'
-    };
-    return classMap[status] || 'chip-available';
+    return this.statusClassMap[status] || 'chip-available';
   }
 
   onStatusChange(newStatus: UnitStatus): void {

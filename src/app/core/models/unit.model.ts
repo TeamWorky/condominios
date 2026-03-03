@@ -58,20 +58,6 @@ export interface ICreateUnitDto {
 
 export interface IUpdateUnitDto extends Partial<ICreateUnitDto> {}
 
-// Interfaces para respuestas del backend
-export interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  message?: string;
-  errors?: string[];
-  meta?: {
-    page?: number;
-    limit?: number;
-    total?: number;
-    totalPages?: number;
-  };
-}
-
 // Mapeo de estados para mostrar en español
 export const UnitStatusLabels: { [key in UnitStatus]: string } = {
   [UnitStatus.AVAILABLE]: 'Disponible',

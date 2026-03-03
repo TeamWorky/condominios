@@ -38,43 +38,22 @@ export class SelectCondominioComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    console.log('🔍 [SelectCondominio] Component initialized - reading ONLY from auth state (NO localStorage)');
-
-    // Suscribirse al estado de autenticación - NO usar localStorage
     this.authService.getAuthState()
       .pipe(takeUntil(this.destroy$))
       .subscribe(state => {
-        console.log('🔍 [SelectCondominio] Auth state received:', {
-          isAuthenticated: state.isAuthenticated,
-          condominiosCount: state.condominios?.length || 0,
-          condominios: state.condominios,
-          condominiosNames: state.condominios?.map(c => c.name)
-        });
-
         if (!state.isAuthenticated) {
-          // Si no está autenticado, redirigir al login
           this.router.navigate(['/auth/login']);
           return;
         }
 
-        // Usar SOLO los datos del estado (NO localStorage)
         if (state.condominios && Array.isArray(state.condominios) && state.condominios.length > 0) {
-          // Filtrar solo condominios válidos
           this.condominios = state.condominios.filter(c => c && c.id && c.name);
-          console.log('🔍 [SelectCondominio] Setting condominios from auth state:', {
-            count: this.condominios.length,
-            names: this.condominios.map(c => c.name),
-            fullData: this.condominios
-          });
-          
-          // Si solo hay un condominio, seleccionarlo automáticamente
+
           if (this.condominios.length === 1 && !state.selectedCondominio) {
             this.selectCondominio(this.condominios[0]);
           }
         } else {
-          // Si no hay condominios, redirigir al login
-          console.warn('🔍 [SelectCondominio] No condominios found in auth state, redirecting to login');
-          console.warn('🔍 [SelectCondominio] State condominios:', state.condominios);
+          this.errorMessage = 'No se encontraron condominios asignados';
           this.router.navigate(['/auth/login']);
         }
       });
@@ -94,10 +73,9 @@ export class SelectCondominioComponent implements OnInit, OnDestroy {
         this.loading = false;
         this.router.navigate(['/dashboard']);
       },
-      error: (error) => {
+      error: () => {
         this.loading = false;
         this.errorMessage = 'Error al seleccionar condominio';
-        console.error('Error selecting condominio:', error);
       }
     });
   }
@@ -105,27 +83,5 @@ export class SelectCondominioComponent implements OnInit, OnDestroy {
   logout(): void {
     this.authService.logout();
     this.router.navigate(['/login']);
-  }
-
-  // Método de debug temporal
-  debugInfo(): void {
-    console.log('=== DEBUG INFO (NO localStorage mode) ===');
-    console.log('1. Component condominios:', this.condominios);
-    console.log('2. Component condominios count:', this.condominios.length);
-    console.log('3. Component condominios names:', this.condominios.map(c => c.name));
-    console.log('4. Component condominios IDs:', this.condominios.map(c => c.id));
-    
-    this.authService.getAuthState().subscribe(state => {
-      console.log('5. Auth state condominios:', state.condominios);
-      console.log('6. Auth state condominios count:', state.condominios?.length);
-      console.log('7. Auth state condominios names:', state.condominios?.map(c => c.name));
-      console.log('8. Auth state isAuthenticated:', state.isAuthenticated);
-    });
-    
-    // Verificar localStorage (aunque no lo usemos)
-    const stored = localStorage.getItem('condominios_data');
-    console.log('9. localStorage condominios_data (NOT USED):', stored ? 'Present but ignored' : 'Not present');
-    
-    console.log('=== END DEBUG ===');
   }
 }

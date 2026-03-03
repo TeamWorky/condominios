@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
-import { IBuilding, ICreateBuildingDto, ApiResponse } from '../models/building.model';
+import { IBuilding, ICreateBuildingDto } from '../models/building.model';
+import { ApiResponse } from '../models/api.model';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
@@ -20,32 +21,14 @@ export class BuildingService {
       .set('page', page.toString())
       .set('limit', limit.toString());
     
-    const url = `${this.apiUrl}/condominiums/${condoId}/buildings`;
-    console.log('🔍 [BuildingService] getBuildingsByCondominium URL:', url);
-    console.log('🔍 [BuildingService] getBuildingsByCondominium params:', { condoId, page, limit });
-    
-    return this.http.get<any>(
-      url,
+    return this.http.get<ApiResponse<IBuilding[]>>(
+      `${this.apiUrl}/condominiums/${condoId}/buildings`,
       { params }
     ).pipe(
-      map(response => {
-        console.log('🔍 [BuildingService] Raw response:', response);
-        // El backend devuelve { success: true, data: { success: true, data: [...], meta: {...} } }
-        // Necesitamos acceder a response.data.data para obtener el array
-        const buildingsData = response.data?.data || response.data || [];
-        const total = response.data?.meta?.total || response.meta?.total || 0;
-        
-        console.log('🔍 [BuildingService] buildingsData:', buildingsData);
-        console.log('🔍 [BuildingService] Is buildingsData array?', Array.isArray(buildingsData));
-        
-        const finalData = Array.isArray(buildingsData) ? buildingsData : [];
-        console.log('🔍 [BuildingService] Final data:', finalData);
-        
-        return {
-          data: finalData,
-          total: total
-        };
-      })
+      map(response => ({
+        data: Array.isArray(response.data) ? response.data : [],
+        total: response.meta?.total || 0
+      }))
     );
   }
 
@@ -63,15 +46,7 @@ export class BuildingService {
    */
   getActiveBuildings(condoId: string): Observable<IBuilding[]> {
     return this.getBuildingsByCondominium(condoId).pipe(
-      map(result => {
-        console.log('🔍 [BuildingService] getActiveBuildings result:', result);
-        console.log('🔍 [BuildingService] result.data:', result.data);
-        console.log('🔍 [BuildingService] Is result.data array?', Array.isArray(result.data));
-        // Asegurar que siempre devolvemos un array
-        const buildings = Array.isArray(result.data) ? result.data : [];
-        console.log('🔍 [BuildingService] Final buildings array:', buildings);
-        return buildings;
-      })
+      map(result => result.data)
     );
   }
 

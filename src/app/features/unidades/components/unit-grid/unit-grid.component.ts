@@ -9,7 +9,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { UnitService } from '../../services/unit.service';
-import { IUnit, UnitStatus } from '../../../../core/models/unit.model';
+import { IUnit, UnitStatus, UnitStatusLabels } from '../../../../core/models/unit.model';
 import { AuthService } from '../../../../core/services/auth.service';
 import { Subject, takeUntil } from 'rxjs';
 
@@ -302,6 +302,13 @@ export class UnitGridComponent implements OnInit, OnDestroy {
   loading = true;
   error: string | null = null;
   UnitStatus = UnitStatus;
+  private readonly statusClassMap: { [key in UnitStatus]: string } = {
+    [UnitStatus.AVAILABLE]: 'chip-disponible status-disponible',
+    [UnitStatus.OCCUPIED]: 'chip-ocupada status-ocupada',
+    [UnitStatus.MAINTENANCE]: 'chip-en-mantenimiento status-en-mantenimiento',
+    [UnitStatus.RESERVED]: 'chip-reservada status-reservada',
+    [UnitStatus.OUT_OF_SERVICE]: 'chip-fuera-servicio status-fuera-servicio'
+  };
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -389,25 +396,11 @@ export class UnitGridComponent implements OnInit, OnDestroy {
   }
 
   getStatusLabel(status: UnitStatus): string {
-    const statusMap: { [key in UnitStatus]: string } = {
-      [UnitStatus.AVAILABLE]: 'Disponible',
-      [UnitStatus.OCCUPIED]: 'Ocupada',
-      [UnitStatus.MAINTENANCE]: 'En Mantenimiento',
-      [UnitStatus.RESERVED]: 'Reservada',
-      [UnitStatus.OUT_OF_SERVICE]: 'Fuera de Servicio'
-    };
-    return statusMap[status] || status;
+    return UnitStatusLabels[status] || status;
   }
 
   getStatusClass(status: UnitStatus): string {
-    const classMap: { [key in UnitStatus]: string } = {
-      [UnitStatus.AVAILABLE]: 'chip-disponible status-disponible',
-      [UnitStatus.OCCUPIED]: 'chip-ocupada status-ocupada',
-      [UnitStatus.MAINTENANCE]: 'chip-en-mantenimiento status-en-mantenimiento',
-      [UnitStatus.RESERVED]: 'chip-reservada status-reservada',
-      [UnitStatus.OUT_OF_SERVICE]: 'chip-fuera-servicio status-fuera-servicio'
-    };
-    return classMap[status] || 'chip-disponible status-disponible';
+    return this.statusClassMap[status] || 'chip-disponible status-disponible';
   }
 }
 

@@ -45,29 +45,18 @@ export class AuthService {
       const accessToken = localStorage.getItem(this.TOKEN_KEY);
       const refreshToken = localStorage.getItem(this.REFRESH_TOKEN_KEY);
       const userData = localStorage.getItem(this.USER_KEY);
-      // NO cargar condominios desde localStorage (testing mode)
       const selectedCondominioData = localStorage.getItem(this.SELECTED_CONDOMINIO_KEY);
 
-      console.log('🔍 [AuthService] Loading stored state (NO condominios from localStorage):', {
-        hasAccessToken: !!accessToken,
-        hasUserData: !!userData
-      });
-
-      // Validar que los datos no sean null, undefined, o strings 'undefined'/'null'
       if (accessToken && userData && userData !== 'undefined' && userData !== 'null') {
-        // NO cargar condominios desde localStorage - siempre empezar vacío
         this.authState$.next({
           user: JSON.parse(userData),
-          condominios: [], // Siempre vacío al cargar desde localStorage
+          condominios: [],
           selectedCondominio: selectedCondominioData && selectedCondominioData !== 'undefined' && selectedCondominioData !== 'null' ? JSON.parse(selectedCondominioData) : null,
           tokens: { accessToken, refreshToken: refreshToken || '' },
           isAuthenticated: true
         });
-        console.log('🔍 [AuthService] Loaded state WITHOUT condominios (will be set on login)');
       }
     } catch (error) {
-      // Si hay error parseando, limpiar el localStorage
-      console.error('Error loading stored auth state, clearing localStorage:', error);
       this.logout();
     }
   }
@@ -99,77 +88,27 @@ export class AuthService {
   login(credentials: LoginRequest): Observable<LoginResponse> {
     return this.http.post<{ success: boolean; data: LoginResponse }>(`${this.API_URL}/login`, credentials)
       .pipe(
-        tap(fullResponse => {
-          console.log('🔍 [AuthService] Full backend response:', fullResponse);
-          console.log('🔍 [AuthService] Full response condominios:', fullResponse.data?.condominios);
-          console.log('🔍 [AuthService] Full response condominios count:', fullResponse.data?.condominios?.length);
-          console.log('🔍 [AuthService] Full response condominios names:', fullResponse.data?.condominios?.map((c: any) => c?.name));
-        }),
-        map(response => {
-          console.log('🔍 [AuthService] Mapping response.data:', response.data);
-          console.log('🔍 [AuthService] Response.data.condominios:', response.data?.condominios);
-          console.log('🔍 [AuthService] Response.data.condominios count:', response.data?.condominios?.length);
-          console.log('🔍 [AuthService] Response.data.condominios isArray:', Array.isArray(response.data?.condominios));
-          return response.data;
-        }),
+        map(response => response.data),
         tap(data => {
-          console.log('🔍 [AuthService] Mapped login data:', {
-            userEmail: data.user?.email,
-            condominiosCount: data.condominios?.length || 0,
-            condominios: data.condominios,
-            condominiosIsArray: Array.isArray(data.condominios),
-            condominiosNames: data.condominios?.map(c => c.name)
-          });
-        }),
-        tap(data => {
-          // Limpiar datos antiguos primero para evitar problemas de caché
           localStorage.removeItem(this.CONDOMINIOS_KEY);
           localStorage.removeItem(this.SELECTED_CONDOMINIO_KEY);
 
-          // Guardar tokens y usuario (pero NO condominios en localStorage para pruebas)
           localStorage.setItem(this.TOKEN_KEY, data.accessToken);
           localStorage.setItem(this.REFRESH_TOKEN_KEY, data.refreshToken);
           localStorage.setItem(this.USER_KEY, JSON.stringify(data.user));
-          
-          // NO guardar condominios en localStorage - solo usar el estado
-          console.log('🔍 [AuthService] NOT saving condominios to localStorage (testing mode)');
-          console.log('🔍 [AuthService] Condominios received from backend:', {
-            count: data.condominios?.length || 0,
-            names: data.condominios?.map(c => c.name)
-          });
 
-          // Asegurarse de que condominios es un array válido
           const condominiosArray = Array.isArray(data.condominios) ? data.condominios : [];
-          
-          // Actualizar estado - forzar emisión del estado
-          const newState = {
+
+          this.authState$.next({
             user: data.user,
             condominios: condominiosArray,
-            selectedCondominio: null, // No hay condominio seleccionado aún
+            selectedCondominio: null,
             tokens: {
               accessToken: data.accessToken,
               refreshToken: data.refreshToken
             },
             isAuthenticated: true
-          };
-          
-          console.log('🔍 [AuthService] Setting new auth state:', {
-            condominiosCount: newState.condominios.length,
-            condominiosNames: newState.condominios.map(c => c.name),
-            condominios: newState.condominios
           });
-          
-          this.authState$.next(newState);
-          
-          // Verificar que el estado se actualizó correctamente
-          setTimeout(() => {
-            const currentState = this.authState$.value;
-            console.log('🔍 [AuthService] Verified auth state after update:', {
-              condominiosCount: currentState.condominios?.length || 0,
-              condominiosNames: currentState.condominios?.map(c => c.name),
-              condominios: currentState.condominios
-            });
-          }, 100);
         })
       );
   }
@@ -208,12 +147,8 @@ export class AuthService {
   }
 
   logout(): void {
-    // Llamar al endpoint de logout (opcional, no bloquea si falla)
     this.http.post(`${this.API_URL}/logout`, {}).subscribe({
-      error: () => {
-        // Si falla el logout en el servidor, continuar con el logout local
-        console.warn('Logout endpoint failed, continuing with local logout');
-      }
+      error: () => {}
     });
 
     // Limpiar localStorage siempre
@@ -248,12 +183,7 @@ export class AuthService {
     );
   }
 
-  /**
-   * Limpia completamente el localStorage y el estado de autenticación
-   * Útil para debugging o cuando hay problemas de caché
-   */
   clearAllData(): void {
-    console.log('🔍 [AuthService] Clearing all auth data');
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.REFRESH_TOKEN_KEY);
     localStorage.removeItem(this.USER_KEY);

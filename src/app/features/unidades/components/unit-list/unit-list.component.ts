@@ -209,6 +209,13 @@ export class UnitListComponent implements OnInit, OnDestroy {
   loading = true;
   error: string | null = null;
   UnitStatus = UnitStatus;
+  private readonly statusClassMap: { [key in UnitStatus]: string } = {
+    [UnitStatus.AVAILABLE]: 'chip-available',
+    [UnitStatus.OCCUPIED]: 'chip-occupied',
+    [UnitStatus.MAINTENANCE]: 'chip-maintenance',
+    [UnitStatus.RESERVED]: 'chip-reserved',
+    [UnitStatus.OUT_OF_SERVICE]: 'chip-out_of_service'
+  };
   currentPage = 1;
   pageSize = 10;
   total = 0;
@@ -253,13 +260,11 @@ export class UnitListComponent implements OnInit, OnDestroy {
         this.total = result.total;
         this.loading = false;
         this.cdr.detectChanges();
-        console.log('Units loaded:', result);
       },
-      error: (err) => {
+      error: () => {
         this.error = 'Error al cargar las unidades. Por favor, verifica la conexión con el servidor.';
         this.loading = false;
         this.cdr.detectChanges();
-        console.error('Error loading units:', err);
         this.snackBar.open('Error al cargar las unidades', 'Cerrar', {
           duration: 3000,
           horizontalPosition: 'end',
@@ -287,8 +292,7 @@ export class UnitListComponent implements OnInit, OnDestroy {
           });
           this.loadUnits();
         },
-        error: (err) => {
-          console.error('Error deleting unit:', err);
+        error: () => {
           this.snackBar.open('Error al eliminar la unidad', 'Cerrar', {
             duration: 3000,
             horizontalPosition: 'end',
@@ -305,14 +309,7 @@ export class UnitListComponent implements OnInit, OnDestroy {
   }
 
   getStatusClass(status: UnitStatus): string {
-    const classMap: { [key in UnitStatus]: string } = {
-      [UnitStatus.AVAILABLE]: 'chip-available',
-      [UnitStatus.OCCUPIED]: 'chip-occupied',
-      [UnitStatus.MAINTENANCE]: 'chip-maintenance',
-      [UnitStatus.RESERVED]: 'chip-reserved',
-      [UnitStatus.OUT_OF_SERVICE]: 'chip-out_of_service'
-    };
-    return classMap[status] || 'chip-available';
+    return this.statusClassMap[status] || 'chip-available';
   }
 
 }
