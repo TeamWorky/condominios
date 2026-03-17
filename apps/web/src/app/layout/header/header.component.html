@@ -1,0 +1,50 @@
+<mat-toolbar class="header-toolbar">
+  <button mat-icon-button (click)="onToggleSidebar()" aria-label="Toggle sidebar">
+    <mat-icon>menu</mat-icon>
+  </button>
+
+  <h1 class="app-title">Sistema de Gestión de Condominios</h1>
+
+  <span class="spacer"></span>
+
+  <button mat-icon-button [matBadge]="3" matBadgeColor="warn" aria-label="Notifications">
+    <mat-icon>notifications</mat-icon>
+  </button>
+
+  <button mat-icon-button [matMenuTriggerFor]="userMenu" aria-label="User menu">
+    <mat-icon>account_circle</mat-icon>
+  </button>
+
+  <mat-menu #userMenu="matMenu">
+    <div class="menu-header" *ngIf="selectedCondominio">
+      <div class="condominio-info">
+        <mat-icon class="condominio-icon">apartment</mat-icon>
+        <div class="condominio-details">
+          <span class="condominio-name">{{ selectedCondominio.name }}</span>
+          <span class="condominio-location">{{ selectedCondominio.city }}, {{ selectedCondominio.country }}</span>
+        </div>
+      </div>
+    </div>
+    
+    <mat-divider *ngIf="selectedCondominio"></mat-divider>
+    
+    <button mat-menu-item *ngIf="hasMultipleCondominios" (click)="onChangeCondominio()">
+      <mat-icon>swap_horiz</mat-icon>
+      <span>Cambiar Condominio</span>
+    </button>
+    
+    <button mat-menu-item>
+      <mat-icon>person</mat-icon>
+      <span>Perfil</span>
+    </button>
+    <button mat-menu-item>
+      <mat-icon>settings</mat-icon>
+      <span>Configuración</span>
+    </button>
+    <mat-divider></mat-divider>
+    <button mat-menu-item (click)="onLogout()">
+      <mat-icon>logout</mat-icon>
+      <span>Cerrar Sesión</span>
+    </button>
+  </mat-menu>
+</mat-toolbar>

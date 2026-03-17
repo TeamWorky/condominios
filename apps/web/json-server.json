@@ -1,0 +1,8 @@
+{
+  "port": 3000,
+  "watch": true,
+  "host": "localhost",
+  "delay": 0,
+  "cors": true,
+  "static": "./public"
+}

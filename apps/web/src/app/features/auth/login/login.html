@@ -1,0 +1,120 @@
+<div class="login-container">
+  <div class="login-card">
+    <!-- Logo y Título -->
+    <div class="login-header">
+      <div class="logo-wrapper">
+        <mat-icon class="logo-icon">apartment</mat-icon>
+      </div>
+      <h1 class="login-title">Gestión de Condominios</h1>
+      <p class="login-subtitle">Inicia sesión para acceder al sistema</p>
+    </div>
+
+    <!-- Formulario -->
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+      <!-- Campo Email -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Correo electrónico</mat-label>
+        <input
+          matInput
+          type="email"
+          formControlName="email"
+          autocomplete="email"
+          placeholder="usuario@ejemplo.com"
+        >
+        <mat-icon matPrefix>email</mat-icon>
+        <mat-error *ngIf="email?.invalid && email?.touched">
+          <span *ngIf="email?.errors?.['required']">El email es requerido</span>
+          <span *ngIf="email?.errors?.['email']">Email inválido</span>
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Campo Contraseña -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Contraseña</mat-label>
+        <input
+          matInput
+          [type]="hidePassword ? 'password' : 'text'"
+          formControlName="password"
+          autocomplete="current-password"
+          placeholder="••••••••"
+        >
+        <mat-icon matPrefix>lock</mat-icon>
+        <button
+          mat-icon-button
+          matSuffix
+          (click)="hidePassword = !hidePassword"
+          [attr.aria-label]="'Ocultar contraseña'"
+          [attr.aria-pressed]="hidePassword"
+          type="button"
+        >
+          <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+        </button>
+        <mat-error *ngIf="password?.invalid && password?.touched">
+          <span *ngIf="password?.errors?.['required']">La contraseña es requerida</span>
+          <span *ngIf="password?.errors?.['minlength']">Mínimo 6 caracteres</span>
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Mensaje de Error -->
+      <mat-error *ngIf="errorMessage" class="error-message">
+        <mat-icon>error_outline</mat-icon>
+        <span>{{ errorMessage }}</span>
+      </mat-error>
+
+      <!-- Botón de Login -->
+      <button
+        mat-raised-button
+        color="primary"
+        type="submit"
+        [disabled]="loading || loginForm.invalid"
+        class="login-button"
+      >
+        <mat-icon *ngIf="!loading">login</mat-icon>
+        <mat-spinner *ngIf="loading" diameter="20" class="spinner"></mat-spinner>
+        <span>{{ loading ? 'Iniciando sesión...' : 'Iniciar Sesión' }}</span>
+      </button>
+    </form>
+
+    <!-- Usuarios de Prueba -->
+    <div class="test-users-section">
+      <mat-divider></mat-divider>
+      <div class="test-users-header">
+        <mat-icon>info</mat-icon>
+        <span>Usuarios de prueba</span>
+      </div>
+      <div class="test-users-list">
+        <div class="test-user-item" (click)="fillCredentials('superadmin@condominios.cl', 'Admin123!')">
+          <div class="test-user-info">
+            <mat-icon class="user-icon">admin_panel_settings</mat-icon>
+            <div>
+              <strong>Super Admin</strong>
+              <p>superadmin@condominios.cl</p>
+            </div>
+          </div>
+          <mat-icon class="copy-icon">content_copy</mat-icon>
+        </div>
+        <div class="test-user-item" (click)="fillCredentials('admin@torresdelsol.cl', 'Admin123!')">
+          <div class="test-user-info">
+            <mat-icon class="user-icon">person</mat-icon>
+            <div>
+              <strong>Admin Torres del Sol</strong>
+              <p>admin@torresdelsol.cl</p>
+            </div>
+          </div>
+          <mat-icon class="copy-icon">content_copy</mat-icon>
+        </div>
+        <div class="test-user-item" (click)="fillCredentials('admin@jardinesdeleste.cl', 'Admin123!')">
+          <div class="test-user-info">
+            <mat-icon class="user-icon">person</mat-icon>
+            <div>
+              <strong>Admin Jardines</strong>
+              <p>admin@jardinesdeleste.cl</p>
+            </div>
+          </div>
+          <mat-icon class="copy-icon">content_copy</mat-icon>
+        </div>
+      </div>
+      <p class="test-users-note">Contraseña para todos: <strong>Admin123!</strong></p>
+    </div>
+  </div>
+</div>
