@@ -66,6 +66,19 @@ hotfix/*      ← correcciones urgentes en producción (branch desde main → me
 - Squash merge en PRs para mantener historial limpio
 - Tags semánticos en releases: `v1.0.0`, `v1.1.0`, etc.
 
+### 5. Gestión de Tareas en Trello (Obligatorio)
+**El tablero de Trello (Teamworky) es la fuente de verdad del estado del proyecto:**
+
+- **Toda tarea debe tener una tarjeta en Trello** antes de comenzar a trabajar
+- **Flujo de columnas**: Pending → Planning → Build → QA Local → Finish → Publish
+- **Al iniciar una tarea**: mover la tarjeta a "Build" y asignar miembro
+- **Al completar una tarea**: mover a "QA Local" con checklist de verificación
+- **Al hacer merge del PR**: mover a "Finish"
+- **Al desplegar a producción**: mover a "Publish"
+- **Cada tarjeta debe incluir**: descripción, criterios de aceptación, labels de módulo, y referencia al spec asociado
+- **Nuevas tareas descubiertas durante desarrollo** se agregan como tarjetas en "Pending"
+- No se cierra un sprint sin que todas las tarjetas reflejen el estado real del código
+
 ---
 
 ## Architecture Principles
