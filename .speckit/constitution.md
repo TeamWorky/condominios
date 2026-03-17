@@ -3,6 +3,71 @@
 ## Project Overview
 Sistema de Gestión de Condominios - a multi-tenant condominium management platform built as an Nx monorepo with Angular 21 frontend and NestJS 11 backend.
 
+---
+
+## Mandatory Workflows
+
+### 1. Spec-Driven Development (SDD)
+**Todo módulo o feature DEBE seguir el flujo SDD antes de escribir código:**
+
+1. **Specify**: Crear/actualizar el spec en `.speckit/specs/[module].spec.md` usando el template
+2. **Plan**: Diseñar la implementación basándose en el spec (entidades, endpoints, componentes)
+3. **Implement**: Codificar siguiendo estrictamente lo definido en el spec
+4. **Checklist**: Verificar que toda la funcionalidad del spec fue implementada y testeada
+
+No se acepta código nuevo sin un spec asociado. Si el spec no existe, se crea primero.
+
+### 2. Testing Unitario en Backend (Obligatorio)
+**Todo código backend DEBE tener tests unitarios antes de merge:**
+
+- Cada service: `[name].service.spec.ts` con cobertura de todos los métodos públicos
+- Cada controller: `[name].controller.spec.ts` con cobertura de todos los endpoints
+- Cada guard/interceptor/pipe custom: test correspondiente
+- **Cobertura mínima global**: 70% (branches, functions, lines, statements)
+- **Auth service**: 100% cobertura obligatoria
+- Los tests deben cubrir: happy path, error cases, edge cases, validaciones
+- Ejecutar `npm test` antes de cada PR. No se aprueba PR con tests fallando
+
+### 3. Revisión OWASP Top 10 (Obligatoria)
+**Cada módulo/feature DEBE pasar una revisión de seguridad contra OWASP Top 10 antes de merge:**
+
+| # | Categoría | Checklist obligatorio |
+|---|-----------|----------------------|
+| A01 | Broken Access Control | Guards aplicados, roles verificados, @Public() solo donde corresponde |
+| A02 | Cryptographic Failures | Sin secrets hardcodeados, bcrypt >= 12 rounds, env vars validadas |
+| A03 | Injection | Sin SQL raw con interpolación, ValidationPipe whitelist, sanitización |
+| A04 | Insecure Design | Rate limiting en endpoints sensibles, pagination con límites, body size limitado |
+| A05 | Security Misconfiguration | CSP habilitado, CORS restringido en prod, Swagger oculto en prod |
+| A06 | Vulnerable Components | `npm audit` sin vulnerabilidades high/critical |
+| A07 | Auth Failures | Tokens rotados, lockout por intentos fallidos, blacklist en logout |
+| A08 | Data Integrity | SRI en builds producción, `npm ci` en CI |
+| A09 | Security Logging | Eventos de auth loggeados (login, logout, fallos, lockouts) |
+| A10 | SSRF | No fetch de URLs del usuario sin validación de allowlist |
+
+El spec de cada módulo debe incluir una sección `## Security (OWASP)` con las medidas aplicadas.
+
+### 4. Gitflow (Obligatorio)
+**El proyecto sigue Gitflow estricto:**
+
+```
+main          ← producción estable, solo recibe merges de release/ y hotfix/
+development   ← rama de integración, recibe merges de feature/
+feature/*     ← nuevas funcionalidades (branch desde development)
+bugfix/*      ← correcciones no urgentes (branch desde development)
+release/*     ← preparación de release (branch desde development → merge a main y development)
+hotfix/*      ← correcciones urgentes en producción (branch desde main → merge a main y development)
+```
+
+**Reglas:**
+- No se hace push directo a `main` ni `development`
+- Todo cambio entra por Pull Request con al menos 1 aprobación
+- Nombrar branches: `feature/[module]-[descripción]`, `bugfix/[issue]-[descripción]`, `hotfix/[issue]-[descripción]`
+- Commits siguen Conventional Commits: `feat:`, `fix:`, `docs:`, `test:`, `refactor:`, `chore:`
+- Squash merge en PRs para mantener historial limpio
+- Tags semánticos en releases: `v1.0.0`, `v1.1.0`, etc.
+
+---
+
 ## Architecture Principles
 
 1. **Monorepo-first**: All code lives in one Nx workspace (`TeamWorky/condominios`). Shared code in `libs/`.
