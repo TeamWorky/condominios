@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap, map } from 'rxjs';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
 import {
   LoginRequest,
   LoginResponse,
@@ -86,9 +86,8 @@ export class AuthService {
   }
 
   login(credentials: LoginRequest): Observable<LoginResponse> {
-    return this.http.post<{ success: boolean; data: LoginResponse }>(`${this.API_URL}/login`, credentials)
+    return this.http.post<LoginResponse>(`${this.API_URL}/login`, credentials)
       .pipe(
-        map(response => response.data),
         tap(data => {
           localStorage.removeItem(this.CONDOMINIOS_KEY);
           localStorage.removeItem(this.SELECTED_CONDOMINIO_KEY);
@@ -116,11 +115,10 @@ export class AuthService {
   selectCondominio(condominioId: string): Observable<SelectCondominioResponse> {
     const request: SelectCondominioRequest = { condominioId };
 
-    return this.http.post<{ success: boolean; data: SelectCondominioResponse }>(
+    return this.http.post<SelectCondominioResponse>(
       `${this.API_URL}/select-condominio`,
       request
     ).pipe(
-      map(response => response.data),
       tap(data => {
         // Actualizar tokens con el nuevo JWT que contiene el condominioId
         localStorage.setItem(this.TOKEN_KEY, data.accessToken);
@@ -165,11 +163,10 @@ export class AuthService {
   refreshTokens(): Observable<AuthTokens> {
     const refreshToken = this.getRefreshToken();
 
-    return this.http.post<{ success: boolean; data: AuthTokens }>(
+    return this.http.post<AuthTokens>(
       `${this.API_URL}/refresh`,
       { refreshToken }
     ).pipe(
-      map(response => response.data),
       tap(tokens => {
         localStorage.setItem(this.TOKEN_KEY, tokens.accessToken);
         localStorage.setItem(this.REFRESH_TOKEN_KEY, tokens.refreshToken);

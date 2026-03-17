@@ -34,9 +34,10 @@ Handles user authentication with JWT access/refresh tokens, RBAC, and multi-tena
 - **On failure**: Increment failed login counter in Redis
 
 ### POST /api/v1/auth/refresh
-- **Auth**: Public (uses refresh token in body)
+- **Auth**: Public (uses refresh token in body, NOT `@CurrentUser()`)
 - **Body**: `{ refreshToken }`
 - **Response**: `{ accessToken, refreshToken }` (token rotation)
+- **Implementation note**: El controller decodifica el refresh token directamente con `JwtService.decode()` para extraer el `sub` (userId), ya que el access token está expirado al momento de refrescar y `@CurrentUser()` no puede extraer el userId del request
 
 ### POST /api/v1/auth/logout
 - **Auth**: JWT required
@@ -63,6 +64,11 @@ Handles user authentication with JWT access/refresh tokens, RBAC, and multi-tena
 - A04: Rate limiting on login, account lockout
 - A07: Token rotation on refresh, blacklisting on logout
 - A09: Log all auth events (login, logout, failed attempts, lockouts)
+
+## Frontend Implementation Notes
+- **API Response Format**: El frontend consume respuestas directas (`LoginResponse`, `SelectCondominioResponse`, `AuthTokens`) sin wrapper `{ success, data }`. No se usa el operador `map()` de RxJS para extraer datos.
+- **Login Form Validation**: El campo password solo requiere `Validators.required` (sin `minLength`). La validación de fortaleza de contraseña se hace exclusivamente en el backend (registro).
+- **Auth Service**: Usa `BehaviorSubject<AuthState>` para estado, `localStorage` para persistencia de tokens.
 
 ## Test Requirements (100% coverage)
 - Register: success, duplicate email, weak password, invalid input
