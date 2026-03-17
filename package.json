@@ -6,13 +6,18 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "nest build",
-    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "nest start",
-    "start:dev": "nest start --watch",
-    "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
-    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+    "build": "nest build api && nest build worker",
+    "build:api": "nest build api",
+    "build:worker": "nest build worker",
+    "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\" \"test/**/*.ts\"",
+    "start": "nest start api",
+    "start:dev": "nest start api --watch",
+    "start:debug": "nest start api --debug --watch",
+    "start:prod": "node dist/apps/api/src/main",
+    "start:worker": "nest start worker",
+    "start:worker:dev": "nest start worker --watch",
+    "start:worker:prod": "node dist/apps/worker/src/main",
+    "lint": "eslint \"{apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
@@ -21,9 +26,9 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "typeorm": "typeorm-ts-node-commonjs",
-    "migration:generate": "npm run typeorm -- migration:generate -d src/database/data-source.ts",
-    "migration:run": "npm run typeorm -- migration:run -d src/database/data-source.ts",
-    "migration:revert": "npm run typeorm -- migration:revert -d src/database/data-source.ts"
+    "migration:generate": "npm run typeorm -- migration:generate -d libs/database/src/data-source.ts",
+    "migration:run": "npm run typeorm -- migration:run -d libs/database/src/data-source.ts",
+    "migration:revert": "npm run typeorm -- migration:revert -d libs/database/src/data-source.ts"
   },
   "dependencies": {
     "@nestjs/bullmq": "^11.0.4",
@@ -94,13 +99,24 @@
       "json",
       "ts"
     ],
-    "rootDir": "src",
+    "rootDir": ".",
+    "roots": [
+      "<rootDir>/apps/",
+      "<rootDir>/libs/"
+    ],
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
+    "moduleNameMapper": {
+      "^@libs/common(.*)$": "<rootDir>/libs/common/src$1",
+      "^@libs/database(.*)$": "<rootDir>/libs/database/src$1",
+      "^@libs/infrastructure(.*)$": "<rootDir>/libs/infrastructure/src$1",
+      "^@libs/shared(.*)$": "<rootDir>/libs/shared/src$1"
+    },
     "collectCoverageFrom": [
-      "**/*.(t|j)s",
+      "apps/**/*.(t|j)s",
+      "libs/**/*.(t|j)s",
       "!**/*.spec.ts",
       "!**/*.interface.ts",
       "!**/*.dto.ts",
@@ -111,7 +127,7 @@
       "!**/*.module.ts",
       "!**/node_modules/**"
     ],
-    "coverageDirectory": "../coverage",
+    "coverageDirectory": "./coverage",
     "coverageReporters": [
       "text",
       "lcov",
@@ -125,7 +141,7 @@
         "lines": 70,
         "statements": 70
       },
-      "./src/auth/auth.service.ts": {
+      "./apps/api/src/auth/auth.service.ts": {
         "branches": 80,
         "functions": 100,
         "lines": 100,

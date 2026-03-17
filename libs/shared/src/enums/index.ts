@@ -1,0 +1,10 @@
+export { Role } from './role.enum';
+export { ResidentType } from './resident-type.enum';
+export { DocumentType } from './document-type.enum';
+export { PaymentStatus } from './payment-status.enum';
+export { PaymentMethod } from './payment-method.enum';
+export { CommonSpaceType } from './common-space-type.enum';
+export { ReservationStatus } from './reservation-status.enum';
+export { ReservationType } from './reservation-type.enum';
+export { UnitStatus } from './unit-status.enum';
+export { UnitType } from './unit-type.enum';
