@@ -10,7 +10,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { Building } from '../../buildings/entities/building.entity';
-import { CommonSpaceType } from '@libs/shared/enums/common-space-type.enum';
+import { CommonSpaceType } from '@condominios/shared/enums/common-space-type.enum';
 import { Reservation } from '../../reservations/entities/reservation.entity';
 
 /**

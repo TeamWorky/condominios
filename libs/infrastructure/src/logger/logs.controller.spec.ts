@@ -3,8 +3,8 @@ import { LogsController } from './logs.controller';
 import { LogsService } from './logs.service';
 import { FilterLogsDto, LogLevel } from './dto/filter-logs.dto';
 import { Log } from './entities/log.entity';
-import { ResponseUtil } from '@libs/common/utils/response.util';
-import { NotFoundException } from '@libs/common/exceptions/business.exception';
+import { ResponseUtil } from '@condominios/common/utils/response.util';
+import { NotFoundException } from '@condominios/common/exceptions/business.exception';
 
 describe('LogsController', () => {
   let controller: LogsController;

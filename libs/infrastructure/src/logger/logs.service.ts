@@ -4,7 +4,7 @@ import { Repository, FindOptionsWhere, Like } from 'typeorm';
 import { Log } from './entities/log.entity';
 import { FilterLogsDto, LogLevel } from './dto/filter-logs.dto';
 import { LoggerService } from './logger.service';
-import { NotFoundException } from '@libs/common/exceptions/business.exception';
+import { NotFoundException } from '@condominios/common/exceptions/business.exception';
 
 @Injectable()
 export class LogsService {

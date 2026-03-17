@@ -4,9 +4,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, QueryFailedError } from 'typeorm';
 import { User } from '../../../../apps/api/src/users/entities/user.entity';
 import { Condominium } from '../../../../apps/api/src/condominiums/entities/condominium.entity';
-import { Role } from '@libs/shared/enums/role.enum';
-import { LoggerService } from '@libs/infrastructure/logger/logger.service';
-import { RedisCacheService } from '@libs/infrastructure/redis/redis-cache.service';
+import { Role } from '@condominios/shared/enums/role.enum';
+import { LoggerService } from '@condominios/infrastructure/logger/logger.service';
+import { RedisCacheService } from '@condominios/infrastructure/redis/redis-cache.service';
 
 @Injectable()
 export class AdminUserSeeder implements OnModuleInit {

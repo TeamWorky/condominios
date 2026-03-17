@@ -1,6 +1,6 @@
 import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsStrongPassword } from '@libs/common/validators/password-strength.validator';
+import { IsStrongPassword } from '@condominios/common/validators/password-strength.validator';
 
 export class RegisterDto {
   @ApiProperty({

@@ -16,13 +16,13 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagg
 import { ResidentsService } from './residents.service';
 import { CreateResidentDto } from './dto/create-resident.dto';
 import { UpdateResidentDto } from './dto/update-resident.dto';
-import { PaginationDto } from '@libs/common/dto/pagination.dto';
-import { ResponseUtil } from '@libs/common/utils/response.util';
-import { SUCCESS_MESSAGES } from '@libs/common/constants/app.constants';
-import { JwtAuthGuard } from '@libs/common/guards/jwt-auth.guard';
-import { MinRoleGuard } from '@libs/common/guards/min-role.guard';
-import { MinRole } from '@libs/common/decorators/min-role.decorator';
-import { Role } from '@libs/shared/enums/role.enum';
+import { PaginationDto } from '@condominios/common/dto/pagination.dto';
+import { ResponseUtil } from '@condominios/common/utils/response.util';
+import { SUCCESS_MESSAGES } from '@condominios/common/constants/app.constants';
+import { JwtAuthGuard } from '@condominios/common/guards/jwt-auth.guard';
+import { MinRoleGuard } from '@condominios/common/guards/min-role.guard';
+import { MinRole } from '@condominios/common/decorators/min-role.decorator';
+import { Role } from '@condominios/shared/enums/role.enum';
 
 @ApiTags('Residents')
 @ApiBearerAuth('JWT-auth')

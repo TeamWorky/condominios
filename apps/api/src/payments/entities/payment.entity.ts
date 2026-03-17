@@ -10,8 +10,8 @@ import {
 } from 'typeorm';
 import { Unit } from '../../units/entities/unit.entity';
 import { Resident } from '../../residents/entities/resident.entity';
-import { PaymentStatus } from '@libs/shared/enums/payment-status.enum';
-import { PaymentMethod } from '@libs/shared/enums/payment-method.enum';
+import { PaymentStatus } from '@condominios/shared/enums/payment-status.enum';
+import { PaymentMethod } from '@condominios/shared/enums/payment-method.enum';
 
 /**
  * Entidad Payment (Pago)

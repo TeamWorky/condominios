@@ -4,11 +4,11 @@ import { Repository } from 'typeorm';
 import { Unit } from './entities/unit.entity';
 import { CreateUnitDto } from './dto/create-unit.dto';
 import { UpdateUnitDto } from './dto/update-unit.dto';
-import { PaginationDto } from '@libs/common/dto/pagination.dto';
-import { NotFoundException, AlreadyExistsException } from '@libs/common/exceptions/business.exception';
-import { SoftDeleteRepositoryHelper } from '@libs/common/repositories/base.repository';
-import { LoggerService } from '@libs/infrastructure/logger/logger.service';
-import { RedisCacheService } from '@libs/infrastructure/redis/redis-cache.service';
+import { PaginationDto } from '@condominios/common/dto/pagination.dto';
+import { NotFoundException, AlreadyExistsException } from '@condominios/common/exceptions/business.exception';
+import { SoftDeleteRepositoryHelper } from '@condominios/common/repositories/base.repository';
+import { LoggerService } from '@condominios/infrastructure/logger/logger.service';
+import { RedisCacheService } from '@condominios/infrastructure/redis/redis-cache.service';
 import { BuildingsService } from '../buildings/buildings.service';
 import { CondominiumsService } from '../condominiums/condominiums.service';
 

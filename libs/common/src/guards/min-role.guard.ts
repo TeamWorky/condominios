@@ -1,7 +1,7 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { MIN_ROLE_KEY } from '../decorators/min-role.decorator';
-import { Role } from '@libs/shared';
+import { Role } from '@condominios/shared';
 import { hasRolePermission } from '../enums/role.helpers';
 
 /**

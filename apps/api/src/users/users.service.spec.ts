@@ -4,18 +4,18 @@ import { Repository } from 'typeorm';
 import { ForbiddenException } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from './entities/user.entity';
-import { LoggerService } from '@libs/infrastructure/logger/logger.service';
-import { RedisCacheService } from '@libs/infrastructure/redis/redis-cache.service';
+import { LoggerService } from '@condominios/infrastructure/logger/logger.service';
+import { RedisCacheService } from '@condominios/infrastructure/redis/redis-cache.service';
 import {
   NotFoundException,
   AlreadyExistsException,
-} from '@libs/common/exceptions/business.exception';
-import { Role } from '@libs/shared/enums/role.enum';
-import { RoleHierarchy } from '@libs/common/enums/role.helpers';
-import { SoftDeleteRepositoryHelper } from '@libs/common/repositories/base.repository';
+} from '@condominios/common/exceptions/business.exception';
+import { Role } from '@condominios/shared/enums/role.enum';
+import { RoleHierarchy } from '@condominios/common/enums/role.helpers';
+import { SoftDeleteRepositoryHelper } from '@condominios/common/repositories/base.repository';
 
 // Mock SoftDeleteRepositoryHelper
-jest.mock('@libs/common/repositories/base.repository');
+jest.mock('@condominios/common/repositories/base.repository');
 
 describe('UsersService', () => {
   let service: UsersService;

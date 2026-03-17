@@ -1,6 +1,6 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
-import { CryptoUtil } from '@libs/common/utils/crypto.util';
+import { CryptoUtil } from '@condominios/common/utils/crypto.util';
 
 @Injectable()
 export class RequestIdMiddleware implements NestMiddleware {

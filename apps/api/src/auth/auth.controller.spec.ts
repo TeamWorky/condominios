@@ -8,7 +8,7 @@ import { SelectCondominioDto } from './dto/select-condominio.dto';
 import {
   AlreadyExistsException,
   UnauthorizedException,
-} from '@libs/common/exceptions/business.exception';
+} from '@condominios/common/exceptions/business.exception';
 
 describe('AuthController', () => {
   let controller: AuthController;

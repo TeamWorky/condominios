@@ -6,8 +6,8 @@ import {
   IsString,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Role } from '@libs/shared/enums/role.enum';
-import { IsStrongPassword } from '@libs/common/validators/password-strength.validator';
+import { Role } from '@condominios/shared/enums/role.enum';
+import { IsStrongPassword } from '@condominios/common/validators/password-strength.validator';
 
 export class CreateUserDto {
   @ApiProperty({

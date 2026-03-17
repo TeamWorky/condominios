@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { LogsService } from './logs.service';
 import { Log, LogLevel } from './entities/log.entity';
 import { LoggerService } from './logger.service';
-import { NotFoundException } from '@libs/common/exceptions/business.exception';
+import { NotFoundException } from '@condominios/common/exceptions/business.exception';
 
 describe('LogsService', () => {
   let service: LogsService;

@@ -7,8 +7,8 @@ import {
   JoinTable,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { BaseEntity } from '@libs/common/entities/base.entity';
-import { Role } from '@libs/shared/enums/role.enum';
+import { BaseEntity } from '@condominios/common/entities/base.entity';
+import { Role } from '@condominios/shared/enums/role.enum';
 import { Condominium } from '../../condominiums/entities/condominium.entity';
 
 @Entity('users')

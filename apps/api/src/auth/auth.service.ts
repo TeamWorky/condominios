@@ -8,7 +8,7 @@ import { LoginDto } from './dto/login.dto';
 import {
   UnauthorizedException,
   AlreadyExistsException,
-} from '@libs/common/exceptions/business.exception';
+} from '@condominios/common/exceptions/business.exception';
 import { User } from '../users/entities/user.entity';
 
 @Injectable()

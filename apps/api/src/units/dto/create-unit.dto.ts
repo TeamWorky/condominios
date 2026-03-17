@@ -12,8 +12,8 @@ import {
   IsUUID,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { UnitType } from '@libs/shared/enums/unit-type.enum';
-import { UnitStatus } from '@libs/shared/enums/unit-status.enum';
+import { UnitType } from '@condominios/shared/enums/unit-type.enum';
+import { UnitStatus } from '@condominios/shared/enums/unit-status.enum';
 
 export class CreateUnitDto {
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000', description: 'Building ID' })

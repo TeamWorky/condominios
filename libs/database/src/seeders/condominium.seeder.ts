@@ -6,11 +6,11 @@ import { Condominium } from '../../../../apps/api/src/condominiums/entities/cond
 import { Building } from '../../../../apps/api/src/buildings/entities/building.entity';
 import { Unit } from '../../../../apps/api/src/units/entities/unit.entity';
 import { User } from '../../../../apps/api/src/users/entities/user.entity';
-import { UnitType } from '@libs/shared/enums/unit-type.enum';
-import { UnitStatus } from '@libs/shared/enums/unit-status.enum';
-import { Role } from '@libs/shared/enums/role.enum';
-import { LoggerService } from '@libs/infrastructure/logger/logger.service';
-import { RedisCacheService } from '@libs/infrastructure/redis/redis-cache.service';
+import { UnitType } from '@condominios/shared/enums/unit-type.enum';
+import { UnitStatus } from '@condominios/shared/enums/unit-status.enum';
+import { Role } from '@condominios/shared/enums/role.enum';
+import { LoggerService } from '@condominios/infrastructure/logger/logger.service';
+import { RedisCacheService } from '@condominios/infrastructure/redis/redis-cache.service';
 
 @Injectable()
 export class CondominiumSeeder implements OnModuleInit {

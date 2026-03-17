@@ -18,9 +18,9 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { SelectCondominioDto } from './dto/select-condominio.dto';
-import { JwtAuthGuard } from '@libs/common/guards/jwt-auth.guard';
-import { CurrentUser } from '@libs/common/decorators/current-user.decorator';
-import { Public } from '@libs/common/decorators/public.decorator';
+import { JwtAuthGuard } from '@condominios/common/guards/jwt-auth.guard';
+import { CurrentUser } from '@condominios/common/decorators/current-user.decorator';
+import { Public } from '@condominios/common/decorators/public.decorator';
 
 @ApiTags('Auth')
 @Controller('auth')

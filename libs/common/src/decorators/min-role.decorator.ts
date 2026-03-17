@@ -1,5 +1,5 @@
 import { SetMetadata } from '@nestjs/common';
-import { Role } from '@libs/shared';
+import { Role } from '@condominios/shared';
 
 export const MIN_ROLE_KEY = 'minRole';
 

@@ -5,8 +5,8 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
-import { Role } from '@libs/shared';
-import { RoleHierarchy } from '@libs/common/enums/role.helpers';
+import { Role } from '@condominios/shared';
+import { RoleHierarchy } from '@condominios/common/enums/role.helpers';
 
 /**
  * Guard to prevent users from modifying users with higher or equal roles

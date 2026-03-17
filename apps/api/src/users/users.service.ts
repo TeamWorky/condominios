@@ -4,16 +4,16 @@ import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { PaginationDto } from '@libs/common/dto/pagination.dto';
+import { PaginationDto } from '@condominios/common/dto/pagination.dto';
 import {
   AlreadyExistsException,
   NotFoundException,
-} from '@libs/common/exceptions/business.exception';
-import { Role } from '@libs/shared/enums/role.enum';
-import { RoleHierarchy } from '@libs/common/enums/role.helpers';
-import { SoftDeleteRepositoryHelper } from '@libs/common/repositories/base.repository';
-import { LoggerService } from '@libs/infrastructure/logger/logger.service';
-import { RedisCacheService } from '@libs/infrastructure/redis/redis-cache.service';
+} from '@condominios/common/exceptions/business.exception';
+import { Role } from '@condominios/shared/enums/role.enum';
+import { RoleHierarchy } from '@condominios/common/enums/role.helpers';
+import { SoftDeleteRepositoryHelper } from '@condominios/common/repositories/base.repository';
+import { LoggerService } from '@condominios/infrastructure/logger/logger.service';
+import { RedisCacheService } from '@condominios/infrastructure/redis/redis-cache.service';
 
 /**
  * Cache TTL constants (in seconds)

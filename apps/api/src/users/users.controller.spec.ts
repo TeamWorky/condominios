@@ -3,15 +3,15 @@ import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { PaginationDto } from '@libs/common/dto/pagination.dto';
+import { PaginationDto } from '@condominios/common/dto/pagination.dto';
 import { User } from './entities/user.entity';
-import { Role } from '@libs/shared/enums/role.enum';
-import { ResponseUtil } from '@libs/common/utils/response.util';
-import { SUCCESS_MESSAGES } from '@libs/common/constants/app.constants';
+import { Role } from '@condominios/shared/enums/role.enum';
+import { ResponseUtil } from '@condominios/common/utils/response.util';
+import { SUCCESS_MESSAGES } from '@condominios/common/constants/app.constants';
 import {
   AlreadyExistsException,
   NotFoundException,
-} from '@libs/common/exceptions/business.exception';
+} from '@condominios/common/exceptions/business.exception';
 import { ForbiddenException } from '@nestjs/common';
 
 describe('UsersController', () => {

@@ -6,11 +6,11 @@ import {
   JoinColumn,
   Unique,
 } from 'typeorm';
-import { BaseEntity } from '@libs/common/entities/base.entity';
+import { BaseEntity } from '@condominios/common/entities/base.entity';
 import { Building } from '../../buildings/entities/building.entity';
 import { Resident } from '../../residents/entities/resident.entity';
-import { UnitType } from '@libs/shared/enums/unit-type.enum';
-import { UnitStatus } from '@libs/shared/enums/unit-status.enum';
+import { UnitType } from '@condominios/shared/enums/unit-type.enum';
+import { UnitStatus } from '@condominios/shared/enums/unit-status.enum';
 import { Payment } from '../../payments/entities/payment.entity';
 
 @Entity('units')

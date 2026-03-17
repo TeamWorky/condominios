@@ -1,4 +1,4 @@
-import { Role } from '@libs/shared';
+import { Role } from '@condominios/shared';
 
 /**
  * Role hierarchy levels

@@ -1,4 +1,4 @@
-import { ApiResponse } from '@libs/common/interfaces/api-response.interface';
+import { ApiResponse } from '@condominios/common/interfaces/api-response.interface';
 
 export class ResponseUtil {
   static success<T>(data: T, message?: string): ApiResponse<T> {

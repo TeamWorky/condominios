@@ -1,5 +1,5 @@
 import { Entity, Column, Index } from 'typeorm';
-import { BaseEntity } from '@libs/common/entities/base.entity';
+import { BaseEntity } from '@condominios/common/entities/base.entity';
 
 export enum LogLevel {
   ERROR = 'error',

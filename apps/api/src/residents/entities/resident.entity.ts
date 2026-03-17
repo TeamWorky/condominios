@@ -1,8 +1,8 @@
 import { Entity, Column, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
-import { BaseEntity } from '@libs/common/entities/base.entity';
+import { BaseEntity } from '@condominios/common/entities/base.entity';
 import { Unit } from '../../units/entities/unit.entity';
 import { User } from '../../users/entities/user.entity';
-import { ResidentType } from '@libs/shared/enums/resident-type.enum';
+import { ResidentType } from '@condominios/shared/enums/resident-type.enum';
 import { Reservation } from '../../reservations/entities/reservation.entity';
 
 @Entity('residents')

@@ -6,7 +6,7 @@ import {
   JoinColumn,
   Unique,
 } from 'typeorm';
-import { BaseEntity } from '@libs/common/entities/base.entity';
+import { BaseEntity } from '@condominios/common/entities/base.entity';
 import { Condominium } from '../../condominiums/entities/condominium.entity';
 import { Unit } from '../../units/entities/unit.entity';
 import { CommonSpace } from '../../common-spaces/entities/common-space.entity';

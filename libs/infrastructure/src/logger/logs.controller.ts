@@ -16,11 +16,11 @@ import {
 } from '@nestjs/swagger';
 import { LogsService } from './logs.service';
 import { FilterLogsDto, LogLevel } from './dto/filter-logs.dto';
-import { ResponseUtil } from '@libs/common/utils/response.util';
-import { JwtAuthGuard } from '@libs/common/guards/jwt-auth.guard';
-import { MinRoleGuard } from '@libs/common/guards/min-role.guard';
-import { MinRole } from '@libs/common/decorators/min-role.decorator';
-import { Role } from '@libs/shared/enums/role.enum';
+import { ResponseUtil } from '@condominios/common/utils/response.util';
+import { JwtAuthGuard } from '@condominios/common/guards/jwt-auth.guard';
+import { MinRoleGuard } from '@condominios/common/guards/min-role.guard';
+import { MinRole } from '@condominios/common/decorators/min-role.decorator';
+import { Role } from '@condominios/shared/enums/role.enum';
 
 @ApiTags('Logs')
 @ApiBearerAuth('JWT-auth')

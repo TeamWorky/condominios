@@ -8,7 +8,7 @@ import helmet from 'helmet';
 import compression = require('compression');
 import { apiReference } from '@scalar/nestjs-api-reference';
 import { AppModule } from './app.module';
-import { LoggerService } from '@libs/infrastructure/logger/logger.service';
+import { LoggerService } from '@condominios/infrastructure/logger/logger.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

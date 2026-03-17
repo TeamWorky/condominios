@@ -4,11 +4,11 @@ import { Repository } from 'typeorm';
 import { Condominium } from './entities/condominium.entity';
 import { CreateCondominiumDto } from './dto/create-condominium.dto';
 import { UpdateCondominiumDto } from './dto/update-condominium.dto';
-import { PaginationDto } from '@libs/common/dto/pagination.dto';
-import { NotFoundException } from '@libs/common/exceptions/business.exception';
-import { SoftDeleteRepositoryHelper } from '@libs/common/repositories/base.repository';
-import { LoggerService } from '@libs/infrastructure/logger/logger.service';
-import { RedisCacheService } from '@libs/infrastructure/redis/redis-cache.service';
+import { PaginationDto } from '@condominios/common/dto/pagination.dto';
+import { NotFoundException } from '@condominios/common/exceptions/business.exception';
+import { SoftDeleteRepositoryHelper } from '@condominios/common/repositories/base.repository';
+import { LoggerService } from '@condominios/infrastructure/logger/logger.service';
+import { RedisCacheService } from '@condominios/infrastructure/redis/redis-cache.service';
 
 const CACHE_TTL = {
   CONDOMINIUM: 300,

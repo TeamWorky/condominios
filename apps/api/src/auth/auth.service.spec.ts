@@ -7,9 +7,9 @@ import { UsersService } from '../users/users.service';
 import {
   AlreadyExistsException,
   UnauthorizedException,
-} from '@libs/common/exceptions/business.exception';
+} from '@condominios/common/exceptions/business.exception';
 import { User } from '../users/entities/user.entity';
-import { Role } from '@libs/shared/enums/role.enum';
+import { Role } from '@condominios/shared/enums/role.enum';
 
 // Mock bcrypt
 jest.mock('bcrypt');

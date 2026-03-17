@@ -10,8 +10,8 @@ import {
 } from 'typeorm';
 import { CommonSpace } from '../../common-spaces/entities/common-space.entity';
 import { Resident } from '../../residents/entities/resident.entity';
-import { ReservationStatus } from '@libs/shared/enums/reservation-status.enum';
-import { ReservationType } from '@libs/shared/enums/reservation-type.enum';
+import { ReservationStatus } from '@condominios/shared/enums/reservation-status.enum';
+import { ReservationType } from '@condominios/shared/enums/reservation-type.enum';
 
 /**
  * Entidad Reservation (Reserva)

@@ -2,8 +2,8 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BullModule } from '@nestjs/bullmq';
-import { LoggerModule, RedisModule, QueueModule, EmailProcessor, EmailService, EmailTemplatesService } from '@libs/infrastructure';
-import { envValidationSchema } from '@libs/infrastructure/config/env.validation';
+import { LoggerModule, RedisModule, QueueModule, EmailProcessor, EmailService, EmailTemplatesService } from '@condominios/infrastructure';
+import { envValidationSchema } from '@condominios/infrastructure/config/env.validation';
 
 @Module({
   imports: [
