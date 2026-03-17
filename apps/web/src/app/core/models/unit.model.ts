@@ -1,19 +1,5 @@
-export enum UnitStatus {
-  AVAILABLE = 'AVAILABLE',
-  OCCUPIED = 'OCCUPIED',
-  MAINTENANCE = 'MAINTENANCE',
-  RESERVED = 'RESERVED',
-  OUT_OF_SERVICE = 'OUT_OF_SERVICE'
-}
-
-export enum UnitType {
-  APARTMENT = 'APARTMENT',
-  HOUSE = 'HOUSE',
-  OFFICE = 'OFFICE',
-  COMMERCIAL = 'COMMERCIAL',
-  PARKING = 'PARKING',
-  STORAGE = 'STORAGE'
-}
+import { UnitStatus, UnitType } from '@condominios/shared';
+export { UnitStatus, UnitType };
 
 export interface IUnit {
   id: string;

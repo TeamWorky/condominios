@@ -1,3 +1,6 @@
+import { ResidentType, DocumentType } from '@condominios/shared';
+export { ResidentType, DocumentType };
+
 export interface IResident {
   id: string;
   firstName: string;
@@ -13,17 +16,6 @@ export interface IResident {
   moveOutDate?: Date;
   createdAt: Date;
   updatedAt: Date;
-}
-
-export enum ResidentType {
-  OWNER = 'OWNER',
-  TENANT = 'TENANT'
-}
-
-export enum DocumentType {
-  RUT = 'RUT',
-  PASSPORT = 'PASSPORT',
-  DNI = 'DNI'
 }
 
 export interface ICreateResidentDto {

@@ -1,3 +1,6 @@
+import { Role } from '@condominios/shared';
+export { Role };
+
 export interface LoginRequest {
   email: string;
   password: string;
@@ -8,7 +11,7 @@ export interface User {
   email: string;
   firstName: string;
   lastName: string;
-  role: UserRole;
+  role: Role;
   isActive: boolean;
   condominios: Condominio[];
 }
@@ -49,12 +52,6 @@ export interface SelectCondominioRequest {
 export interface SelectCondominioResponse {
   accessToken: string;
   refreshToken: string;
-}
-
-export enum UserRole {
-  USER = 'USER',
-  ADMIN = 'ADMIN',
-  SUPER_ADMIN = 'SUPER_ADMIN'
 }
 
 export interface AuthState {

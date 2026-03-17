@@ -1,19 +1,5 @@
-export enum ReservationStatus {
-  PENDING = 'PENDING',
-  CONFIRMED = 'CONFIRMED',
-  CANCELLED = 'CANCELLED',
-  COMPLETED = 'COMPLETED'
-}
-
-export enum ReservationType {
-  CUMPLEANOS = 'CUMPLEANOS',
-  REUNION_FAMILIAR = 'REUNION_FAMILIAR',
-  EVENTO_CORPORATIVO = 'EVENTO_CORPORATIVO',
-  CELEBRACION = 'CELEBRACION',
-  DEPORTE = 'DEPORTE',
-  TRABAJO = 'TRABAJO',
-  OTRO = 'OTRO'
-}
+import { ReservationStatus, ReservationType } from '@condominios/shared';
+export { ReservationStatus, ReservationType };
 
 export interface IReservation {
   id: string;

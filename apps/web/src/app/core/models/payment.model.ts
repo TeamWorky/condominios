@@ -1,3 +1,6 @@
+import { PaymentStatus, PaymentMethod } from '@condominios/shared';
+export { PaymentStatus, PaymentMethod };
+
 export interface IPayment {
   id: string;
   unitNumber: string;
@@ -13,22 +16,6 @@ export interface IPayment {
   notes?: string;
   createdAt: Date;
   updatedAt: Date;
-}
-
-export enum PaymentStatus {
-  PENDING = 'PENDING',
-  PAID = 'PAID',
-  OVERDUE = 'OVERDUE',
-  PARTIAL = 'PARTIAL',
-  CANCELLED = 'CANCELLED'
-}
-
-export enum PaymentMethod {
-  CASH = 'CASH',
-  TRANSFER = 'TRANSFER',
-  CHECK = 'CHECK',
-  CREDIT_CARD = 'CREDIT_CARD',
-  DEBIT_CARD = 'DEBIT_CARD'
 }
 
 export interface ICommonExpense {

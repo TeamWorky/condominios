@@ -1,16 +1,5 @@
-export enum CommonSpaceType {
-  SALON_EVENTOS = 'SALON_EVENTOS',
-  GIMNASIO = 'GIMNASIO',
-  PISCINA = 'PISCINA',
-  QUINCHO = 'QUINCHO',
-  SALA_MULTIUSO = 'SALA_MULTIUSO',
-  CANCHA_DEPORTIVA = 'CANCHA_DEPORTIVA',
-  JARDIN = 'JARDIN',
-  PLAYGROUND = 'PLAYGROUND',
-  BIBLIOTECA = 'BIBLIOTECA',
-  SALA_DE_JUEGOS = 'SALA_DE_JUEGOS',
-  OTRO = 'OTRO'
-}
+import { CommonSpaceType } from '@condominios/shared';
+export { CommonSpaceType };
 
 export interface ICommonSpace {
   id: string;
