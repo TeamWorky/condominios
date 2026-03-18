@@ -198,9 +198,7 @@ Use these slash commands for the SDD workflow:
 | `/speckit.taskstoissues` | Convert tasks to GitHub Issues |
 | `/speckit.constitution` | Create/update project constitution |
 
-## Active Technologies
-- TypeScript 5.9, Node.js 24.11.1 + Angular 21, Angular Material 21, NestJS 11 (backend existente) (001-dashboard-real-data)
-- PostgreSQL (backend, no se modifica), localStorage (tokens) (001-dashboard-real-data)
+## Frontend Services
 
-## Recent Changes
-- 001-dashboard-real-data: Added TypeScript 5.9, Node.js 24.11.1 + Angular 21, Angular Material 21, NestJS 11 (backend existente)
+- **DashboardService** (`apps/web/src/app/core/services/dashboard.service.ts`): Aggregates stats from BuildingService, UnitService, and ResidentService via forkJoin. Limits resident count to condominiums with ≤50 units.
+- **DashboardComponent** uses Angular Signals (`signal()`, `computed()`) for reactive state. Payment cards show "Proximamente" until backend is ready.
