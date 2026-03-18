@@ -15,6 +15,9 @@ import { CondominiumsModule } from './condominiums/condominiums.module';
 import { BuildingsModule } from './buildings/buildings.module';
 import { UnitsModule } from './units/units.module';
 import { ResidentsModule } from './residents/residents.module';
+import { CommonSpacesModule } from './common-spaces/common-spaces.module';
+import { ReservationsModule } from './reservations/reservations.module';
+import { PaymentsModule } from './payments/payments.module';
 
 @Module({
   imports: [
@@ -60,6 +63,9 @@ import { ResidentsModule } from './residents/residents.module';
     BuildingsModule,
     UnitsModule,
     ResidentsModule,
+    CommonSpacesModule,
+    ReservationsModule,
+    PaymentsModule,
   ],
   controllers: [AppController],
   providers: [

@@ -46,7 +46,17 @@ No se acepta código nuevo sin un spec asociado. Si el spec no existe, se crea p
 
 El spec de cada módulo debe incluir una sección `## Security (OWASP)` con las medidas aplicadas.
 
-### 4. Gitflow (Obligatorio)
+### 4. Pruebas de Endpoints (Obligatorio)
+**Todo cambio en el backend que afecte endpoints DEBE incluir pruebas manuales o automatizadas de los endpoints modificados:**
+
+- Antes de considerar completada una tarea que modifique controllers, services, guards, interceptors o DTOs, se DEBEN probar los endpoints afectados
+- Probar con `curl`, Swagger (`/api-docs`), o herramientas como Postman/Insomnia
+- Verificar: status codes correctos, formato de respuesta, validaciones, autenticación/autorización
+- Documentar en el PR los endpoints probados y los resultados
+- Para seeders y migraciones: verificar que los datos se crean correctamente consultando los endpoints correspondientes
+- Si el cambio afecta el flujo de autenticación: probar login, select-condominio, refresh y logout end-to-end
+
+### 5. Gitflow (Obligatorio)
 **El proyecto sigue Gitflow estricto:**
 
 ```
@@ -66,7 +76,7 @@ hotfix/*      ← correcciones urgentes en producción (branch desde main → me
 - Squash merge en PRs para mantener historial limpio
 - Tags semánticos en releases: `v1.0.0`, `v1.1.0`, etc.
 
-### 5. Gestión de Tareas en Trello (Obligatorio)
+### 6. Gestión de Tareas en Trello (Obligatorio)
 **El tablero de Trello (Teamworky) es la fuente de verdad del estado del proyecto:**
 
 - **Toda tarea debe tener una tarjeta en Trello** antes de comenzar a trabajar

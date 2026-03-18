@@ -60,108 +60,139 @@ export class CondominiumSeeder implements OnModuleInit {
 
       this.logger.log('Starting condominium demo data seeding...', CondominiumSeeder.name);
 
-      // Create demo condominium
-      const condominium = this.condominiumRepository.create({
-        name: 'Condominio Las Palmas',
-        legalName: 'Condominio Las Palmas SpA',
-        rut: '76.123.456-7',
-        address: 'Av. Las Condes 12345',
-        city: 'Santiago',
-        region: 'Región Metropolitana',
-        postalCode: '7550000',
-        phone: '+56912345678',
-        email: 'contacto@laspalmas.cl',
-        settings: {
-          currency: 'CLP',
-          timezone: 'America/Santiago',
-          language: 'es',
-        },
-        isActive: true,
-      });
-
-      const savedCondominium = await this.condominiumRepository.save(condominium);
-
-      this.logger.log(
-        `Created condominium: ${savedCondominium.name}`,
-        CondominiumSeeder.name,
-        { condominiumId: savedCondominium.id },
-      );
-
-      // Create two buildings
-      const buildings = [
+      // Define condominiums with their buildings and admin users
+      const condominiumsData = [
         {
-          condominiumId: savedCondominium.id,
-          name: 'Torre A',
-          code: 'TA',
-          floors: 5,
-          undergroundFloors: 1,
-          hasElevator: true,
-          address: 'Entrada principal',
-          isActive: true,
+          condominium: {
+            name: 'Torres del Sol',
+            legalName: 'Condominio Torres del Sol SpA',
+            rut: '76.123.456-7',
+            address: 'Av. Las Condes 12345',
+            city: 'Santiago',
+            region: 'Región Metropolitana',
+            postalCode: '7550000',
+            phone: '+56912345678',
+            email: 'contacto@torresdelsol.cl',
+            settings: { currency: 'CLP', timezone: 'America/Santiago', language: 'es' },
+            isActive: true,
+          },
+          buildings: [
+            { name: 'Torre A', code: 'TA', floors: 5, undergroundFloors: 1, hasElevator: true, address: 'Entrada principal', isActive: true },
+            { name: 'Torre B', code: 'TB', floors: 5, undergroundFloors: 1, hasElevator: true, address: 'Entrada secundaria', isActive: true },
+          ],
+          admin: { email: 'admin@torresdelsol.cl', password: 'Admin123!', firstName: 'Admin', lastName: 'Torres del Sol', role: Role.ADMIN },
         },
         {
-          condominiumId: savedCondominium.id,
-          name: 'Torre B',
-          code: 'TB',
-          floors: 5,
-          undergroundFloors: 1,
-          hasElevator: true,
-          address: 'Entrada secundaria',
-          isActive: true,
+          condominium: {
+            name: 'Jardines del Este',
+            legalName: 'Condominio Jardines del Este SpA',
+            rut: '76.234.567-8',
+            address: 'Av. Vitacura 6789',
+            city: 'Santiago',
+            region: 'Región Metropolitana',
+            postalCode: '7630000',
+            phone: '+56923456789',
+            email: 'contacto@jardinesdeleste.cl',
+            settings: { currency: 'CLP', timezone: 'America/Santiago', language: 'es' },
+            isActive: true,
+          },
+          buildings: [
+            { name: 'Edificio Central', code: 'EC', floors: 8, undergroundFloors: 2, hasElevator: true, address: 'Acceso principal', isActive: true },
+          ],
+          admin: { email: 'admin@jardinesdeleste.cl', password: 'Admin123!', firstName: 'Admin', lastName: 'Jardines', role: Role.ADMIN },
         },
       ];
 
-      const savedBuildings: Building[] = [];
+      let totalUnits = 0;
+      const savedCondominiumIds: string[] = [];
 
-      for (const buildingData of buildings) {
-        const building = this.buildingRepository.create(buildingData);
-        const savedBuilding = await this.buildingRepository.save(building);
-        savedBuildings.push(savedBuilding);
+      for (const data of condominiumsData) {
+        // Create condominium
+        const condominium = this.condominiumRepository.create(data.condominium);
+        const savedCondominium = await this.condominiumRepository.save(condominium);
+        savedCondominiumIds.push(savedCondominium.id);
 
         this.logger.log(
-          `Created building: ${savedBuilding.name}`,
+          `Created condominium: ${savedCondominium.name}`,
           CondominiumSeeder.name,
-          { buildingId: savedBuilding.id },
+          { condominiumId: savedCondominium.id },
         );
-      }
 
-      // Create units for each building (5 floors × 2 units per floor = 10 units per building)
-      const unitTypes = [UnitType.APARTMENT, UnitType.APARTMENT];
-      let totalUnits = 0;
+        // Create buildings
+        for (const buildingData of data.buildings) {
+          const building = this.buildingRepository.create({
+            ...buildingData,
+            condominiumId: savedCondominium.id,
+          });
+          const savedBuilding = await this.buildingRepository.save(building);
 
-      for (const building of savedBuildings) {
-        for (let floor = 1; floor <= 5; floor++) {
-          for (let unitNum = 1; unitNum <= 2; unitNum++) {
-            const unitNumber = `${floor}0${unitNum}`;
-            const unit = this.unitRepository.create({
-              buildingId: building.id,
-              number: unitNumber,
-              floor,
-              unitType: unitTypes[(unitNum - 1) % unitTypes.length],
-              areaM2: 70 + Math.random() * 30, // Random area between 70-100 m2
-              aliquot: 0.025, // 2.5% per unit (40 units = 100%)
-              bedrooms: 2 + Math.floor(Math.random() * 2), // 2-3 bedrooms
-              bathrooms: 1 + Math.floor(Math.random() * 2), // 1-2 bathrooms
-              status: UnitStatus.AVAILABLE,
-              isOccupied: false,
-            });
+          this.logger.log(
+            `Created building: ${savedBuilding.name}`,
+            CondominiumSeeder.name,
+            { buildingId: savedBuilding.id },
+          );
 
-            await this.unitRepository.save(unit);
-            totalUnits++;
+          // Create units (floors × 2 units per floor)
+          for (let floor = 1; floor <= savedBuilding.floors; floor++) {
+            for (let unitNum = 1; unitNum <= 2; unitNum++) {
+              const unitNumber = `${floor}0${unitNum}`;
+              const unit = this.unitRepository.create({
+                buildingId: savedBuilding.id,
+                number: unitNumber,
+                floor,
+                unitType: UnitType.APARTMENT,
+                areaM2: 70 + Math.random() * 30,
+                aliquot: 0.025,
+                bedrooms: 2 + Math.floor(Math.random() * 2),
+                bathrooms: 1 + Math.floor(Math.random() * 2),
+                status: UnitStatus.AVAILABLE,
+                isOccupied: false,
+              });
+              await this.unitRepository.save(unit);
+              totalUnits++;
+            }
           }
+        }
+
+        // Create admin user for this condominium
+        const existingAdmin = await this.userRepository.findOne({
+          where: { email: data.admin.email },
+        });
+
+        if (!existingAdmin) {
+          const adminUser = this.userRepository.create({
+            email: data.admin.email,
+            password: data.admin.password,
+            firstName: data.admin.firstName,
+            lastName: data.admin.lastName,
+            role: data.admin.role,
+            isActive: true,
+          });
+          const savedAdmin = await this.userRepository.save(adminUser);
+
+          // Associate admin to their condominium
+          savedAdmin.condominios = [savedCondominium];
+          await this.userRepository.save(savedAdmin);
+
+          this.logger.log(
+            `Created admin user: ${savedAdmin.email} for ${savedCondominium.name}`,
+            CondominiumSeeder.name,
+            { userId: savedAdmin.id, condominiumId: savedCondominium.id },
+          );
         }
       }
 
-      // Asociar el condominio al usuario SUPER_ADMIN
-      await this.associateCondominiumToSuperAdmin(savedCondominium.id);
+      // Associate all condominiums to SUPER_ADMIN
+      for (const condoId of savedCondominiumIds) {
+        await this.associateCondominiumToSuperAdmin(condoId);
+      }
 
       this.logger.warn(
         '✅ DEMO DATA CREATED SUCCESSFULLY',
         CondominiumSeeder.name,
         {
-          condominium: savedCondominium.name,
-          buildings: savedBuildings.length,
-          units: totalUnits,
+          condominiums: condominiumsData.length,
+          totalUnits,
         },
       );
     } catch (error) {
