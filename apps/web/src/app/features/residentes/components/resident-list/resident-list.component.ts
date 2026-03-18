@@ -9,7 +9,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ResidentService } from '../../services/resident.service';
 import { IResident } from '../../../../core/models/resident.model';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject } from 'rxjs';
 
 @Component({
   selector: 'app-resident-list',
@@ -192,24 +192,11 @@ export class ResidentListComponent implements OnInit, OnDestroy {
   }
 
   loadResidents(): void {
-    this.loading = true;
-    this.error = null;
+    // TODO: Refactor to load residents by unit - the backend requires /units/:unitId/residents
+    // For now, show empty state until the resident list feature is properly connected
+    this.loading = false;
+    this.error = 'La lista de residentes requiere seleccionar una unidad. Esta funcionalidad sera actualizada proximamente.';
     this.cdr.detectChanges();
-
-    this.residentService.getResidents().pipe(takeUntil(this.destroy$)).subscribe({
-      next: (residents) => {
-        this.dataSource.data = residents;
-        this.loading = false;
-        this.cdr.detectChanges();
-        console.log('Residents loaded:', residents);
-      },
-      error: (err) => {
-        this.error = 'Error al cargar los residentes. Por favor, verifica que el servidor mock esté ejecutándose.';
-        this.loading = false;
-        this.cdr.detectChanges();
-        console.error('Error loading residents:', err);
-      }
-    });
   }
 
   onDelete(id: string): void {

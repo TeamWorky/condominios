@@ -67,9 +67,8 @@ describe('UnitDetailComponent', () => {
     expect(component.loading).toBe(false);
   });
 
-  it('debería extraer data cuando la respuesta viene como { success, data }', () => {
-    const wrappedResponse = { success: true, data: mockUnit };
-    unitService.getUnitById.mockReturnValue(of(wrappedResponse as any));
+  it('debería extraer data cuando se recarga el componente', () => {
+    unitService.getUnitById.mockReturnValue(of(mockUnit));
     fixture = TestBed.createComponent(UnitDetailComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

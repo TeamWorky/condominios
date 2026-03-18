@@ -89,6 +89,17 @@ hotfix/*      ← correcciones urgentes en producción (branch desde main → me
 - **Nuevas tareas descubiertas durante desarrollo** se agregan como tarjetas en "Pending"
 - No se cierra un sprint sin que todas las tarjetas reflejen el estado real del código
 
+### 7. Actualización de Documentación (Obligatorio)
+**Todo cambio significativo DEBE incluir actualización de la documentación asociada:**
+
+- **README.md**: Actualizar si se agregan nuevos módulos, comandos, scripts, o cambia la arquitectura
+- **Specs (`.speckit/specs/`)**: Actualizar el spec del módulo si la implementación introduce cambios al alcance original
+- **Swagger/OpenAPI**: Todo endpoint nuevo o modificado debe estar documentado con decoradores de Swagger
+- **CLAUDE.md**: Actualizar si cambian reglas de arquitectura, dependencias principales, o workflows
+- **Comentarios en código**: Agregar solo donde la lógica no sea autoevidente
+- No se aprueba PR con documentación desactualizada respecto a los cambios introducidos
+- Si un módulo nuevo no tiene spec, se crea primero con `/speckit.specify`
+
 ---
 
 ## Architecture Principles

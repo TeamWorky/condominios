@@ -54,6 +54,10 @@ Cada modulo/feature debe pasar revision de seguridad:
 
 Todo cambio que afecte endpoints DEBE incluir pruebas de los endpoints modificados. Verificar status codes, formato de respuesta, validaciones y auth/authz.
 
+### Actualizacion de Documentacion (Obligatorio)
+
+Ver reglas completas en `.speckit/constitution.md` seccion 7. En resumen: actualizar README, specs, Swagger y CLAUDE.md segun corresponda. No se aprueba PR con documentacion desactualizada.
+
 ### Gitflow (Obligatorio)
 
 **TODO cambio de codigo DEBE seguir Gitflow estricto. No se permite push directo a `main` ni `development`.**
@@ -187,3 +191,8 @@ Use these slash commands for the SDD workflow:
 | `/speckit.analyze` | Check consistency across artifacts |
 | `/speckit.taskstoissues` | Convert tasks to GitHub Issues |
 | `/speckit.constitution` | Create/update project constitution |
+
+## Frontend Services
+
+- **DashboardService** (`apps/web/src/app/core/services/dashboard.service.ts`): Aggregates stats from BuildingService, UnitService, and ResidentService via forkJoin. Limits resident count to condominiums with ≤50 units.
+- **DashboardComponent** uses Angular Signals (`signal()`, `computed()`) for reactive state. Payment cards show "Proximamente" until backend is ready.

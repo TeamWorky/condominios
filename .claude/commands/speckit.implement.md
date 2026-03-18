@@ -132,4 +132,21 @@ You **MUST** consider the user input before proceeding (if not empty).
    - Confirm the implementation follows the technical plan
    - Report final status with summary of completed work
 
+10. **Mandatory: Update Documentation** (per Constitution §7):
+   - **README.md**: Update if new modules, commands, scripts, or architecture changes were introduced
+   - **Specs**: Update the feature spec if implementation deviates from original scope
+   - **Swagger/OpenAPI**: Ensure all new/modified endpoints have Swagger decorators (backend changes only)
+   - **CLAUDE.md**: Update if architecture rules, main dependencies, or workflows changed
+   - Skip items that don't apply (e.g., no Swagger update for frontend-only features)
+   - Commit documentation updates before creating the PR
+
+11. **Mandatory: Create Pull Request**:
+   - After all tasks are committed, push the feature branch to remote
+   - Create a PR targeting `development` branch using `gh pr create`
+   - PR title: use the conventional commit message from the main feature commit
+   - PR body must include:
+     - **Summary**: Bullet points of key changes
+     - **Test plan**: Checklist of tests passed and QA validations
+   - Report the PR URL to the user
+
 Note: This command assumes a complete task breakdown exists in tasks.md. If tasks are incomplete or missing, suggest running `/speckit.tasks` first to regenerate the task list.

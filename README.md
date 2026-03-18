@@ -30,7 +30,7 @@ El proyecto es un **monorepo Nx** con 3 aplicaciones y 4 librerias compartidas:
 |-----|-----------|-------------|
 | `apps/api` | NestJS 11 | API REST principal (puerto 3000). Modulos de dominio: auth, buildings, common-spaces, condominiums, payments, reservations, residents, units, users |
 | `apps/worker` | NestJS 11 + BullMQ | Worker para tareas en background (emails, jobs asincronos) |
-| `apps/web` | Angular 21 | Frontend SPA con Angular Material |
+| `apps/web` | Angular 21 | Frontend SPA con Angular Material. Dashboard con datos reales del backend (edificios, unidades, residentes, ocupacion) |
 
 ### Librerias Compartidas
 
@@ -359,7 +359,7 @@ Para implementar un nuevo modulo (ej: "notificaciones push"):
 
 ### Constitucion del Proyecto
 
-La constitucion (`.speckit/constitution.md`) define 6 workflows obligatorios:
+La constitucion (`.speckit/constitution.md`) define 7 workflows obligatorios:
 
 1. **Spec-Driven Development** - Todo modulo requiere spec antes de codificar
 2. **Testing unitario** - Minimo 70% cobertura (100% en auth)
@@ -367,6 +367,7 @@ La constitucion (`.speckit/constitution.md`) define 6 workflows obligatorios:
 4. **Pruebas de endpoints** - Todo endpoint debe probarse antes del merge
 5. **Gitflow** - Branching strategy estricta
 6. **Gestion en Trello** - Tareas deben estar en el tablero de Trello
+7. **Actualizacion de documentacion** - README, specs, Swagger y CLAUDE.md deben mantenerse al dia
 
 ### Modulos ya especificados
 
