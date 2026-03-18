@@ -1,8 +1,23 @@
 node_modules/
 dist/
+build/
 .angular/
 apps/web/dist/
 apps/web/node_modules/
 coverage/
 .nx/
 *.log
+
+# Environment
+.env
+.env.*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.tmp
