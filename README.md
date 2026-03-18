@@ -359,7 +359,7 @@ Para implementar un nuevo modulo (ej: "notificaciones push"):
 
 ### Constitucion del Proyecto
 
-La constitucion (`.speckit/constitution.md`) define 6 workflows obligatorios:
+La constitucion (`.speckit/constitution.md`) define 7 workflows obligatorios:
 
 1. **Spec-Driven Development** - Todo modulo requiere spec antes de codificar
 2. **Testing unitario** - Minimo 70% cobertura (100% en auth)
@@ -367,6 +367,7 @@ La constitucion (`.speckit/constitution.md`) define 6 workflows obligatorios:
 4. **Pruebas de endpoints** - Todo endpoint debe probarse antes del merge
 5. **Gitflow** - Branching strategy estricta
 6. **Gestion en Trello** - Tareas deben estar en el tablero de Trello
+7. **Actualizacion de documentacion** - README, specs, Swagger y CLAUDE.md deben mantenerse al dia
 
 ### Modulos ya especificados
 

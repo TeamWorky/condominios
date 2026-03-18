@@ -54,6 +54,16 @@ Cada modulo/feature debe pasar revision de seguridad:
 
 Todo cambio que afecte endpoints DEBE incluir pruebas de los endpoints modificados. Verificar status codes, formato de respuesta, validaciones y auth/authz.
 
+### Actualizacion de Documentacion (Obligatorio)
+
+**Todo cambio significativo DEBE incluir actualizacion de la documentacion asociada.**
+
+- **README.md**: Actualizar si se agregan nuevos modulos, comandos, scripts, o cambia la arquitectura
+- **Specs (`.speckit/specs/`)**: Actualizar el spec del modulo si la implementacion introduce cambios al alcance original
+- **Swagger/OpenAPI**: Todo endpoint nuevo o modificado debe estar documentado con decoradores de Swagger
+- **CLAUDE.md**: Actualizar si cambian reglas de arquitectura, dependencias principales, o workflows
+- No se aprueba PR con documentacion desactualizada respecto a los cambios introducidos
+
 ### Gitflow (Obligatorio)
 
 **TODO cambio de codigo DEBE seguir Gitflow estricto. No se permite push directo a `main` ni `development`.**
@@ -187,3 +197,10 @@ Use these slash commands for the SDD workflow:
 | `/speckit.analyze` | Check consistency across artifacts |
 | `/speckit.taskstoissues` | Convert tasks to GitHub Issues |
 | `/speckit.constitution` | Create/update project constitution |
+
+## Active Technologies
+- TypeScript 5.9, Node.js 24.11.1 + Angular 21, Angular Material 21, NestJS 11 (backend existente) (001-dashboard-real-data)
+- PostgreSQL (backend, no se modifica), localStorage (tokens) (001-dashboard-real-data)
+
+## Recent Changes
+- 001-dashboard-real-data: Added TypeScript 5.9, Node.js 24.11.1 + Angular 21, Angular Material 21, NestJS 11 (backend existente)

@@ -103,7 +103,7 @@
 - [x] T020 [P] Verify no db.json dependency in dashboard flow: ensure `apps/web/src/app/layout/dashboard/` does not import or reference `db.json` or json-server endpoints
 - [x] T021 [P] Run all frontend tests: `npm run test:web` and verify all pass
 - [x] T022 [P] Run quickstart.md validation: follow steps in `specs/001-dashboard-real-data/quickstart.md` end-to-end
-- [ ] T023 Commit all changes following Conventional Commits: `feat: connect dashboard to real backend API data`
+- [x] T023 Commit all changes following Conventional Commits: `feat: connect dashboard to real backend API data`
 
 ---
 
