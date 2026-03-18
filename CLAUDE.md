@@ -56,13 +56,7 @@ Todo cambio que afecte endpoints DEBE incluir pruebas de los endpoints modificad
 
 ### Actualizacion de Documentacion (Obligatorio)
 
-**Todo cambio significativo DEBE incluir actualizacion de la documentacion asociada.**
-
-- **README.md**: Actualizar si se agregan nuevos modulos, comandos, scripts, o cambia la arquitectura
-- **Specs (`.speckit/specs/`)**: Actualizar el spec del modulo si la implementacion introduce cambios al alcance original
-- **Swagger/OpenAPI**: Todo endpoint nuevo o modificado debe estar documentado con decoradores de Swagger
-- **CLAUDE.md**: Actualizar si cambian reglas de arquitectura, dependencias principales, o workflows
-- No se aprueba PR con documentacion desactualizada respecto a los cambios introducidos
+Ver reglas completas en `.speckit/constitution.md` seccion 7. En resumen: actualizar README, specs, Swagger y CLAUDE.md segun corresponda. No se aprueba PR con documentacion desactualizada.
 
 ### Gitflow (Obligatorio)
 

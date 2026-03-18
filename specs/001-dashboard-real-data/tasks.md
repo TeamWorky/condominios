@@ -87,7 +87,7 @@
 
 ### Implementation for User Story 3
 
-- [x] T016 [P] [US3] Add routerLink to stat cards in `apps/web/src/app/layout/dashboard/dashboard.component.ts`: "Total Residentes" → `/residentes`, "Unidades Ocupadas" → `/unidades`, "Total Edificios" → `/edificios`. Cards with comingSoon=true should not be clickable
+- [x] T016 [P] [US3] Add routerLink to stat cards in `apps/web/src/app/layout/dashboard/dashboard.component.ts`: "Total Residentes" → `/residentes`, "Unidades Ocupadas" → `/unidades`, "Total Edificios" → `/unidades` (no existe ruta /edificios). Cards with comingSoon=true should not be clickable
 - [x] T017 [US3] Update card template for clickability in `apps/web/src/app/layout/dashboard/dashboard.component.html`: wrap stat cards with `[routerLink]` directive. Add cursor:pointer style and hover effect for clickable cards. Disable click for comingSoon cards
 - [x] T018 [US3] Verify quick actions links in `apps/web/src/app/layout/dashboard/dashboard.component.html`: ensure "Ver residentes", "Ver pagos", "Crear residente", "Registrar pago" buttons navigate to correct routes. Disable payment-related actions with tooltip "Proximamente"
 

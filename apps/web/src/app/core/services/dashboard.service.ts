@@ -7,6 +7,8 @@ import { ResidentService } from '../../features/residentes/services/resident.ser
 import { DashboardStats } from '../models/dashboard.models';
 
 const MAX_UNITS_FOR_RESIDENT_COUNT = 50;
+// TODO: Replace with a dedicated backend summary endpoint for condominiums with large unit counts
+const MAX_UNITS_PER_PAGE = 9999;
 
 @Injectable({
   providedIn: 'root'
@@ -23,7 +25,7 @@ export class DashboardService {
       buildings: this.buildingService.getBuildingsByCondominium(condominiumId, 1, 1).pipe(
         catchError(() => of({ data: [], total: 0 }))
       ),
-      units: this.unitService.getUnitsByCondominium(condominiumId, 1, 999).pipe(
+      units: this.unitService.getUnitsByCondominium(condominiumId, 1, MAX_UNITS_PER_PAGE).pipe(
         catchError(() => of({ data: [], total: 0 }))
       )
     }).pipe(
