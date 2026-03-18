@@ -54,21 +54,28 @@ Cada modulo/feature debe pasar revision de seguridad:
 
 Todo cambio que afecte endpoints DEBE incluir pruebas de los endpoints modificados. Verificar status codes, formato de respuesta, validaciones y auth/authz.
 
-### Gitflow
+### Gitflow (Obligatorio)
+
+**TODO cambio de codigo DEBE seguir Gitflow estricto. No se permite push directo a `main` ni `development`.**
 
 ```
-main          <- produccion estable (solo merges de release/ y hotfix/)
+main          <- produccion estable (solo recibe merges de release/ y hotfix/)
 development   <- rama de integracion (recibe merges de feature/)
 feature/*     <- nuevas funcionalidades (branch desde development)
 bugfix/*      <- correcciones no urgentes (branch desde development)
-release/*     <- preparacion de release
-hotfix/*      <- correcciones urgentes (branch desde main)
+release/*     <- preparacion de release (branch desde development -> merge a main y development)
+hotfix/*      <- correcciones urgentes en produccion (branch desde main -> merge a main y development)
 ```
 
-- No push directo a `main` ni `development`
-- Todo cambio entra por Pull Request
-- Branches: `feature/[module]-[descripcion]`, `bugfix/[issue]-[descripcion]`, `hotfix/[issue]-[descripcion]`
+**Reglas:**
+- **NUNCA** hacer push directo a `main` ni `development`
+- Todo cambio entra por Pull Request con al menos 1 aprobacion
+- Antes de crear una feature, crear la branch desde `development`: `git checkout -b feature/[module]-[descripcion] development`
+- Nombrar branches: `feature/[module]-[descripcion]`, `bugfix/[issue]-[descripcion]`, `hotfix/[issue]-[descripcion]`
 - Commits siguen Conventional Commits: `feat:`, `fix:`, `docs:`, `test:`, `refactor:`, `chore:`
+- Squash merge en PRs para mantener historial limpio
+- Tags semanticos en releases: `v1.0.0`, `v1.1.0`, etc.
+- Si el usuario pide hacer push a `main` o `development` directamente, advertir que viola Gitflow y sugerir crear un PR
 
 ## Architecture
 
