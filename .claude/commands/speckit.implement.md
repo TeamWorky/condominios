@@ -132,4 +132,13 @@ You **MUST** consider the user input before proceeding (if not empty).
    - Confirm the implementation follows the technical plan
    - Report final status with summary of completed work
 
+10. **Mandatory: Create Pull Request**:
+   - After all tasks are committed, push the feature branch to remote
+   - Create a PR targeting `development` branch using `gh pr create`
+   - PR title: use the conventional commit message from the main feature commit
+   - PR body must include:
+     - **Summary**: Bullet points of key changes
+     - **Test plan**: Checklist of tests passed and QA validations
+   - Report the PR URL to the user
+
 Note: This command assumes a complete task breakdown exists in tasks.md. If tasks are incomplete or missing, suggest running `/speckit.tasks` first to regenerate the task list.
