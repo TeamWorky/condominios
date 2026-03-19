@@ -116,4 +116,63 @@ describe('BuildingListComponent', () => {
     expect(component.getStatusLabel(true)).toBe('Activo');
     expect(component.getStatusLabel(false)).toBe('Inactivo');
   });
+
+  it('should open confirmation dialog when toggling status', () => {
+    fixture.detectChanges();
+    const dialogSpy = vi.spyOn((component as any).dialog, 'open')
+      .mockReturnValue({ afterClosed: () => of(false) });
+
+    component.onToggleStatus(mockBuildings[0]);
+
+    expect(dialogSpy).toHaveBeenCalledWith(expect.any(Function), expect.objectContaining({
+      data: expect.objectContaining({
+        title: expect.any(String),
+        message: expect.any(String)
+      })
+    }));
+  });
+
+  it('should call toggleBuildingStatus when user confirms', () => {
+    fixture.detectChanges();
+    vi.spyOn((component as any).dialog, 'open')
+      .mockReturnValue({ afterClosed: () => of(true) });
+
+    component.onToggleStatus(mockBuildings[0]);
+
+    expect(buildingService.toggleBuildingStatus).toHaveBeenCalledWith('1', false);
+  });
+
+  it('should not call toggleBuildingStatus when user cancels', () => {
+    fixture.detectChanges();
+    vi.spyOn((component as any).dialog, 'open')
+      .mockReturnValue({ afterClosed: () => of(false) });
+
+    component.onToggleStatus(mockBuildings[0]);
+
+    expect(buildingService.toggleBuildingStatus).not.toHaveBeenCalled();
+  });
+
+  it('should reload buildings after successful toggle', () => {
+    fixture.detectChanges();
+    vi.spyOn((component as any).dialog, 'open')
+      .mockReturnValue({ afterClosed: () => of(true) });
+    const loadSpy = vi.spyOn(component, 'loadBuildings');
+
+    component.onToggleStatus(mockBuildings[1]);
+
+    expect(buildingService.toggleBuildingStatus).toHaveBeenCalledWith('2', true);
+    expect(loadSpy).toHaveBeenCalled();
+  });
+
+  it('should show error snackbar when toggle fails', () => {
+    fixture.detectChanges();
+    vi.spyOn((component as any).dialog, 'open')
+      .mockReturnValue({ afterClosed: () => of(true) });
+    buildingService.toggleBuildingStatus.mockReturnValue(throwError(() => new Error('fail')));
+    const snackSpy = vi.spyOn((component as any).snackBar, 'open');
+
+    component.onToggleStatus(mockBuildings[0]);
+
+    expect(snackSpy).toHaveBeenCalledWith('Error al cambiar el estado del edificio', 'Cerrar', expect.any(Object));
+  });
 });

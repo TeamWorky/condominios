@@ -1,11 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter, ActivatedRoute } from '@angular/router';
+import { provideRouter, ActivatedRoute, Router } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { of, throwError } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
-
 import { BuildingFormComponent } from './building-form.component';
 import { BuildingService } from '../../../../core/services/building.service';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -154,5 +153,48 @@ describe('BuildingFormComponent', () => {
     component.buildingForm.get('name')?.setValue('');
     component.buildingForm.get('name')?.markAsTouched();
     expect(component.getErrorMessage('name')).toBe('Este campo es requerido');
+  });
+
+  it('should navigate to list after successful create', () => {
+    setup();
+    const router = TestBed.inject(Router);
+    const routerSpy = vi.spyOn(router, 'navigate');
+
+    component.buildingForm.patchValue({ name: 'Test', code: 'T', floors: 5 });
+    component.onSubmit();
+
+    expect(routerSpy).toHaveBeenCalledWith(['/edificios']);
+  });
+
+  it('should show success snackbar after create', () => {
+    setup();
+    const snackSpy = vi.spyOn((component as any).snackBar, 'open');
+    component.buildingForm.patchValue({ name: 'Test', code: 'T', floors: 5 });
+    component.onSubmit();
+
+    expect(snackSpy).toHaveBeenCalledWith('Edificio creado exitosamente', 'Cerrar', expect.any(Object));
+  });
+
+  it('should navigate to list after successful update', () => {
+    setup('1');
+    const router = TestBed.inject(Router);
+    const routerSpy = vi.spyOn(router, 'navigate');
+
+    component.buildingForm.patchValue({ name: 'Updated' });
+    component.onSubmit();
+
+    expect(routerSpy).toHaveBeenCalledWith(['/edificios']);
+  });
+
+  it('should show error when no condominium selected on create', () => {
+    setup();
+    const snackSpy = vi.spyOn((component as any).snackBar, 'open');
+    authService.getSelectedCondominio.mockReturnValue(null);
+
+    component.buildingForm.patchValue({ name: 'Test', code: 'T', floors: 5 });
+    component.onSubmit();
+
+    expect(snackSpy).toHaveBeenCalledWith('No hay condominio seleccionado', 'Cerrar', expect.any(Object));
+    expect(buildingService.createBuilding).not.toHaveBeenCalled();
   });
 });
