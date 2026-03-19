@@ -50,11 +50,8 @@ describe('UnitService', () => {
       const condoId = '764efaaa-a7fe-48a0-a702-a412e31b8a5f';
       const backendResponse = {
         success: true,
-        data: {
-          success: true,
-          data: [mockUnit],
-          meta: { page: 1, limit: 10, total: 1, totalPages: 1 }
-        }
+        data: [mockUnit],
+        meta: { page: 1, limit: 10, total: 1, totalPages: 1 }
       };
 
       service.getUnitsByCondominium(condoId, 1, 10).subscribe((result) => {
@@ -98,9 +95,9 @@ describe('UnitService', () => {
       req.flush(backendResponse);
     });
 
-    it('debería manejar respuesta anidada { success, data: { success, data } }', () => {
+    it('debería manejar respuesta estandar de la API', () => {
       const id = mockUnit.id;
-      const nestedResponse = { success: true, data: { success: true, data: mockUnit } };
+      const response = { success: true, data: mockUnit };
 
       service.getUnitById(id).subscribe((unit) => {
         expect(unit).toBeDefined();
@@ -108,7 +105,7 @@ describe('UnitService', () => {
       });
 
       const req = httpMock.expectOne(`${apiUrl}/units/${id}`);
-      req.flush(nestedResponse);
+      req.flush(response);
     });
   });
 

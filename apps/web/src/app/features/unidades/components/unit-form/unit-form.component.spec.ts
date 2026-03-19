@@ -29,7 +29,7 @@ describe('UnitFormComponent', () => {
     await TestBed.configureTestingModule({
       imports: [UnitFormComponent],
       providers: [
-        provideRouter([]),
+        provideRouter([{ path: 'unidades', children: [] }]),
         { provide: UnitService, useValue: unitServiceSpy },
         { provide: BuildingService, useValue: buildingServiceSpy },
         { provide: AuthService, useValue: authServiceSpy },

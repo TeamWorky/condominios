@@ -2,22 +2,51 @@
   <!-- Page Header -->
   <div class="page-header">
     <h1 class="mat-headline-4">Dashboard</h1>
-    <p class="mat-body-1 subtitle">Bienvenido al sistema de gestión de condominios</p>
+    <p class="mat-body-1 subtitle">Bienvenido al sistema de gestion de condominios</p>
   </div>
+
+  <!-- Error State -->
+  @if (error()) {
+    <mat-card class="error-card">
+      <mat-card-content>
+        <div class="error-container">
+          <mat-icon color="warn">error_outline</mat-icon>
+          <p>{{ error() }}</p>
+          <button mat-raised-button color="primary" (click)="loadData()">
+            <mat-icon>refresh</mat-icon>
+            Reintentar
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
 
   <!-- Stats Cards -->
   <div class="stats-grid">
-    @for (card of cards; track card.title) {
-      <mat-card class="stat-card">
+    @for (card of cards(); track card.title) {
+      <mat-card
+        class="stat-card"
+        [class.clickable]="card.routerLink && !card.comingSoon"
+        [class.coming-soon]="card.comingSoon"
+        [routerLink]="card.routerLink && !card.comingSoon ? card.routerLink : null"
+      >
         <mat-card-content>
           <div class="card-header">
             <mat-icon [class]="'icon-' + card.color">{{ card.icon }}</mat-icon>
-            @if (card.change) {
-              <mat-chip [class]="'chip-' + card.changeType">{{ card.change }}</mat-chip>
+            @if (card.comingSoon) {
+              <mat-chip class="chip-coming-soon">Proximamente</mat-chip>
             }
           </div>
-          <h2 class="mat-headline-3 card-value">{{ card.value }}</h2>
-          <p class="mat-body-2 card-title">{{ card.title }}</p>
+
+          @if (card.loading) {
+            <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+            <p class="mat-body-2 card-title loading-title">{{ card.title }}</p>
+          } @else {
+            <h2 class="mat-headline-3 card-value"
+              [matTooltip]="card.value === 'N/A' ? 'Demasiadas unidades para calcular' : ''"
+            >{{ card.value }}</h2>
+            <p class="mat-body-2 card-title">{{ card.title }}</p>
+          }
         </mat-card-content>
       </mat-card>
     }
@@ -25,37 +54,24 @@
 
   <!-- Content Grid -->
   <div class="content-grid">
-    <!-- Recent Payments -->
+    <!-- Recent Payments (Coming Soon) -->
     <mat-card>
       <mat-card-header>
         <mat-card-title>Pagos Recientes</mat-card-title>
-        <button mat-button color="primary" routerLink="/pagos" class="view-all-btn">Ver todos</button>
       </mat-card-header>
       <mat-card-content>
-        <mat-list>
-          @for (payment of recentPayments; track payment.unit) {
-            <mat-list-item>
-              <div matListItemTitle>Unidad {{ payment.unit }}</div>
-              <div matListItemLine>{{ payment.resident }}</div>
-              <div matListItemMeta class="payment-meta">
-                <span class="amount">${{ payment.amount.toLocaleString() }}</span>
-                <mat-chip [class]="payment.status === 'paid' ? 'status-paid' : 'status-pending'">
-                  {{ payment.status === 'paid' ? 'Pagado' : 'Pendiente' }}
-                </mat-chip>
-              </div>
-            </mat-list-item>
-            @if (!$last) {
-              <mat-divider></mat-divider>
-            }
-          }
-        </mat-list>
+        <div class="coming-soon-section">
+          <mat-icon>construction</mat-icon>
+          <p>El modulo de pagos esta en desarrollo</p>
+          <!-- TODO: Enable PaymentService calls when backend payment controller is ready -->
+        </div>
       </mat-card-content>
     </mat-card>
 
     <!-- Quick Actions -->
     <mat-card>
       <mat-card-header>
-        <mat-card-title>Acciones Rápidas</mat-card-title>
+        <mat-card-title>Acciones Rapidas</mat-card-title>
       </mat-card-header>
       <mat-card-content>
         <div class="actions-grid">
@@ -64,20 +80,20 @@
             <span>Nuevo Residente</span>
           </a>
 
-          <a routerLink="/pagos/nuevo" class="action-card">
+          <div class="action-card disabled" matTooltip="Proximamente">
             <mat-icon>add_circle</mat-icon>
             <span>Registrar Pago</span>
-          </a>
+          </div>
 
           <a routerLink="/residentes" class="action-card">
             <mat-icon>groups</mat-icon>
             <span>Ver Residentes</span>
           </a>
 
-          <a routerLink="/pagos" class="action-card">
+          <div class="action-card disabled" matTooltip="Proximamente">
             <mat-icon>receipt_long</mat-icon>
             <span>Ver Pagos</span>
-          </a>
+          </div>
         </div>
       </mat-card-content>
     </mat-card>
