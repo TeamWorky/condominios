@@ -61,17 +61,17 @@ function shutdown(reason) {
 
   forceTimer.unref();
 
-  // Exit once all child processes have confirmed termination
-  let exited = 0;
-  for (const p of procs) {
-    p.proc.once("exit", () => {
-      exited++;
-      if (exited === procs.length) {
-        clearTimeout(forceTimer);
-        process.exit(firstExitCode || 0);
-      }
-    });
-  }
+  // Exit once all child processes have confirmed termination.
+  // Check exitCode first in case a process already exited before shutdown was called.
+  const exitPromises = procs.map((p) => {
+    if (p.proc.exitCode !== null) return Promise.resolve();
+    return new Promise((resolve) => p.proc.once("exit", resolve));
+  });
+
+  Promise.all(exitPromises).then(() => {
+    clearTimeout(forceTimer);
+    process.exit(firstExitCode || 0);
+  });
 }
 
 process.on("SIGINT", () => shutdown("SIGINT"));
@@ -103,6 +103,3 @@ for (const t of tasks) {
     shutdown(`spawn error (${t.name})`);
   });
 }
-
-// Keep the orchestrator alive while child processes are running.
-setInterval(() => {}, 1 << 30).unref();
