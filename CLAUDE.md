@@ -18,7 +18,8 @@ El flujo obligatorio es:
 4. `/speckit.tasks` - Generar las tareas ordenadas por dependencia
 5. `/speckit.checklist` - Generar checklist de validacion
 6. `/speckit.implement` - Ejecutar la implementacion tarea por tarea
-7. `/speckit.analyze` - Verificar consistencia entre artefactos (post-implementacion)
+7. **QA Manual** - Ejecutar validacion manual con quickstart.md ANTES del PR (ver seccion "QA Manual Obligatorio")
+8. `/speckit.analyze` - Verificar consistencia entre artefactos (post-implementacion)
 
 **Reglas:**
 - No se acepta codigo nuevo sin un spec asociado en `.speckit/specs/[module].spec.md`
@@ -53,6 +54,24 @@ Cada modulo/feature debe pasar revision de seguridad:
 ### Pruebas de Endpoints
 
 Todo cambio que afecte endpoints DEBE incluir pruebas de los endpoints modificados. Verificar status codes, formato de respuesta, validaciones y auth/authz.
+
+### QA Manual Obligatorio (Pre-PR)
+
+**Todo feature DEBE pasar QA manual ANTES de crear el commit final y el PR. No se permite crear PRs sin haber validado manualmente la funcionalidad.**
+
+**Proceso obligatorio:**
+1. Levantar backend (`npm run start:api`) y frontend (`npm run start:web`)
+2. Ejecutar TODOS los pasos de validacion definidos en `quickstart.md` del feature
+3. Documentar el resultado de cada paso (PASS/FAIL)
+4. Si algun paso falla: corregir, re-ejecutar tests automatizados, y repetir QA manual
+5. Solo despues de que TODOS los pasos pasen, proceder con commit y PR
+
+**Reglas:**
+- Si el feature tiene `quickstart.md`, TODOS sus pasos deben ejecutarse y pasar
+- Si no tiene `quickstart.md`, validar manualmente los flujos principales del feature
+- El QA manual es responsabilidad del implementador, no del reviewer
+- Marcar la tarea de QA manual como completada SOLO despues de ejecutar realmente los pasos
+- **NUNCA** marcar QA como completado sin haberlo ejecutado — esto es una violacion grave del workflow
 
 ### Actualizacion de Documentacion (Obligatorio)
 
