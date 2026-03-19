@@ -11,7 +11,10 @@ import {
   View,
 } from 'react-native';
 import { router } from 'expo-router';
+import axios from 'axios';
 import { login } from '../../services/auth.service';
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -24,12 +27,28 @@ export default function LoginScreen() {
       return;
     }
 
+    if (!EMAIL_REGEX.test(email.trim())) {
+      Alert.alert('Invalid Email', 'Please enter a valid email address.');
+      return;
+    }
+
     setLoading(true);
     try {
-      await login(email, password);
+      await login(email.trim(), password);
       router.replace('/(app)');
-    } catch {
-      Alert.alert('Login failed', 'Invalid credentials. Please try again.');
+    } catch (error) {
+      console.error('[LoginScreen] Login error:', error);
+      if (axios.isAxiosError(error)) {
+        if (!error.response) {
+          Alert.alert('Network Error', 'Could not connect to the server. Please check your internet connection.');
+        } else if (error.response.status === 401) {
+          Alert.alert('Login failed', 'Invalid credentials. Please try again.');
+        } else {
+          Alert.alert('Error', 'An unexpected error occurred. Please try again later.');
+        }
+      } else {
+        Alert.alert('Error', 'An unexpected error occurred. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -49,7 +68,9 @@ export default function LoginScreen() {
           placeholder="Email"
           placeholderTextColor="#9ca3af"
           autoCapitalize="none"
+          autoCorrect={false}
           keyboardType="email-address"
+          autoComplete="email"
           value={email}
           onChangeText={setEmail}
         />
