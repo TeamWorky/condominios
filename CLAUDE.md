@@ -196,3 +196,9 @@ Use these slash commands for the SDD workflow:
 
 - **DashboardService** (`apps/web/src/app/core/services/dashboard.service.ts`): Aggregates stats from BuildingService, UnitService, and ResidentService via forkJoin. Limits resident count to condominiums with ≤50 units.
 - **DashboardComponent** uses Angular Signals (`signal()`, `computed()`) for reactive state. Payment cards show "Proximamente" until backend is ready.
+
+## Active Technologies
+- TypeScript 5.9, Node.js 24.x (001-add-mobile-app)
+
+## Recent Changes
+- 001-add-mobile-app: Added TypeScript 5.9, Node.js 24.x

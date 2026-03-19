@@ -22,3 +22,8 @@ Thumbs.db
 .idea/
 *.swp
 *.tmp
+
+# Expo / React Native
+apps/mobile/.expo/
+apps/mobile/node_modules/
+apps/mobile/dist/
