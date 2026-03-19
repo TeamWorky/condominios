@@ -120,7 +120,7 @@ condominios-nx/
 ```bash
 # 1. Clonar e instalar
 git clone <repository>
-cd condominios-nx
+
 npm install
 
 # 2. Configurar variables de entorno
@@ -128,6 +128,9 @@ cp .env.example .env
 
 # 3. Iniciar servicios Docker (PostgreSQL + Redis)
 docker-compose up -d
+
+# 4. Ejecutar aplicación
+npm run start:dev # Levanta API + worker + web
 
 # 4. Ejecutar migraciones
 npm run migration:run
@@ -139,13 +142,12 @@ npm run start:web      # Frontend en http://localhost:4200
 ```
 
 ### Accesos
-
 | Servicio | URL |
 |----------|-----|
-| API | http://localhost:3000/api |
-| Documentacion API (Swagger/Scalar) | http://localhost:3000/api-docs |
-| Health Check | http://localhost:3000/api/health |
-| Frontend | http://localhost:4200 |
+| **API** | http://localhost:3000/api |
+| **Documentación** | http://localhost:3000/api-docs |
+| **Health Check** | http://localhost:3000/api/health |
+| **Frontend (Web)** | http://localhost:4200/ |
 
 ### Credenciales por Defecto
 
@@ -377,8 +379,21 @@ Hay 10 specs existentes en `.speckit/specs/`: auth, buildings, common-spaces, co
 
 ## Gitflow
 
-El proyecto sigue Gitflow estricto:
 
+| Comando | Descripción |
+|---------|-------------|
+| `npm run start:dev` | Iniciar API + worker + web (hot reload) |
+| `npm run start:api` | Iniciar API con watch |
+| `npm run start:worker` | Iniciar worker con watch |
+| `npm run start:web` | Iniciar frontend (Angular) |
+| `npm run build` | Compilar para producción |
+| `npm test` | Ejecutar tests |
+| `npm run test:cov` | Tests con cobertura |
+| `npm run lint` | Linter de código |
+| `npm run format` | Formatear código |
+| `npm run migration:run` | Ejecutar migraciones |
+=======
+El proyecto sigue Gitflow estricto:
 ```
 main          <- produccion estable (solo recibe merges de release/ y hotfix/)
 development   <- rama de integracion (recibe merges de feature/)
