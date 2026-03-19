@@ -18,7 +18,7 @@ function pipeWithPrefix(stream, label, dest) {
 
 function killProc(p) {
   try {
-    // Matar el grupo de procesos completo (npm + hijos como nest/ng)
+    // Kill the entire process group (npm + children like nest/ng)
     process.kill(-p.proc.pid, "SIGTERM");
   } catch {
     try {
@@ -51,7 +51,7 @@ function shutdown(reason) {
     killProc(p);
   }
 
-  // Si después de 3s algún proceso sigue vivo, SIGKILL
+  // If any process is still alive after 3s, force kill with SIGKILL
   const forceTimer = setTimeout(() => {
     for (const p of procs) {
       forceKillProc(p);
@@ -61,7 +61,7 @@ function shutdown(reason) {
 
   forceTimer.unref();
 
-  // Salir cuando todos los hijos hayan muerto
+  // Exit once all child processes have confirmed termination
   let exited = 0;
   for (const p of procs) {
     p.proc.once("exit", () => {
@@ -81,7 +81,7 @@ for (const t of tasks) {
   const proc = spawn(t.cmd, t.args, {
     env: process.env,
     stdio: ["ignore", "pipe", "pipe"],
-    // detached: true permite matar el grupo de procesos completo con -pid
+    // detached: true allows killing the entire process group via -pid
     detached: true,
   });
 
@@ -104,5 +104,5 @@ for (const t of tasks) {
   });
 }
 
-// Mantener el proceso vivo mientras los hijos corren.
+// Keep the orchestrator alive while child processes are running.
 setInterval(() => {}, 1 << 30).unref();
