@@ -80,7 +80,6 @@
 ```bash
 # 1. Clonar e instalar
 git clone <repository>
-cd nest-proptech-backend
 npm install
 
 # 2. Configurar variables de entorno
@@ -90,16 +89,16 @@ cp .env.example .env
 docker-compose up -d
 
 # 4. Ejecutar aplicación
-npm run start:dev
+npm run start:dev # Levanta API + worker + web
 ```
 
 ### Accesos
-
 | Servicio | URL |
 |----------|-----|
 | **API** | http://localhost:3000/api |
 | **Documentación** | http://localhost:3000/api-docs |
 | **Health Check** | http://localhost:3000/api/health |
+| **Frontend (Web)** | http://localhost:4200/ |
 
 ### Credenciales por Defecto
 
@@ -184,7 +183,10 @@ Ver [TESTING.md](./docs/TESTING.md) para más información.
 
 | Comando | Descripción |
 |---------|-------------|
-| `npm run start:dev` | Iniciar con hot reload |
+| `npm run start:dev` | Iniciar API + worker + web (hot reload) |
+| `npm run start:api` | Iniciar API con watch |
+| `npm run start:worker` | Iniciar worker con watch |
+| `npm run start:web` | Iniciar frontend (Angular) |
 | `npm run build` | Compilar para producción |
 | `npm test` | Ejecutar tests |
 | `npm run test:cov` | Tests con cobertura |

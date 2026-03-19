@@ -6,3 +6,6 @@ apps/web/node_modules/
 coverage/
 .nx/
 *.log
+.qodo/
+.env
+.DS_Store

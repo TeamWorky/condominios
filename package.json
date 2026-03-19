@@ -11,6 +11,7 @@
     "build:worker": "nest build worker",
     "build:web": "cd apps/web && npx ng build --configuration=production",
     "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
+    "start:dev": "node ./start-all.js",
     "start:api": "nest start api --watch",
     "start:api:prod": "node dist/apps/api/src/main",
     "start:worker": "nest start worker --watch",
