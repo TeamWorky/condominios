@@ -14,7 +14,7 @@ export class BuildingService {
   constructor(private http: HttpClient) {}
 
   /**
-   * Obtener todos los edificios de un condominio
+   * Get all buildings for a condominium
    */
   getBuildingsByCondominium(condoId: string, page: number = 1, limit: number = 100): Observable<{ data: IBuilding[]; total: number }> {
     const params = new HttpParams()
@@ -33,7 +33,7 @@ export class BuildingService {
   }
 
   /**
-   * Obtener todos los edificios (para compatibilidad)
+   * Get all buildings (compatibility wrapper)
    */
   getBuildings(): Observable<IBuilding[]> {
     return this.getBuildingsByCondominium('').pipe(
@@ -42,7 +42,7 @@ export class BuildingService {
   }
 
   /**
-   * Obtener edificios activos
+   * Get active buildings
    */
   getActiveBuildings(condoId: string): Observable<IBuilding[]> {
     return this.getBuildingsByCondominium(condoId).pipe(
@@ -51,14 +51,14 @@ export class BuildingService {
   }
 
   /**
-   * Obtener nombres de edificios
+   * Get building names
    */
   getBuildingNames(condoId: string): Observable<IBuilding[]> {
     return this.getActiveBuildings(condoId);
   }
 
   /**
-   * Obtener un edificio por ID
+   * Get a building by ID
    */
   getBuildingById(id: string): Observable<IBuilding> {
     return this.http.get<ApiResponse<IBuilding>>(`${this.apiUrl}/buildings/${id}`).pipe(
@@ -67,7 +67,7 @@ export class BuildingService {
   }
 
   /**
-   * Crear un nuevo edificio en un condominio
+   * Create a new building in a condominium
    */
   createBuilding(condominiumId: string, building: ICreateBuildingDto): Observable<IBuilding> {
     return this.http.post<ApiResponse<IBuilding>>(
@@ -79,7 +79,7 @@ export class BuildingService {
   }
 
   /**
-   * Actualizar un edificio
+   * Update a building
    */
   updateBuilding(id: string, building: IUpdateBuildingDto): Observable<IBuilding> {
     return this.http.patch<ApiResponse<IBuilding>>(
@@ -91,7 +91,7 @@ export class BuildingService {
   }
 
   /**
-   * Activar o desactivar un edificio
+   * Activate or deactivate a building
    */
   toggleBuildingStatus(id: string, isActive: boolean): Observable<IBuilding> {
     return this.http.patch<ApiResponse<IBuilding>>(
