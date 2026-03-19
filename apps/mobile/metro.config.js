@@ -1,4 +1,3 @@
-const { withNxMetro } = require('@nx/expo');
 const { getDefaultConfig } = require('@expo/metro-config');
 const { mergeConfig } = require('metro-config');
 const path = require('path');
@@ -17,6 +16,8 @@ const { assetExts, sourceExts } = defaultConfig.resolver;
  */
 const customConfig = {
   cacheVersion: 'mobile',
+  // Watch the full monorepo root so changes in libs/shared trigger hot reload
+  watchFolders: [monorepoRoot],
   transformer: {
     babelTransformerPath: require.resolve('react-native-svg-transformer'),
   },
@@ -35,9 +36,4 @@ const customConfig = {
   },
 };
 
-module.exports = withNxMetro(mergeConfig(defaultConfig, customConfig), {
-  debug: false,
-  extensions: [],
-  // Watch the full monorepo root so changes in libs/shared trigger hot reload
-  watchFolders: [monorepoRoot],
-});
+module.exports = mergeConfig(defaultConfig, customConfig);

@@ -10,8 +10,12 @@
     "moduleResolution": "bundler",
     "baseUrl": "../..",
     "paths": {
-      "@condominios/shared": ["libs/shared/src"],
-      "@condominios/shared/*": ["libs/shared/src/*"]
+      "@condominios/shared": [
+        "libs/shared/src"
+      ],
+      "@condominios/shared/*": [
+        "libs/shared/src/*"
+      ]
     }
   },
   "include": [
@@ -19,7 +23,6 @@
     "**/*.tsx",
     "**/*.js",
     "**/*.jsx",
-    ".expo/types/**/*.d.ts",
-    "expo-env.d.ts"
+    ".expo/types/**/*.d.ts"
   ]
 }
