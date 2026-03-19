@@ -17,7 +17,7 @@ describe('DashboardService', () => {
   const condoId = 'condo-123';
 
   const mockBuildings: IBuilding[] = [
-    { id: 'b1', name: 'Torre A', isActive: true, createdAt: new Date(), updatedAt: new Date() }
+    { id: 'b1', condominiumId: 'condo-123', name: 'Torre A', code: 'A', floors: 10, undergroundFloors: 1, hasElevator: true, isActive: true, createdAt: new Date(), updatedAt: new Date() }
   ];
 
   const mockUnits: IUnit[] = [

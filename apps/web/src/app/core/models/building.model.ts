@@ -1,20 +1,32 @@
 export interface IBuilding {
   id: string;
+  condominiumId: string;
   name: string;
-  description?: string;
+  code: string;
+  floors: number;
+  undergroundFloors: number;
+  hasElevator: boolean;
   address?: string;
-  totalFloors?: number;
-  totalUnits?: number;
   isActive: boolean;
+  units?: IBuildingUnit[];
   createdAt: Date;
   updatedAt: Date;
 }
 
-export interface ICreateBuildingDto {
-  name: string;
-  description?: string;
-  address?: string;
-  totalFloors?: number;
-  totalUnits?: number;
+export interface IBuildingUnit {
+  id: string;
+  number: string;
+  floor?: number;
+  status?: string;
 }
 
+export interface ICreateBuildingDto {
+  name: string;
+  code: string;
+  floors?: number;
+  undergroundFloors?: number;
+  hasElevator?: boolean;
+  address?: string;
+}
+
+export type IUpdateBuildingDto = Partial<ICreateBuildingDto>;

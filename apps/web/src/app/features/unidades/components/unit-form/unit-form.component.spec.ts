@@ -11,7 +11,7 @@ import { of, throwError } from 'rxjs';
 
 const mockCondominio = { id: 'condo-1', name: 'Test Condo', createdAt: '', updatedAt: '', deletedAt: null };
 const mockBuildings: IBuilding[] = [
-  { id: 'building-1', name: 'Torre A', isActive: true, createdAt: new Date(), updatedAt: new Date() }
+  { id: 'building-1', condominiumId: 'condo-1', name: 'Torre A', code: 'A', floors: 10, undergroundFloors: 0, hasElevator: false, isActive: true, createdAt: new Date(), updatedAt: new Date() }
 ];
 
 describe('UnitFormComponent', () => {

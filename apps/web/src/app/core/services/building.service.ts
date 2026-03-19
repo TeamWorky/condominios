@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
-import { IBuilding, ICreateBuildingDto } from '../models/building.model';
+import { IBuilding, ICreateBuildingDto, IUpdateBuildingDto } from '../models/building.model';
 import { ApiResponse } from '../models/api.model';
 import { environment } from '../../../environments/environment';
 
@@ -20,7 +20,7 @@ export class BuildingService {
     const params = new HttpParams()
       .set('page', page.toString())
       .set('limit', limit.toString());
-    
+
     return this.http.get<ApiResponse<IBuilding[]>>(
       `${this.apiUrl}/condominiums/${condoId}/buildings`,
       { params }
@@ -67,11 +67,11 @@ export class BuildingService {
   }
 
   /**
-   * Crear un nuevo edificio
+   * Crear un nuevo edificio en un condominio
    */
-  createBuilding(building: ICreateBuildingDto): Observable<IBuilding> {
+  createBuilding(condominiumId: string, building: ICreateBuildingDto): Observable<IBuilding> {
     return this.http.post<ApiResponse<IBuilding>>(
-      `${this.apiUrl}/buildings`,
+      `${this.apiUrl}/condominiums/${condominiumId}/buildings`,
       building
     ).pipe(
       map(response => response.data as IBuilding)
@@ -81,7 +81,7 @@ export class BuildingService {
   /**
    * Actualizar un edificio
    */
-  updateBuilding(id: string, building: Partial<IBuilding>): Observable<IBuilding> {
+  updateBuilding(id: string, building: IUpdateBuildingDto): Observable<IBuilding> {
     return this.http.patch<ApiResponse<IBuilding>>(
       `${this.apiUrl}/buildings/${id}`,
       building
@@ -91,10 +91,14 @@ export class BuildingService {
   }
 
   /**
-   * Eliminar un edificio
+   * Activar o desactivar un edificio
    */
-  deleteBuilding(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/buildings/${id}`);
+  toggleBuildingStatus(id: string, isActive: boolean): Observable<IBuilding> {
+    return this.http.patch<ApiResponse<IBuilding>>(
+      `${this.apiUrl}/buildings/${id}`,
+      { isActive }
+    ).pipe(
+      map(response => response.data as IBuilding)
+    );
   }
 }
-

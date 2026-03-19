@@ -133,7 +133,7 @@ libs/
 - **Backend**: NestJS conventions, TypeORM entities, class-validator DTOs
 - **Frontend**: Angular 21 standalone components, signals preferred over subjects/BehaviorSubjects
 - **Styling**: SCSS, Angular Material 21
-- **Language**: Spanish for user-facing labels, English for code identifiers and comments
+- **Language (MANDATORY)**: ALL code MUST be written in English — variable names, function names, class names, comments, file names, route paths, test descriptions. Spanish is ONLY allowed for user-facing labels (UI text, error messages, snackbar messages displayed to the end user). When in doubt, use English.
 - **Enums**: Always defined in `@condominios/shared`, never locally
 - **File naming**: kebab-case (`auth.service.ts`), PascalCase for classes, camelCase for methods
 - **Suffixes**: `.dto.ts`, `.entity.ts`, `.spec.ts`, `.module.ts`, `.service.ts`, `.controller.ts`
@@ -196,3 +196,12 @@ Use these slash commands for the SDD workflow:
 
 - **DashboardService** (`apps/web/src/app/core/services/dashboard.service.ts`): Aggregates stats from BuildingService, UnitService, and ResidentService via forkJoin. Limits resident count to condominiums with ≤50 units.
 - **DashboardComponent** uses Angular Signals (`signal()`, `computed()`) for reactive state. Payment cards show "Proximamente" until backend is ready.
+- **BuildingService** (`apps/web/src/app/core/services/building.service.ts`): CRUD operations for buildings. `createBuilding(condominiumId, dto)` POSTs to `/condominiums/:condoId/buildings`. `toggleBuildingStatus(id, isActive)` PATCHes `/buildings/:id`.
+- **Edificios Module** (`apps/web/src/app/features/edificios/`): Full CRUD for buildings — list (paginated table), create/edit (reactive form), detail (with units), deactivate/activate (with confirmation dialog). No delete — buildings are deactivated via PATCH `isActive: false`.
+
+## Active Technologies
+- TypeScript 5.9, Node.js 24.11.1 + Angular 21, Angular Material 21, RxJS (002-buildings-crud)
+- Backend API REST existente (NestJS 11 + PostgreSQL) (002-buildings-crud)
+
+## Recent Changes
+- 002-buildings-crud: Added TypeScript 5.9, Node.js 24.11.1 + Angular 21, Angular Material 21, RxJS

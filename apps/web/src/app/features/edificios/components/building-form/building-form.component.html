@@ -1,0 +1,85 @@
+<div class="building-form-container">
+  <div class="header">
+    <button mat-icon-button routerLink="/edificios" matTooltip="Volver a la lista">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h2>{{ isEditMode ? 'Editar Edificio' : 'Nuevo Edificio' }}</h2>
+  </div>
+
+  @if (loadingData) {
+    <div class="loading-container">
+      <mat-spinner></mat-spinner>
+    </div>
+  } @else {
+    <mat-card>
+      <mat-card-content>
+        <form [formGroup]="buildingForm" (ngSubmit)="onSubmit()">
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Nombre</mat-label>
+              <input matInput formControlName="name" placeholder="Ej: Edificio A">
+              <mat-icon matPrefix>business</mat-icon>
+              @if (buildingForm.get('name')?.invalid && buildingForm.get('name')?.touched) {
+                <mat-error>{{ getErrorMessage('name') }}</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Codigo</mat-label>
+              <input matInput formControlName="code" placeholder="Ej: A">
+              <mat-icon matPrefix>tag</mat-icon>
+              @if (buildingForm.get('code')?.invalid && buildingForm.get('code')?.touched) {
+                <mat-error>{{ getErrorMessage('code') }}</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Pisos</mat-label>
+              <input matInput type="number" formControlName="floors" min="1">
+              <mat-icon matPrefix>layers</mat-icon>
+              @if (buildingForm.get('floors')?.invalid && buildingForm.get('floors')?.touched) {
+                <mat-error>{{ getErrorMessage('floors') }}</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Subsuelos</mat-label>
+              <input matInput type="number" formControlName="undergroundFloors" min="0">
+              <mat-icon matPrefix>vertical_align_bottom</mat-icon>
+              @if (buildingForm.get('undergroundFloors')?.invalid && buildingForm.get('undergroundFloors')?.touched) {
+                <mat-error>{{ getErrorMessage('undergroundFloors') }}</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Direccion</mat-label>
+            <input matInput formControlName="address" placeholder="Ej: Calle 1 #100">
+            <mat-icon matPrefix>location_on</mat-icon>
+            @if (buildingForm.get('address')?.invalid && buildingForm.get('address')?.touched) {
+              <mat-error>{{ getErrorMessage('address') }}</mat-error>
+            }
+          </mat-form-field>
+
+          <div class="checkbox-row">
+            <mat-checkbox formControlName="hasElevator">Tiene ascensor</mat-checkbox>
+          </div>
+
+          <div class="form-actions">
+            <button mat-button type="button" routerLink="/edificios">Cancelar</button>
+            <button mat-raised-button color="primary" type="submit"
+                    [disabled]="buildingForm.invalid || loading">
+              @if (loading) {
+                <mat-spinner diameter="20"></mat-spinner>
+              } @else {
+                {{ isEditMode ? 'Actualizar' : 'Guardar' }}
+              }
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  }
+</div>

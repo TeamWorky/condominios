@@ -31,6 +31,10 @@ export const routes: Routes = [
         loadChildren: () => import('./features/pagos/pagos.routes').then(m => m.PAGOS_ROUTES)
       },
       {
+        path: 'edificios',
+        loadChildren: () => import('./features/edificios/edificios.routes').then(m => m.EDIFICIOS_ROUTES)
+      },
+      {
         path: 'unidades',
         loadChildren: () => import('./features/unidades/unidades.routes').then(m => m.UNIDADES_ROUTES)
       },

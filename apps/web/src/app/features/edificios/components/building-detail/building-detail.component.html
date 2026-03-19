@@ -1,0 +1,110 @@
+<div class="building-detail-container">
+  <div class="header">
+    <button mat-icon-button routerLink="/edificios" matTooltip="Volver a la lista">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h2>Detalle del Edificio</h2>
+  </div>
+
+  @if (error) {
+    <div class="error-container">
+      <mat-icon color="warn">error</mat-icon>
+      <p>{{ error }}</p>
+    </div>
+  } @else if (loading) {
+    <div class="loading-container">
+      <mat-spinner></mat-spinner>
+    </div>
+  } @else if (building) {
+    <div class="detail-content">
+      <mat-card class="info-card">
+        <mat-card-header>
+          <mat-card-title>{{ building.name }}</mat-card-title>
+          <mat-card-subtitle>Codigo: {{ building.code }}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="info-grid">
+            <div class="info-item">
+              <mat-icon>layers</mat-icon>
+              <div>
+                <span class="label">Pisos</span>
+                <span class="value">{{ building.floors }}</span>
+              </div>
+            </div>
+
+            <div class="info-item">
+              <mat-icon>vertical_align_bottom</mat-icon>
+              <div>
+                <span class="label">Subsuelos</span>
+                <span class="value">{{ building.undergroundFloors }}</span>
+              </div>
+            </div>
+
+            <div class="info-item">
+              <mat-icon>elevator</mat-icon>
+              <div>
+                <span class="label">Ascensor</span>
+                <span class="value">{{ building.hasElevator ? 'Si' : 'No' }}</span>
+              </div>
+            </div>
+
+            <div class="info-item">
+              <mat-icon>location_on</mat-icon>
+              <div>
+                <span class="label">Direccion</span>
+                <span class="value">{{ building.address || 'No especificada' }}</span>
+              </div>
+            </div>
+
+            <div class="info-item">
+              <mat-icon>circle</mat-icon>
+              <div>
+                <span class="label">Estado</span>
+                <mat-chip [class]="getStatusClass(building.isActive)">
+                  {{ getStatusLabel(building.isActive) }}
+                </mat-chip>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+        <mat-card-actions align="end">
+          <button mat-button [routerLink]="['/edificios', 'editar', building.id]">
+            <mat-icon>edit</mat-icon>
+            Editar
+          </button>
+          <button mat-button routerLink="/edificios">
+            <mat-icon>list</mat-icon>
+            Volver a la lista
+          </button>
+        </mat-card-actions>
+      </mat-card>
+
+      <mat-card class="units-card">
+        <mat-card-header>
+          <mat-card-title>Unidades</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          @if (building.units && building.units.length > 0) {
+            <mat-list>
+              @for (unit of building.units; track unit.id) {
+                <mat-list-item>
+                  <mat-icon matListItemIcon>home</mat-icon>
+                  <span matListItemTitle>Unidad {{ unit.number }}</span>
+                  @if (unit.floor !== undefined && unit.floor !== null) {
+                    <span matListItemLine>Piso {{ unit.floor }}</span>
+                  }
+                </mat-list-item>
+                <mat-divider></mat-divider>
+              }
+            </mat-list>
+          } @else {
+            <div class="empty-units">
+              <mat-icon class="empty-icon">home_work</mat-icon>
+              <p>Este edificio no tiene unidades registradas</p>
+            </div>
+          }
+        </mat-card-content>
+      </mat-card>
+    </div>
+  }
+</div>
