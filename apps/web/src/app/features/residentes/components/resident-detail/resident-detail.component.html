@@ -1,0 +1,98 @@
+<div class="resident-detail-container">
+  <div class="header">
+    <button mat-icon-button routerLink="/residentes" matTooltip="Volver a la lista">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h2>Detalle del Residente</h2>
+    @if (resident) {
+      <div class="header-actions">
+        <button mat-raised-button color="primary" [routerLink]="['/residentes', 'editar', resident.id]">
+          <mat-icon>edit</mat-icon>
+          Editar
+        </button>
+      </div>
+    }
+  </div>
+
+  @if (loading) {
+    <div class="loading-container">
+      <mat-spinner></mat-spinner>
+    </div>
+  } @else if (error) {
+    <div class="error-container">
+      <mat-icon color="warn">error</mat-icon>
+      <p>{{ error }}</p>
+      <button mat-button routerLink="/residentes">Volver a la lista</button>
+    </div>
+  } @else if (resident) {
+    <!-- Personal Data Section -->
+    <mat-card class="detail-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar class="section-icon">person</mat-icon>
+        <mat-card-title>Datos Personales</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="detail-grid">
+          <div class="detail-field">
+            <span class="label">Nombre completo</span>
+            <span class="value">{{ resident.firstName }} {{ resident.lastName }}</span>
+          </div>
+          <div class="detail-field">
+            <span class="label">Documento</span>
+            <span class="value">{{ resident.documentType }} {{ resident.documentNumber }}</span>
+          </div>
+          <div class="detail-field">
+            <span class="label">Fecha de Nacimiento</span>
+            <span class="value">{{ resident.dateOfBirth || '—' }}</span>
+          </div>
+          <div class="detail-field">
+            <span class="label">Telefono</span>
+            <span class="value">{{ resident.phone || '—' }}</span>
+          </div>
+          <div class="detail-field">
+            <span class="label">Email</span>
+            <span class="value">{{ resident.email || '—' }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Residence Data Section -->
+    <mat-card class="detail-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar class="section-icon">home</mat-icon>
+        <mat-card-title>Datos de Residencia</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="detail-grid">
+          <div class="detail-field">
+            <span class="label">Tipo de Residente</span>
+            <span class="value">{{ getResidentTypeLabel(resident.residentType) }}</span>
+          </div>
+          <div class="detail-field">
+            <span class="label">Residente Principal</span>
+            <span class="value">{{ resident.isPrimary ? 'Si' : 'No' }}</span>
+          </div>
+          <div class="detail-field">
+            <span class="label">Relacion</span>
+            <span class="value">{{ resident.relationship || '—' }}</span>
+          </div>
+          <div class="detail-field">
+            <span class="label">Fecha de Ingreso</span>
+            <span class="value">{{ resident.moveInDate || '—' }}</span>
+          </div>
+          <div class="detail-field">
+            <span class="label">Fecha de Salida</span>
+            <span class="value">{{ resident.moveOutDate || '—' }}</span>
+          </div>
+          <div class="detail-field">
+            <span class="label">Estado</span>
+            <mat-chip [class]="getStatusClass(resident.isActive)">
+              {{ getStatusLabel(resident.isActive) }}
+            </mat-chip>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+</div>

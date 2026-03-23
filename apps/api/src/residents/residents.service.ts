@@ -5,7 +5,10 @@ import { Resident } from './entities/resident.entity';
 import { CreateResidentDto } from './dto/create-resident.dto';
 import { UpdateResidentDto } from './dto/update-resident.dto';
 import { PaginationDto } from '@condominios/common/dto/pagination.dto';
-import { NotFoundException } from '@condominios/common/exceptions/business.exception';
+import {
+  AlreadyExistsException,
+  NotFoundException,
+} from '@condominios/common/exceptions/business.exception';
 import { SoftDeleteRepositoryHelper } from '@condominios/common/repositories/base.repository';
 import { LoggerService } from '@condominios/infrastructure/logger/logger.service';
 import { RedisCacheService } from '@condominios/infrastructure/redis/redis-cache.service';
@@ -36,6 +39,22 @@ export class ResidentsService {
   async create(createResidentDto: CreateResidentDto): Promise<Resident> {
     // Verify unit exists
     await this.unitsService.findOne(createResidentDto.unitId);
+
+    // Check no active resident with same documentNumber exists
+    const existingResident = await this.residentRepository
+      .createQueryBuilder('resident')
+      .where('resident.document_number = :documentNumber', {
+        documentNumber: createResidentDto.documentNumber,
+      })
+      .andWhere('resident.is_active = :isActive', { isActive: true })
+      .andWhere('resident.deleted_at IS NULL')
+      .getOne();
+
+    if (existingResident) {
+      throw new AlreadyExistsException(
+        'Resident with this document number',
+      );
+    }
 
     const resident = this.residentRepository.create(createResidentDto);
     const savedResident = await this.residentRepository.save(resident);

@@ -217,11 +217,14 @@ Use these slash commands for the SDD workflow:
 - **DashboardComponent** uses Angular Signals (`signal()`, `computed()`) for reactive state. Payment cards show "Proximamente" until backend is ready.
 - **BuildingService** (`apps/web/src/app/core/services/building.service.ts`): CRUD operations for buildings. `createBuilding(condominiumId, dto)` POSTs to `/condominiums/:condoId/buildings`. `toggleBuildingStatus(id, isActive)` PATCHes `/buildings/:id`.
 - **Edificios Module** (`apps/web/src/app/features/edificios/`): Full CRUD for buildings — list (paginated table), create/edit (reactive form), detail (with units), deactivate/activate (with confirmation dialog). No delete — buildings are deactivated via PATCH `isActive: false`.
+- **ResidentService** (`apps/web/src/app/features/residentes/services/resident.service.ts`): CRUD operations for residents scoped by unitId. `getResidentsByUnit(unitId, page, limit)` returns paginated residents. `toggleResidentStatus(id, isActive)` PATCHes via `updateResident`.
+- **Residentes Module** (`apps/web/src/app/features/residentes/`): Full CRUD for residents — list (with cascading Building→Unit filters, paginated table), create/edit (reactive form with personal data + residence data sections), detail view, activate/deactivate (with confirmation dialog). Reuses ConfirmDialogComponent from edificios module. DocumentType/DocumentNumber read-only in edit mode.
 
 ## Active Technologies
 - TypeScript 5.9, Node.js 24.x (001-add-mobile-app)
 - TypeScript 5.9, Node.js 24.11.1 + Angular 21, Angular Material 21, RxJS (002-buildings-crud)
 - Backend API REST existente (NestJS 11 + PostgreSQL) (002-buildings-crud)
+- PostgreSQL (TypeORM), Redis (cache) (003-residents-crud)
 
 ## Recent Changes
 - 001-add-mobile-app: Added TypeScript 5.9, Node.js 24.x

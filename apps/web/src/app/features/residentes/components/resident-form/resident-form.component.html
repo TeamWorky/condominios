@@ -1,0 +1,137 @@
+<div class="resident-form-container">
+  <div class="header">
+    <button mat-icon-button routerLink="/residentes" matTooltip="Volver a la lista">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h2>{{ isEditMode ? 'Editar Residente' : 'Nuevo Residente' }}</h2>
+  </div>
+
+  @if (loadingData) {
+    <div class="loading-container">
+      <mat-spinner></mat-spinner>
+    </div>
+  } @else {
+    <mat-card>
+      <mat-card-content>
+        <form [formGroup]="residentForm" (ngSubmit)="onSubmit()">
+          <h3>Datos Personales</h3>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Nombre</mat-label>
+              <input matInput formControlName="firstName" placeholder="Ej: Juan">
+              <mat-icon matPrefix>person</mat-icon>
+              @if (residentForm.get('firstName')?.invalid && residentForm.get('firstName')?.touched) {
+                <mat-error>{{ getErrorMessage('firstName') }}</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Apellido</mat-label>
+              <input matInput formControlName="lastName" placeholder="Ej: Perez">
+              <mat-icon matPrefix>person</mat-icon>
+              @if (residentForm.get('lastName')?.invalid && residentForm.get('lastName')?.touched) {
+                <mat-error>{{ getErrorMessage('lastName') }}</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Tipo de Documento</mat-label>
+              <mat-select formControlName="documentType">
+                @for (opt of documentTypeOptions; track opt.value) {
+                  <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+                }
+              </mat-select>
+              <mat-icon matPrefix>badge</mat-icon>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Numero de Documento</mat-label>
+              <input matInput formControlName="documentNumber" placeholder="Ej: 12345678-9">
+              <mat-icon matPrefix>fingerprint</mat-icon>
+              @if (residentForm.get('documentNumber')?.invalid && residentForm.get('documentNumber')?.touched) {
+                <mat-error>{{ getErrorMessage('documentNumber') }}</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Fecha de Nacimiento</mat-label>
+              <input matInput type="date" formControlName="dateOfBirth">
+              <mat-icon matPrefix>cake</mat-icon>
+              @if (residentForm.get('dateOfBirth')?.invalid && residentForm.get('dateOfBirth')?.touched) {
+                <mat-error>{{ getErrorMessage('dateOfBirth') }}</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Telefono</mat-label>
+              <input matInput formControlName="phone" placeholder="Ej: +56912345678">
+              <mat-icon matPrefix>phone</mat-icon>
+              @if (residentForm.get('phone')?.invalid && residentForm.get('phone')?.touched) {
+                <mat-error>{{ getErrorMessage('phone') }}</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Email</mat-label>
+            <input matInput type="email" formControlName="email" placeholder="Ej: juan@email.com">
+            <mat-icon matPrefix>email</mat-icon>
+            @if (residentForm.get('email')?.invalid && residentForm.get('email')?.touched) {
+              <mat-error>{{ getErrorMessage('email') }}</mat-error>
+            }
+          </mat-form-field>
+
+          <h3>Datos de Residencia</h3>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Tipo de Residente</mat-label>
+              <mat-select formControlName="residentType">
+                @for (opt of residentTypeOptions; track opt.value) {
+                  <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+                }
+              </mat-select>
+              <mat-icon matPrefix>home</mat-icon>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Fecha de Ingreso</mat-label>
+              <input matInput type="date" formControlName="moveInDate">
+              <mat-icon matPrefix>calendar_today</mat-icon>
+            </mat-form-field>
+          </div>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Relacion con propietario</mat-label>
+            <input matInput formControlName="relationship" placeholder="Ej: Esposa, Hijo, etc.">
+            <mat-icon matPrefix>group</mat-icon>
+            @if (residentForm.get('relationship')?.invalid && residentForm.get('relationship')?.touched) {
+              <mat-error>{{ getErrorMessage('relationship') }}</mat-error>
+            }
+          </mat-form-field>
+
+          <div class="checkbox-row">
+            <mat-checkbox formControlName="isPrimary">Residente principal</mat-checkbox>
+          </div>
+
+          <div class="form-actions">
+            <button mat-button type="button" routerLink="/residentes">Cancelar</button>
+            <button mat-raised-button color="primary" type="submit"
+                    [disabled]="residentForm.invalid || loading">
+              @if (loading) {
+                <mat-spinner diameter="20"></mat-spinner>
+              } @else {
+                {{ isEditMode ? 'Actualizar' : 'Guardar' }}
+              }
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  }
+</div>
