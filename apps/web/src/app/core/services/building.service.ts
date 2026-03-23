@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
-import { IBuilding, ICreateBuildingDto } from '../models/building.model';
+import { IBuilding, ICreateBuildingDto, IUpdateBuildingDto } from '../models/building.model';
 import { ApiResponse } from '../models/api.model';
 import { environment } from '../../../environments/environment';
 
@@ -14,13 +14,13 @@ export class BuildingService {
   constructor(private http: HttpClient) {}
 
   /**
-   * Obtener todos los edificios de un condominio
+   * Get all buildings for a condominium
    */
   getBuildingsByCondominium(condoId: string, page: number = 1, limit: number = 100): Observable<{ data: IBuilding[]; total: number }> {
     const params = new HttpParams()
       .set('page', page.toString())
       .set('limit', limit.toString());
-    
+
     return this.http.get<ApiResponse<IBuilding[]>>(
       `${this.apiUrl}/condominiums/${condoId}/buildings`,
       { params }
@@ -33,7 +33,7 @@ export class BuildingService {
   }
 
   /**
-   * Obtener todos los edificios (para compatibilidad)
+   * Get all buildings (compatibility wrapper)
    */
   getBuildings(): Observable<IBuilding[]> {
     return this.getBuildingsByCondominium('').pipe(
@@ -42,7 +42,7 @@ export class BuildingService {
   }
 
   /**
-   * Obtener edificios activos
+   * Get active buildings
    */
   getActiveBuildings(condoId: string): Observable<IBuilding[]> {
     return this.getBuildingsByCondominium(condoId).pipe(
@@ -51,14 +51,14 @@ export class BuildingService {
   }
 
   /**
-   * Obtener nombres de edificios
+   * Get building names
    */
   getBuildingNames(condoId: string): Observable<IBuilding[]> {
     return this.getActiveBuildings(condoId);
   }
 
   /**
-   * Obtener un edificio por ID
+   * Get a building by ID
    */
   getBuildingById(id: string): Observable<IBuilding> {
     return this.http.get<ApiResponse<IBuilding>>(`${this.apiUrl}/buildings/${id}`).pipe(
@@ -67,11 +67,11 @@ export class BuildingService {
   }
 
   /**
-   * Crear un nuevo edificio
+   * Create a new building in a condominium
    */
-  createBuilding(building: ICreateBuildingDto): Observable<IBuilding> {
+  createBuilding(condominiumId: string, building: ICreateBuildingDto): Observable<IBuilding> {
     return this.http.post<ApiResponse<IBuilding>>(
-      `${this.apiUrl}/buildings`,
+      `${this.apiUrl}/condominiums/${condominiumId}/buildings`,
       building
     ).pipe(
       map(response => response.data as IBuilding)
@@ -79,9 +79,9 @@ export class BuildingService {
   }
 
   /**
-   * Actualizar un edificio
+   * Update a building
    */
-  updateBuilding(id: string, building: Partial<IBuilding>): Observable<IBuilding> {
+  updateBuilding(id: string, building: IUpdateBuildingDto): Observable<IBuilding> {
     return this.http.patch<ApiResponse<IBuilding>>(
       `${this.apiUrl}/buildings/${id}`,
       building
@@ -91,10 +91,14 @@ export class BuildingService {
   }
 
   /**
-   * Eliminar un edificio
+   * Activate or deactivate a building
    */
-  deleteBuilding(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/buildings/${id}`);
+  toggleBuildingStatus(id: string, isActive: boolean): Observable<IBuilding> {
+    return this.http.patch<ApiResponse<IBuilding>>(
+      `${this.apiUrl}/buildings/${id}`,
+      { isActive }
+    ).pipe(
+      map(response => response.data as IBuilding)
+    );
   }
 }
-

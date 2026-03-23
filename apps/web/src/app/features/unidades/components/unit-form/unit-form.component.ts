@@ -82,7 +82,13 @@ import { Subject, takeUntil } from 'rxjs';
                   <mat-error>El piso es requerido</mat-error>
                 }
                 @if (unitForm.get('floor')?.hasError('min') && unitForm.get('floor')?.touched) {
-                  <mat-error>El piso debe ser mayor a 0</mat-error>
+                  <mat-error>El piso no puede ser menor a {{ getMinFloor() }}</mat-error>
+                }
+                @if (unitForm.get('floor')?.hasError('max') && unitForm.get('floor')?.touched) {
+                  <mat-error>El piso no puede ser mayor a {{ getMaxFloor() }}</mat-error>
+                }
+                @if (selectedBuilding) {
+                  <mat-hint>Pisos válidos: {{ getMinFloor() }} a {{ getMaxFloor() }}</mat-hint>
                 }
               </mat-form-field>
 
@@ -246,12 +252,20 @@ export class UnitFormComponent implements OnInit, OnDestroy {
   isEditMode = false;
   loading = false;
   error: string | null = null;
-  buildings: IBuilding[] = []; // Siempre inicializado como array vacío
+  buildings: IBuilding[] = [];
+  selectedBuilding: IBuilding | null = null;
   loadingBuildings = false;
 
-  // Función helper para obtener edificios de forma segura
   getBuildingsArray(): IBuilding[] {
     return Array.isArray(this.buildings) ? this.buildings : [];
+  }
+
+  getMinFloor(): number {
+    return this.selectedBuilding ? -(this.selectedBuilding.undergroundFloors || 0) : 0;
+  }
+
+  getMaxFloor(): number {
+    return this.selectedBuilding ? this.selectedBuilding.floors : 999;
   }
   UnitStatus = UnitStatus;
   UnitType = UnitType;
@@ -299,11 +313,35 @@ export class UnitFormComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadBuildings();
+    this.setupBuildingFloorValidation();
     const id = this.route.snapshot.paramMap.get('id');
     if (id && id !== 'nuevo') {
       this.isEditMode = true;
       this.loadUnit(id);
     }
+  }
+
+  private setupBuildingFloorValidation(): void {
+    this.unitForm.get('buildingId')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((buildingId: string) => {
+        this.selectedBuilding = this.buildings.find(b => b.id === buildingId) || null;
+        this.updateFloorValidators();
+      });
+  }
+
+  private updateFloorValidators(): void {
+    const floorControl = this.unitForm.get('floor');
+    if (!floorControl) return;
+
+    if (this.selectedBuilding) {
+      const minFloor = -(this.selectedBuilding.undergroundFloors || 0);
+      const maxFloor = this.selectedBuilding.floors;
+      floorControl.setValidators([Validators.min(minFloor), Validators.max(maxFloor)]);
+    } else {
+      floorControl.clearValidators();
+    }
+    floorControl.updateValueAndValidity();
   }
 
   loadBuildings(): void {
@@ -348,6 +386,8 @@ export class UnitFormComponent implements OnInit, OnDestroy {
     
     this.unitService.getUnitById(id).pipe(takeUntil(this.destroy$)).subscribe({
       next: (unit) => {
+        this.selectedBuilding = this.buildings.find(b => b.id === unit.buildingId) || null;
+        this.updateFloorValidators();
         this.unitForm.patchValue({
           buildingId: unit.buildingId,
           number: unit.number,

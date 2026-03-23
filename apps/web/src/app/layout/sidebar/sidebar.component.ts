@@ -34,9 +34,10 @@ export class SidebarComponent {
 
   menuItems: MenuItem[] = [
     { label: 'Dashboard', icon: 'dashboard', route: '/dashboard' },
+    { label: 'Edificios', icon: 'business', route: '/edificios' },
+    { label: 'Unidades', icon: 'apartment', route: '/unidades' },
     { label: 'Residentes', icon: 'people', route: '/residentes' },
     { label: 'Pagos', icon: 'payments', route: '/pagos', badge: 3 },
-    { label: 'Unidades', icon: 'apartment', route: '/unidades' },
     { label: 'Espacios Comunes', icon: 'meeting_room', route: '/espacios-comunes' },
   ];
 

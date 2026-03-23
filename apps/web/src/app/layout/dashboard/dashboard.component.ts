@@ -67,7 +67,7 @@ export class DashboardComponent implements OnInit {
         value: s.totalBuildings,
         icon: 'apartment',
         color: 'primary',
-        routerLink: '/unidades'
+        routerLink: '/edificios'
       },
       {
         title: 'Unidades Ocupadas',

@@ -18,7 +18,8 @@ El flujo obligatorio es:
 4. `/speckit.tasks` - Generar las tareas ordenadas por dependencia
 5. `/speckit.checklist` - Generar checklist de validacion
 6. `/speckit.implement` - Ejecutar la implementacion tarea por tarea
-7. `/speckit.analyze` - Verificar consistencia entre artefactos (post-implementacion)
+7. **QA Manual** - Ejecutar validacion manual con quickstart.md ANTES del PR (ver seccion "QA Manual Obligatorio")
+8. `/speckit.analyze` - Verificar consistencia entre artefactos (post-implementacion)
 
 **Reglas:**
 - No se acepta codigo nuevo sin un spec asociado en `.speckit/specs/[module].spec.md`
@@ -53,6 +54,24 @@ Cada modulo/feature debe pasar revision de seguridad:
 ### Pruebas de Endpoints
 
 Todo cambio que afecte endpoints DEBE incluir pruebas de los endpoints modificados. Verificar status codes, formato de respuesta, validaciones y auth/authz.
+
+### QA Manual Obligatorio (Pre-PR)
+
+**Todo feature DEBE pasar QA manual ANTES de crear el commit final y el PR. No se permite crear PRs sin haber validado manualmente la funcionalidad.**
+
+**Proceso obligatorio:**
+1. Levantar backend (`npm run start:api`) y frontend (`npm run start:web`)
+2. Ejecutar TODOS los pasos de validacion definidos en `quickstart.md` del feature
+3. Documentar el resultado de cada paso (PASS/FAIL)
+4. Si algun paso falla: corregir, re-ejecutar tests automatizados, y repetir QA manual
+5. Solo despues de que TODOS los pasos pasen, proceder con commit y PR
+
+**Reglas:**
+- Si el feature tiene `quickstart.md`, TODOS sus pasos deben ejecutarse y pasar
+- Si no tiene `quickstart.md`, validar manualmente los flujos principales del feature
+- El QA manual es responsabilidad del implementador, no del reviewer
+- Marcar la tarea de QA manual como completada SOLO despues de ejecutar realmente los pasos
+- **NUNCA** marcar QA como completado sin haberlo ejecutado — esto es una violacion grave del workflow
 
 ### Actualizacion de Documentacion (Obligatorio)
 
@@ -133,7 +152,7 @@ libs/
 - **Backend**: NestJS conventions, TypeORM entities, class-validator DTOs
 - **Frontend**: Angular 21 standalone components, signals preferred over subjects/BehaviorSubjects
 - **Styling**: SCSS, Angular Material 21
-- **Language**: Spanish for user-facing labels, English for code identifiers and comments
+- **Language (MANDATORY)**: ALL code MUST be written in English — variable names, function names, class names, comments, file names, route paths, test descriptions. Spanish is ONLY allowed for user-facing labels (UI text, error messages, snackbar messages displayed to the end user). When in doubt, use English.
 - **Enums**: Always defined in `@condominios/shared`, never locally
 - **File naming**: kebab-case (`auth.service.ts`), PascalCase for classes, camelCase for methods
 - **Suffixes**: `.dto.ts`, `.entity.ts`, `.spec.ts`, `.module.ts`, `.service.ts`, `.controller.ts`
@@ -196,9 +215,14 @@ Use these slash commands for the SDD workflow:
 
 - **DashboardService** (`apps/web/src/app/core/services/dashboard.service.ts`): Aggregates stats from BuildingService, UnitService, and ResidentService via forkJoin. Limits resident count to condominiums with ≤50 units.
 - **DashboardComponent** uses Angular Signals (`signal()`, `computed()`) for reactive state. Payment cards show "Proximamente" until backend is ready.
+- **BuildingService** (`apps/web/src/app/core/services/building.service.ts`): CRUD operations for buildings. `createBuilding(condominiumId, dto)` POSTs to `/condominiums/:condoId/buildings`. `toggleBuildingStatus(id, isActive)` PATCHes `/buildings/:id`.
+- **Edificios Module** (`apps/web/src/app/features/edificios/`): Full CRUD for buildings — list (paginated table), create/edit (reactive form), detail (with units), deactivate/activate (with confirmation dialog). No delete — buildings are deactivated via PATCH `isActive: false`.
 
 ## Active Technologies
 - TypeScript 5.9, Node.js 24.x (001-add-mobile-app)
+- TypeScript 5.9, Node.js 24.11.1 + Angular 21, Angular Material 21, RxJS (002-buildings-crud)
+- Backend API REST existente (NestJS 11 + PostgreSQL) (002-buildings-crud)
 
 ## Recent Changes
 - 001-add-mobile-app: Added TypeScript 5.9, Node.js 24.x
+- 002-buildings-crud: Added TypeScript 5.9, Node.js 24.11.1 + Angular 21, Angular Material 21, RxJS
