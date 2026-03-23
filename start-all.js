@@ -1,4 +1,7 @@
-const { spawn } = require("node:child_process");
+const { spawn, execSync } = require("node:child_process");
+
+// Ports used by each service — must match the app configuration
+const PORTS_TO_CLEAR = [3000, 3001, 4200, 8081];
 
 const procs = [];
 let shuttingDown = false;
@@ -8,6 +11,7 @@ const tasks = [
   { name: "api", cmd: "npm", args: ["run", "start:api"] },
   { name: "worker", cmd: "npm", args: ["run", "start:worker"] },
   { name: "web", cmd: "npm", args: ["run", "start:web"] },
+  { name: "mobile", cmd: "npm", args: ["run", "start:mobile"] },
 ];
 
 function pipeWithPrefix(stream, label, dest) {
@@ -73,6 +77,22 @@ function shutdown(reason) {
     process.exit(firstExitCode || 0);
   });
 }
+
+// Free up ports before starting to avoid EADDRINUSE errors from leftover processes
+function clearPorts(ports) {
+  for (const port of ports) {
+    try {
+      const pids = execSync(`lsof -ti:${port} 2>/dev/null`, { encoding: "utf8" }).trim();
+      if (!pids) continue;
+      execSync(`kill -9 ${pids.split("\n").join(" ")} 2>/dev/null`, { stdio: "ignore" });
+      process.stdout.write(`[orchestrator] cleared port ${port}\n`);
+    } catch {
+      // No process on this port — nothing to do
+    }
+  }
+}
+
+clearPorts(PORTS_TO_CLEAR);
 
 process.on("SIGINT", () => shutdown("SIGINT"));
 process.on("SIGTERM", () => shutdown("SIGTERM"));
