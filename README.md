@@ -1,6 +1,6 @@
 # TeamWorky Condominios - Sistema de Gestion de Condominios
 
-> Plataforma multi-tenant para la gestion integral de condominios y conjuntos residenciales, construida como un monorepo Nx con Angular 21 y NestJS 11.
+> Plataforma multi-tenant para la gestion integral de condominios y conjuntos residenciales, construida como un monorepo Nx con Angular 21, NestJS 11 y React Native (Expo).
 
 ---
 
@@ -11,6 +11,7 @@
 - [Estructura del Proyecto](#estructura-del-proyecto)
 - [Inicio Rapido](#inicio-rapido)
 - [Scripts Disponibles](#scripts-disponibles)
+- [App Movil](#app-movil)
 - [Modelo de Dominio](#modelo-de-dominio)
 - [Docker](#docker)
 - [Testing](#testing)
@@ -22,7 +23,7 @@
 
 ## Arquitectura
 
-El proyecto es un **monorepo Nx** con 3 aplicaciones y 4 librerias compartidas:
+El proyecto es un **monorepo Nx** con 4 aplicaciones y 4 librerias compartidas:
 
 ### Aplicaciones
 
@@ -30,13 +31,14 @@ El proyecto es un **monorepo Nx** con 3 aplicaciones y 4 librerias compartidas:
 |-----|-----------|-------------|
 | `apps/api` | NestJS 11 | API REST principal (puerto 3000). Modulos de dominio: auth, buildings, common-spaces, condominiums, payments, reservations, residents, units, users |
 | `apps/worker` | NestJS 11 + BullMQ | Worker para tareas en background (emails, jobs asincronos) |
-| `apps/web` | Angular 21 | Frontend SPA con Angular Material. Dashboard con datos reales del backend (edificios, unidades, residentes, ocupacion) |
+| `apps/web` | Angular 21 | Frontend SPA con Angular Material. Dashboard con datos reales del backend |
+| `apps/mobile` | React Native + Expo | App movil para iOS, Android y web |
 
 ### Librerias Compartidas
 
 | Libreria | Alias | Descripcion | Consumida por |
 |----------|-------|-------------|---------------|
-| `libs/shared` | `@condominios/shared` | Enums, interfaces, DTOs compartidos | api, worker, web |
+| `libs/shared` | `@condominios/shared` | Enums, interfaces, DTOs compartidos | api, worker, web, **mobile** |
 | `libs/common` | `@condominios/common` | Guards, filters, interceptors, entidad base | api, worker |
 | `libs/database` | `@condominios/database` | TypeORM data-source, migraciones, seeders | api |
 | `libs/infrastructure` | `@condominios/infrastructure` | Logger (Winston), email, redis, queue, health | api, worker |
@@ -45,6 +47,7 @@ El proyecto es un **monorepo Nx** con 3 aplicaciones y 4 librerias compartidas:
 
 ```
 apps/web       -> libs/shared (unicamente)
+apps/mobile    -> libs/shared (unicamente)
 apps/api       -> libs/shared, libs/common, libs/database, libs/infrastructure
 apps/worker    -> libs/shared, libs/common, libs/infrastructure
 libs/shared    -> sin dependencias
@@ -59,7 +62,8 @@ libs/infrastructure -> libs/shared, libs/common
 
 | Capa | Tecnologia | Version |
 |------|-----------|---------|
-| Frontend | Angular + Angular Material | 21 |
+| Frontend Web | Angular + Angular Material | 21 |
+| App Movil | React Native + Expo | SDK 53 |
 | Backend API | NestJS | 11 |
 | Worker | NestJS + BullMQ | 11 |
 | Base de datos | PostgreSQL + TypeORM | 0.3.x |
@@ -94,14 +98,20 @@ condominios-nx/
 │   │       ├── units/          # Unidades habitacionales
 │   │       └── users/          # Usuarios del sistema
 │   ├── worker/                 # Worker BullMQ (emails, jobs)
-│   └── web/                    # Frontend Angular 21
+│   ├── web/                    # Frontend Angular 21
+│   └── mobile/                 # App movil React Native (Expo)
+│       └── src/
+│           ├── app/            # Screens y layouts (Expo Router)
+│           ├── config/         # Configuracion (API base URL)
+│           └── services/       # HTTP client y auth service
 ├── libs/
-│   ├── shared/                 # Enums, interfaces (frontend + backend)
+│   ├── shared/                 # Enums, interfaces (frontend + backend + mobile)
 │   ├── common/                 # Guards, filters, entidad base (backend)
 │   ├── database/               # TypeORM, migraciones, seeders (backend)
 │   └── infrastructure/         # Logger, email, redis, queue (backend)
 ├── .speckit/                   # Framework de especificaciones
 ├── .specify/                   # Scripts y templates operacionales
+├── start-all.js                # Orquestador de desarrollo (API + worker + web + mobile)
 ├── Dockerfile                  # Multi-stage (dev, prod-api, prod-worker)
 └── docker-compose.yml          # PostgreSQL + Redis
 ```
@@ -120,7 +130,6 @@ condominios-nx/
 ```bash
 # 1. Clonar e instalar
 git clone <repository>
-cd condominios-nx
 npm install
 
 # 2. Configurar variables de entorno
@@ -132,26 +141,25 @@ docker-compose up -d
 # 4. Ejecutar migraciones
 npm run migration:run
 
-# 5. Iniciar en desarrollo
-npm run start:api      # API en http://localhost:3000
-npm run start:worker   # Worker de background
-npm run start:web      # Frontend en http://localhost:4200
+# 5. Iniciar en desarrollo (API + worker + web + mobile)
+npm run start:dev
 ```
 
 ### Accesos
 
 | Servicio | URL |
 |----------|-----|
-| API | http://localhost:3000/api |
-| Documentacion API (Swagger/Scalar) | http://localhost:3000/api-docs |
-| Health Check | http://localhost:3000/api/health |
-| Frontend | http://localhost:4200 |
+| **API** | http://localhost:3000/api |
+| **Documentacion** | http://localhost:3000/api-docs |
+| **Health Check** | http://localhost:3000/api/health |
+| **Frontend (Web)** | http://localhost:4200/ |
+| **Mobile (Metro)** | http://localhost:8081/ |
 
 ### Credenciales por Defecto
 
 ```
 Email:    admin@admin.com
-Password: admin
+Password: <valor de ADMIN_PASSWORD en .env> (minimo 8 caracteres)
 Role:     SUPER_ADMIN
 ```
 
@@ -165,9 +173,13 @@ Role:     SUPER_ADMIN
 
 | Comando | Descripcion |
 |---------|-------------|
+| `npm run start:dev` | Iniciar API + Worker + Web + Mobile (todos juntos) |
 | `npm run start:api` | Iniciar API con hot reload |
 | `npm run start:worker` | Iniciar Worker con hot reload |
 | `npm run start:web` | Iniciar frontend Angular |
+| `npm run start:mobile` | Iniciar app movil (Metro bundler) |
+| `npm run start:mobile:ios` | Abrir app movil en iOS simulator |
+| `npm run start:mobile:android` | Abrir app movil en Android emulator |
 | `npm run start:debug` | API en modo debug |
 
 ### Build
@@ -204,6 +216,69 @@ Role:     SUPER_ADMIN
 |---------|-------------|
 | `npm run lint` | Linter con auto-fix |
 | `npm run format` | Formatear con Prettier |
+
+---
+
+## App Movil
+
+La app movil esta construida con **React Native + Expo** y vive en `apps/mobile`. Comparte tipos y enums con el backend y el frontend web a traves de `libs/shared`.
+
+### Prerequisitos adicionales
+
+- **iOS**: Xcode 15+ con iOS Simulator (macOS unicamente)
+- **Android**: Android Studio con un AVD (Android Virtual Device) configurado
+- **Dispositivo fisico**: App [Expo Go](https://expo.dev/go) instalada en el dispositivo
+
+### Levantar la app movil
+
+```bash
+# Opcion A: Todos los servicios juntos (recomendado)
+npm run start:dev
+# Los logs apareceran con prefijos: [api] [worker] [web] [mobile]
+
+# Opcion B: Solo la app movil
+npm run start:mobile
+# En el Metro bundler: presiona 'i' para iOS, 'a' para Android, 'w' para web
+
+# Opcion C: Plataforma especifica
+npm run start:mobile:ios       # iOS simulator
+npm run start:mobile:android   # Android emulator
+```
+
+### Configuracion de entorno
+
+Crea el archivo `apps/mobile/.env` basado en el ejemplo:
+
+```bash
+cp apps/mobile/.env.example apps/mobile/.env
+```
+
+Contenido de `apps/mobile/.env`:
+
+```env
+# iOS Simulator y Expo Go en la misma red que el host
+EXPO_PUBLIC_API_URL=http://localhost:3000/api/v1
+
+# Android Emulator (localhost apunta al emulador, no al host)
+# EXPO_PUBLIC_API_URL=http://10.0.2.2:3000/api/v1
+
+# Dispositivo fisico en la misma red local
+# EXPO_PUBLIC_API_URL=http://192.168.1.x:3000/api/v1
+```
+
+Despues de cambiar `.env`, limpia el cache de Metro:
+
+```bash
+cd apps/mobile && npx expo start --clear
+```
+
+### Solucion de problemas comunes
+
+| Problema | Solucion |
+|---------|---------|
+| `EADDRINUSE: port 8081` | `lsof -ti:8081 \| xargs kill -9` |
+| `Unable to resolve @condominios/shared` | `cd apps/mobile && npx expo start --clear` |
+| Android no puede conectar a la API | Usar `EXPO_PUBLIC_API_URL=http://10.0.2.2:3000/api/v1` |
 
 ---
 
@@ -287,91 +362,15 @@ Todos los comandos se ejecutan desde el chat de **Claude Code** escribiendo el s
 
 | Fase | Comando | Que hace | Cuando usarlo |
 |------|---------|----------|---------------|
-| 1. Especificar | `/speckit.specify` | Genera un `spec.md` con user stories, requisitos funcionales y criterios de aceptacion a partir de una descripcion en lenguaje natural | Al inicio, cuando tienes una idea de feature |
-| 2. Clarificar | `/speckit.clarify` | Hace hasta 5 preguntas para resolver ambiguedades en la spec y las codifica de vuelta | Si hay puntos vagos o dudas en la spec |
+| 1. Especificar | `/speckit.specify` | Genera un `spec.md` con user stories, requisitos funcionales y criterios de aceptacion | Al inicio, cuando tienes una idea de feature |
+| 2. Clarificar | `/speckit.clarify` | Hace hasta 5 preguntas para resolver ambiguedades en la spec | Si hay puntos vagos o dudas en la spec |
 | 3. Planificar | `/speckit.plan` | Genera plan tecnico: modelo de datos, contratos API, research y quickstart | Despues de tener la spec aprobada |
-| 4. Tareas | `/speckit.tasks` | Crea `tasks.md` con tareas numeradas, ordenadas por dependencia y con criterios de completitud | Despues de tener el plan |
+| 4. Tareas | `/speckit.tasks` | Crea `tasks.md` con tareas numeradas, ordenadas por dependencia | Despues de tener el plan |
 | 5. Checklist | `/speckit.checklist` | Genera checklist de validacion de calidad basado en los requisitos | Para QA y seguimiento |
-| 6. Implementar | `/speckit.implement` | Ejecuta las tareas paso a paso, guiando la implementacion | Cuando empiezas a codificar |
+| 6. Implementar | `/speckit.implement` | Ejecuta las tareas paso a paso | Cuando empiezas a codificar |
 | 7. Analizar | `/speckit.analyze` | Revisa consistencia entre spec, plan y tasks | Para verificar que todo esta alineado |
-| 8. Issues | `/speckit.taskstoissues` | Convierte las tareas en GitHub Issues ordenados por dependencia | Para tracking en GitHub |
+| 8. Issues | `/speckit.taskstoissues` | Convierte las tareas en GitHub Issues | Para tracking en GitHub |
 | 9. Constitucion | `/speckit.constitution` | Crea o actualiza las reglas fundamentales del proyecto | Para definir/modificar principios |
-
-### Ejemplo de uso completo
-
-Para implementar un nuevo modulo (ej: "notificaciones push"):
-
-```
-# 1. Describir la feature
-/speckit.specify sistema de notificaciones push y email para residentes
-
-# 2. Si hay dudas, clarificar
-/speckit.clarify
-
-# 3. Generar plan tecnico
-/speckit.plan
-
-# 4. Generar tareas ordenadas
-/speckit.tasks
-
-# 5. Generar checklist de QA
-/speckit.checklist
-
-# 6. Implementar tarea por tarea
-/speckit.implement
-
-# 7. (Opcional) Verificar consistencia
-/speckit.analyze
-
-# 8. (Opcional) Crear issues en GitHub
-/speckit.taskstoissues
-```
-
-### Estructura de archivos Speckit
-
-```
-.speckit/
-├── constitution.md              # Reglas obligatorias del proyecto
-├── specs/                       # Especificaciones de modulos
-│   ├── auth.spec.md
-│   ├── buildings.spec.md
-│   ├── common-spaces.spec.md
-│   ├── condominiums.spec.md
-│   ├── payments.spec.md
-│   ├── reservations.spec.md
-│   ├── residents.spec.md
-│   ├── security.spec.md
-│   ├── units.spec.md
-│   └── users.spec.md
-├── agents/                      # Agentes AI especializados
-│   ├── backend-developer.md
-│   ├── frontend-developer.md
-│   ├── product-strategy-analyst.md
-│   └── devops.md
-└── templates/
-    └── module-spec.template.md
-
-.specify/
-├── README.md                    # Documentacion completa de Specify
-├── scripts/bash/                # Scripts de automatizacion
-└── templates/                   # Templates (plan, tasks, checklist, spec)
-```
-
-### Constitucion del Proyecto
-
-La constitucion (`.speckit/constitution.md`) define 7 workflows obligatorios:
-
-1. **Spec-Driven Development** - Todo modulo requiere spec antes de codificar
-2. **Testing unitario** - Minimo 70% cobertura (100% en auth)
-3. **Revision OWASP Top 10** - Seguridad obligatoria en cada modulo
-4. **Pruebas de endpoints** - Todo endpoint debe probarse antes del merge
-5. **Gitflow** - Branching strategy estricta
-6. **Gestion en Trello** - Tareas deben estar en el tablero de Trello
-7. **Actualizacion de documentacion** - README, specs, Swagger y CLAUDE.md deben mantenerse al dia
-
-### Modulos ya especificados
-
-Hay 10 specs existentes en `.speckit/specs/`: auth, buildings, common-spaces, condominiums, payments, reservations, residents, security, units, users.
 
 ---
 

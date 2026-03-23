@@ -219,8 +219,10 @@ Use these slash commands for the SDD workflow:
 - **Edificios Module** (`apps/web/src/app/features/edificios/`): Full CRUD for buildings — list (paginated table), create/edit (reactive form), detail (with units), deactivate/activate (with confirmation dialog). No delete — buildings are deactivated via PATCH `isActive: false`.
 
 ## Active Technologies
+- TypeScript 5.9, Node.js 24.x (001-add-mobile-app)
 - TypeScript 5.9, Node.js 24.11.1 + Angular 21, Angular Material 21, RxJS (002-buildings-crud)
 - Backend API REST existente (NestJS 11 + PostgreSQL) (002-buildings-crud)
 
 ## Recent Changes
+- 001-add-mobile-app: Added TypeScript 5.9, Node.js 24.x
 - 002-buildings-crud: Added TypeScript 5.9, Node.js 24.11.1 + Angular 21, Angular Material 21, RxJS
