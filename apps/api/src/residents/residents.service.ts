@@ -43,11 +43,11 @@ export class ResidentsService {
     // Check no active resident with same documentNumber exists
     const existingResident = await this.residentRepository
       .createQueryBuilder('resident')
-      .where('resident.document_number = :documentNumber', {
+      .where('resident.documentNumber = :documentNumber', {
         documentNumber: createResidentDto.documentNumber,
       })
-      .andWhere('resident.is_active = :isActive', { isActive: true })
-      .andWhere('resident.deleted_at IS NULL')
+      .andWhere('resident.isActive = :isActive', { isActive: true })
+      .andWhere('resident.deletedAt IS NULL')
       .getOne();
 
     if (existingResident) {
@@ -85,9 +85,9 @@ export class ResidentsService {
         const queryBuilder = this.residentRepository
           .createQueryBuilder('resident')
           .leftJoinAndSelect('resident.user', 'user')
-          .where('resident.unit_id = :unitId', { unitId })
-          .orderBy('resident.is_primary', 'DESC')
-          .addOrderBy('resident.created_at', 'ASC')
+          .where('resident.unitId = :unitId', { unitId })
+          .orderBy('resident.isPrimary', 'DESC')
+          .addOrderBy('resident.createdAt', 'ASC')
           .skip((page - 1) * limit)
           .take(limit);
 
