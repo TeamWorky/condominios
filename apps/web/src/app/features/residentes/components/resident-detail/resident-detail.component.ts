@@ -13,6 +13,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { ResidentService } from '../../services/resident.service';
 import { IResident, ResidentType } from '../../../../core/models/resident.model';
+import { RutFormatPipe } from '../../../../core/pipes/rut-format.pipe';
 
 const RESIDENT_TYPE_LABELS: Record<string, string> = {
   [ResidentType.OWNER]: 'Propietario',
@@ -35,6 +36,7 @@ const RESIDENT_TYPE_LABELS: Record<string, string> = {
     MatSnackBarModule,
     MatDividerModule,
     MatTooltipModule,
+    RutFormatPipe,
   ],
   templateUrl: './resident-detail.component.html',
   styleUrls: ['./resident-detail.component.scss'],

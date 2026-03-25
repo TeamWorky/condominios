@@ -39,7 +39,7 @@
           </div>
           <div class="detail-field">
             <span class="label">Documento</span>
-            <span class="value">{{ resident.documentType }} {{ resident.documentNumber }}</span>
+            <span class="value">{{ resident.documentType }} {{ resident.documentType === 'RUT' ? (resident.documentNumber | rutFormat) : resident.documentNumber }}</span>
           </div>
           <div class="detail-field">
             <span class="label">Fecha de Nacimiento</span>

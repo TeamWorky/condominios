@@ -23,6 +23,7 @@ import { IResident, ResidentType } from '../../../../core/models/resident.model'
 import { IBuilding } from '../../../../core/models/building.model';
 import { IUnit } from '../../../../core/models/unit.model';
 import { ConfirmDialogComponent } from '../../../edificios/components/confirm-dialog/confirm-dialog.component';
+import { RutFormatPipe } from '../../../../core/pipes/rut-format.pipe';
 
 const RESIDENT_TYPE_LABELS: Record<string, string> = {
   [ResidentType.OWNER]: 'Propietario',
@@ -49,6 +50,7 @@ const RESIDENT_TYPE_LABELS: Record<string, string> = {
     MatDialogModule,
     MatSelectModule,
     MatFormFieldModule,
+    RutFormatPipe,
   ],
   templateUrl: './resident-list.component.html',
   styleUrls: ['./resident-list.component.scss'],

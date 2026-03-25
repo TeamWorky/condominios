@@ -19,7 +19,7 @@ describe('ResidentFormComponent', () => {
     firstName: 'Juan',
     lastName: 'Perez',
     documentType: DocumentType.RUT,
-    documentNumber: '12345678-9',
+    documentNumber: '12.345.678-5',
     dateOfBirth: '1990-01-01',
     unitId: 'u1',
     residentType: ResidentType.OWNER,
@@ -117,7 +117,7 @@ describe('ResidentFormComponent', () => {
         firstName: 'Juan',
         lastName: 'Perez',
         documentType: DocumentType.RUT,
-        documentNumber: '12345678-9',
+        documentNumber: '12.345.678-5',
         dateOfBirth: '1990-01-01',
         residentType: ResidentType.OWNER,
       });
@@ -127,7 +127,7 @@ describe('ResidentFormComponent', () => {
         expect.objectContaining({
           firstName: 'Juan',
           lastName: 'Perez',
-          documentNumber: '12345678-9',
+          documentNumber: '12.345.678-5',
         }),
       );
     });
@@ -138,7 +138,7 @@ describe('ResidentFormComponent', () => {
       component.residentForm.patchValue({
         firstName: 'Juan',
         lastName: 'Perez',
-        documentNumber: '12345678-9',
+        documentNumber: '12.345.678-5',
         dateOfBirth: '1990-01-01',
       });
       const snackSpy = vi.spyOn((component as any).snackBar, 'open');
@@ -158,7 +158,7 @@ describe('ResidentFormComponent', () => {
       component.residentForm.patchValue({
         firstName: 'Juan',
         lastName: 'Perez',
-        documentNumber: '12345678-9',
+        documentNumber: '12.345.678-5',
         dateOfBirth: '1990-01-01',
       });
       component.onSubmit();

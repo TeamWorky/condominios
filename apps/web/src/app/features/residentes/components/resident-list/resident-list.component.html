@@ -78,7 +78,7 @@
         <ng-container matColumnDef="document">
           <th mat-header-cell *matHeaderCellDef>Documento</th>
           <td mat-cell *matCellDef="let resident">
-            {{ resident.documentType }} {{ resident.documentNumber }}
+            {{ resident.documentType }} {{ resident.documentType === 'RUT' ? (resident.documentNumber | rutFormat) : resident.documentNumber }}
           </td>
         </ng-container>
 

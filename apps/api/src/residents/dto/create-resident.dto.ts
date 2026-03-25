@@ -8,10 +8,28 @@ import {
   IsDateString,
   IsEmail,
   MaxLength,
+  ValidatorConstraint,
+  ValidatorConstraintInterface,
+  ValidationArguments,
+  Validate,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ResidentType } from '@condominios/shared/enums/resident-type.enum';
 import { DocumentType } from '@condominios/shared/enums/document-type.enum';
+import { isValidRut } from '@condominios/shared/validators/rut.validator';
+
+@ValidatorConstraint({ name: 'isValidChileanRut', async: false })
+class IsValidChileanRut implements ValidatorConstraintInterface {
+  validate(documentNumber: string, args: ValidationArguments): boolean {
+    const dto = args.object as CreateResidentDto;
+    if (dto.documentType !== DocumentType.RUT) return true;
+    return isValidRut(documentNumber);
+  }
+
+  defaultMessage(): string {
+    return 'Invalid RUT: verification digit does not match';
+  }
+}
 
 export class CreateResidentDto {
   @ApiProperty({ example: 'Juan', description: 'First name' })
@@ -31,10 +49,11 @@ export class CreateResidentDto {
   @IsNotEmpty()
   documentType: DocumentType;
 
-  @ApiProperty({ example: '12345678-9', description: 'Document number (unique among active residents)' })
+  @ApiProperty({ example: '12.345.678-5', description: 'Document number (unique among active residents). If RUT, must have valid verification digit.' })
   @IsString()
   @IsNotEmpty()
   @MaxLength(50)
+  @Validate(IsValidChileanRut)
   documentNumber: string;
 
   @ApiProperty({ example: '1990-05-15', description: 'Date of birth' })

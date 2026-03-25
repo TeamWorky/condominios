@@ -49,7 +49,7 @@
 
             <mat-form-field appearance="outline">
               <mat-label>Numero de Documento</mat-label>
-              <input matInput formControlName="documentNumber" placeholder="Ej: 12345678-9">
+              <input matInput formControlName="documentNumber" placeholder="Ej: 12.345.678-9" (blur)="onRutBlur()">
               <mat-icon matPrefix>fingerprint</mat-icon>
               @if (residentForm.get('documentNumber')?.invalid && residentForm.get('documentNumber')?.touched) {
                 <mat-error>{{ getErrorMessage('documentNumber') }}</mat-error>

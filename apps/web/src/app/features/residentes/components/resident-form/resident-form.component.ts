@@ -26,6 +26,8 @@ import {
   ResidentType,
   DocumentType,
 } from '../../../../core/models/resident.model';
+import { rutValidator } from '../../../../core/validators/rut.validator';
+import { formatRut, cleanRut } from '@condominios/shared/validators/rut.validator';
 
 const RESIDENT_TYPE_OPTIONS = [
   { value: ResidentType.OWNER, label: 'Propietario' },
@@ -87,7 +89,7 @@ export class ResidentFormComponent implements OnInit, OnDestroy {
       firstName: ['', [Validators.required, Validators.maxLength(100)]],
       lastName: ['', [Validators.required, Validators.maxLength(100)]],
       documentType: [DocumentType.RUT, [Validators.required]],
-      documentNumber: ['', [Validators.required, Validators.maxLength(50)]],
+      documentNumber: ['', [Validators.required, Validators.maxLength(50), rutValidator]],
       dateOfBirth: ['', [Validators.required]],
       phone: ['', [Validators.maxLength(20)]],
       email: ['', [Validators.email]],
@@ -95,6 +97,18 @@ export class ResidentFormComponent implements OnInit, OnDestroy {
       moveInDate: [''],
       isPrimary: [false],
       relationship: ['', [Validators.maxLength(100)]],
+    });
+
+    // Toggle RUT validator when document type changes
+    this.residentForm.get('documentType')?.valueChanges.subscribe((type) => {
+      const docNumber = this.residentForm.get('documentNumber');
+      if (!docNumber) return;
+      if (type === DocumentType.RUT) {
+        docNumber.setValidators([Validators.required, Validators.maxLength(50), rutValidator]);
+      } else {
+        docNumber.setValidators([Validators.required, Validators.maxLength(50)]);
+      }
+      docNumber.updateValueAndValidity();
     });
   }
 
@@ -155,6 +169,17 @@ export class ResidentFormComponent implements OnInit, OnDestroy {
           this.cdr.detectChanges();
         },
       });
+  }
+
+  onRutBlur(): void {
+    const docType = this.residentForm.get('documentType')?.value;
+    const docNumber = this.residentForm.get('documentNumber');
+    if (docType === DocumentType.RUT && docNumber?.value) {
+      const cleaned = cleanRut(docNumber.value);
+      if (cleaned.length >= 8) {
+        docNumber.setValue(formatRut(docNumber.value), { emitEvent: false });
+      }
+    }
   }
 
   onSubmit(): void {
@@ -290,6 +315,8 @@ export class ResidentFormComponent implements OnInit, OnDestroy {
       return `Maximo ${max} caracteres`;
     }
     if (control.hasError('email')) return 'Ingrese un email valido';
+    if (control.hasError('invalidRut'))
+      return 'RUT invalido: el digito verificador no coincide';
     if (control.hasError('duplicate'))
       return 'Ya existe un residente activo con este numero de documento';
 

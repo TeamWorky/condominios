@@ -143,8 +143,8 @@
 - [X] T028 Run all backend tests: `npm test -- --projects=api`
 - [ ] T029 Run quickstart.md validation (8 manual QA steps)
 - [X] T030 Update CLAUDE.md with residents module documentation (ResidentService, Residentes Module descriptions)
-- [ ] T031 Commit all changes with conventional commit message
-- [ ] T032 Create PR to development branch
+- [X] T031 Commit all changes with conventional commit message
+- [X] T032 Create PR to development branch
 
 ---
 

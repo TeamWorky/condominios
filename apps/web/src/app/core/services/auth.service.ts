@@ -146,20 +146,32 @@ export class AuthService {
     );
   }
 
-  logout(): void {
-    this.http.post(`${this.API_URL}/logout`, {}).subscribe({
-      error: () => {}
-    });
+  private isLoggingOut = false;
 
-    // Limpiar localStorage siempre
+  logout(): void {
+    if (this.isLoggingOut) return;
+    this.isLoggingOut = true;
+
+    // Clear local state first to prevent re-entrant calls
+    const token = localStorage.getItem(this.TOKEN_KEY);
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.REFRESH_TOKEN_KEY);
     localStorage.removeItem(this.USER_KEY);
     localStorage.removeItem(this.CONDOMINIOS_KEY);
     localStorage.removeItem(this.SELECTED_CONDOMINIO_KEY);
-
-    // Resetear estado
     this.authState$.next(this.getInitialState());
+
+    // Notify backend (best-effort, ignore errors)
+    if (token) {
+      this.http.post(`${this.API_URL}/logout`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      }).subscribe({
+        complete: () => { this.isLoggingOut = false; },
+        error: () => { this.isLoggingOut = false; },
+      });
+    } else {
+      this.isLoggingOut = false;
+    }
   }
 
   refreshTokens(): Observable<AuthTokens> {
