@@ -126,7 +126,7 @@ export class AddPersonalFieldsToResidents1706650000009
       );
     }
 
-    // Add index on document_number for uniqueness lookups
+    // Add index on document_number for fast lookups
     await queryRunner.createIndex(
       'residents',
       new TableIndex({
@@ -134,9 +134,21 @@ export class AddPersonalFieldsToResidents1706650000009
         columnNames: ['document_number'],
       }),
     );
+
+    // Add partial unique index to enforce data integrity for active residents
+    await queryRunner.createIndex(
+      'residents',
+      new TableIndex({
+        name: 'UQ_residents_active_document',
+        columnNames: ['document_number'],
+        isUnique: true,
+        where: '"is_active" = true AND "deleted_at" IS NULL',
+      }),
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.dropIndex('residents', 'UQ_residents_active_document');
     await queryRunner.dropIndex('residents', 'IDX_residents_document_number');
 
     const table = await queryRunner.getTable('residents');
