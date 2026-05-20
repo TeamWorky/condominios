@@ -238,15 +238,63 @@ Use these slash commands for the SDD workflow:
 - **PaykuSignatureService** (`libs/infrastructure/src/payku/payku-signature.service.ts`): HMAC-SHA256 signing service for Payku endpoints requiring signed requests (nullification, wallet, subscriptions, marketplace, mall). Sorts keys alphabetically, excludes objects/arrays, URL-encodes path.
 - **PaykuException** (`libs/infrastructure/src/payku/payku.exception.ts`): Typed exception extending HttpException with `paykuStatusCode` and `paykuMessage`. Default status: BAD_GATEWAY (502).
 
+## Team
+
+| Miembro | GitHub | Foco |
+|---------|--------|------|
+| Martin Miranda | @martinmiranda14 | Backend, Infrastructure, Security, DevOps |
+| Carlos Compuelec | @Compuelec | Frontend, UX, Accessibility |
+
+**Plan de trabajo detallado**: `specs/004-mvp-completion/team-plan/`
+
+## Module Status
+
+> Snapshot: 2026-05-20. Ver estado actualizado en `specs/004-mvp-completion/team-plan/status.md`.
+
+### Backend (apps/api/src/)
+| Module | Status | Tests |
+|--------|--------|-------|
+| Auth | COMPLETE | ✅ 100% |
+| Users | COMPLETE | ✅ |
+| Condominiums | COMPLETE | ❌ Missing |
+| Buildings | COMPLETE | ❌ Missing |
+| Units | COMPLETE | ❌ Missing |
+| Residents | COMPLETE | ✅ |
+| Payments | STUB (entity only) | ❌ |
+| Common Spaces | STUB (entity only) | ❌ |
+| Reservations | STUB (entity only) | ❌ |
+
+### Frontend (apps/web/src/app/features/)
+| Module | Status | Notes |
+|--------|--------|-------|
+| Auth | COMPLETE | Login + select condominio |
+| Dashboard | COMPLETE | Payment cards show "Proximamente" |
+| Edificios | COMPLETE | Full CRUD |
+| Unidades | COMPLETE | Full CRUD |
+| Residentes | COMPLETE | Full CRUD |
+| Espacios Comunes | UI COMPLETE | Backend missing |
+| Reservas | UI COMPLETE | Backend missing |
+| Pagos | PARTIAL | List works, form/detail are stubs |
+
+### Infrastructure (libs/infrastructure/src/)
+| Module | Status |
+|--------|--------|
+| Logger (Winston) | COMPLETE |
+| Redis | COMPLETE |
+| Queue (BullMQ) | COMPLETE |
+| Email | COMPLETE |
+| Health | COMPLETE |
+| Payku | COMPLETE |
+| Config (env validation) | COMPLETE |
+
 ## Active Technologies
-- TypeScript 5.9, Node.js 24.x (001-add-mobile-app)
-- TypeScript 5.9, Node.js 24.11.1 + Angular 21, Angular Material 21, RxJS (002-buildings-crud)
-- Backend API REST existente (NestJS 11 + PostgreSQL) (002-buildings-crud)
-- PostgreSQL (TypeORM), Redis (cache) (003-residents-crud)
-- TypeScript 5.9, Node.js 24.11.1 + NestJS 11, axios (HTTP client, already installed) (005-payku-library)
-- None (infrastructure library — no database entities) (005-payku-library)
+- TypeScript 5.9, Node.js 24.11.1
+- Angular 21, Angular Material 21, RxJS
+- NestJS 11, PostgreSQL (TypeORM), Redis
+- axios (HTTP client)
 
 ## Recent Changes
 - 001-add-mobile-app: Added TypeScript 5.9, Node.js 24.x
-- 002-buildings-crud: Added TypeScript 5.9, Node.js 24.11.1 + Angular 21, Angular Material 21, RxJS
-- 005-payku-library: Added PaykuModule, PaykuService, PaykuSignatureService, PaykuException in libs/infrastructure/src/payku/
+- 002-buildings-crud: Full CRUD buildings module (backend + frontend)
+- 003-residents-crud: Full CRUD residents module (backend + frontend)
+- 005-payku-library: PaykuModule, PaykuService, PaykuSignatureService, PaykuException
