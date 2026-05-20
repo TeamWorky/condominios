@@ -69,7 +69,7 @@ Code Reviewer → Security Engineer → Accessibility Auditor → Performance Be
 - **Testing**: 70% minimum coverage, auth service 100%
 - **Security**: OWASP Top 10 review for every module
 - **Gitflow**: Feature branches from development, never push to main/development directly
-- **QA Manual**: BLOQUEANTE - levantar servidores y ejecutar quickstart.md antes del PR
+- **QA Manual**: BLOCKING - start servers and execute quickstart.md before PR
 - **Language**: ALL code in English, Spanish ONLY for user-facing UI text
 
 ### Quality Gates
@@ -113,7 +113,7 @@ For each task:
 
 ### Phase 4: Integration & Release
 1. Reality Checker performs final assessment
-2. QA Manual execution (BLOQUEANTE)
+2. QA Manual execution (BLOCKING)
 3. Git workflow: commit → push → PR to development
 4. Documentation update verification
 

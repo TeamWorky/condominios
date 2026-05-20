@@ -53,7 +53,7 @@ Every feature MUST follow:
 4. `/speckit.tasks` → Generate dependency-ordered tasks
 5. `/speckit.checklist` → QA validation checklist
 6. `/speckit.implement` → Execute task by task
-7. **QA Manual** → Execute quickstart.md (BLOQUEANTE)
+7. **QA Manual** → Execute quickstart.md (BLOCKING)
 8. `/speckit.analyze` → Post-implementation consistency check
 
 **Rule**: If someone asks to implement without spec, STOP and create the spec first.
@@ -103,7 +103,7 @@ hotfix/* ← urgent fixes (from main → main + development)
 - Backend tests: Jest 30, 70% minimum coverage, auth 100%
 - Frontend tests: Vitest 4.x, `npx ng test --no-watch`
 - OWASP Top 10 review per module
-- QA Manual BLOQUEANTE before PR creation
+- QA Manual BLOCKING before PR creation
 - ALL code in English, Spanish only for user-facing UI text
 
 ## 📝 Task Format

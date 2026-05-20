@@ -19,7 +19,7 @@ describe('AuthController', () => {
     login: jest.fn(),
     selectCondominio: jest.fn(),
     logout: jest.fn(),
-    refreshTokens: jest.fn(),
+    verifyAndRefreshTokens: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -221,27 +221,18 @@ describe('AuthController', () => {
         refreshToken: 'valid-refresh-token',
       };
 
-      const currentUser = {
-        sub: 'user-id-123',
-        email: 'user@example.com',
-      };
-
       const tokens = {
         accessToken: 'new-access-token',
         refreshToken: 'new-refresh-token',
       };
 
-      service.refreshTokens.mockResolvedValue(tokens);
+      service.verifyAndRefreshTokens.mockResolvedValue(tokens);
 
       // Act
-      const result = await controller.refreshTokens(
-        refreshTokenDto,
-        currentUser as any,
-      );
+      const result = await controller.refreshTokens(refreshTokenDto);
 
       // Assert
-      expect(service.refreshTokens).toHaveBeenCalledWith(
-        currentUser.sub,
+      expect(service.verifyAndRefreshTokens).toHaveBeenCalledWith(
         refreshTokenDto.refreshToken,
       );
       expect(result).toEqual(tokens);
@@ -253,18 +244,13 @@ describe('AuthController', () => {
         refreshToken: 'invalid-refresh-token',
       };
 
-      const currentUser = {
-        sub: 'user-id-123',
-        email: 'user@example.com',
-      };
-
-      service.refreshTokens.mockRejectedValue(
+      service.verifyAndRefreshTokens.mockRejectedValue(
         new UnauthorizedException('Invalid refresh token'),
       );
 
       // Act & Assert
       await expect(
-        controller.refreshTokens(refreshTokenDto, currentUser as any),
+        controller.refreshTokens(refreshTokenDto),
       ).rejects.toThrow(UnauthorizedException);
     });
   });
