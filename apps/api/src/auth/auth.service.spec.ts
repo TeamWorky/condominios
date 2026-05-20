@@ -32,6 +32,7 @@ describe('AuthService', () => {
 
   const mockJwtService = {
     signAsync: jest.fn(),
+    verify: jest.fn(),
   };
 
   const mockConfigService = {
@@ -87,7 +88,7 @@ describe('AuthService', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('register', () => {
@@ -244,9 +245,9 @@ describe('AuthService', () => {
         email: loginDto.email,
         isActive: true,
       });
-      mockUser.validatePassword = jest.fn().mockResolvedValue(false);
 
       mockUsersService.findByEmail.mockResolvedValue(mockUser);
+      mockedBcrypt.compare.mockResolvedValue(false);
 
       // Act & Assert
       await expect(service.login(loginDto)).rejects.toThrow(
@@ -354,6 +355,50 @@ describe('AuthService', () => {
         UnauthorizedException,
       );
       expect(mockUsersService.updateRefreshToken).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('verifyAndRefreshTokens', () => {
+    it('should verify and refresh tokens successfully', async () => {
+      // Arrange
+      const refreshToken = 'valid-refresh-token';
+      const userId = 'user-id-123';
+      const mockUser = createMockUser({
+        id: userId,
+        refreshToken: 'hashed-refresh-token',
+      });
+
+      mockJwtService.verify.mockReturnValue({ sub: userId, email: 'test@example.com' });
+      mockUsersService.findOne.mockResolvedValue(mockUser);
+      mockedBcrypt.compare.mockResolvedValue(true);
+      mockJwtService.signAsync
+        .mockResolvedValueOnce('new-access-token')
+        .mockResolvedValueOnce('new-refresh-token');
+      mockedBcrypt.hash.mockResolvedValue('new-hashed-refresh-token' as never);
+      mockUsersService.updateRefreshToken.mockResolvedValue(undefined);
+
+      // Act
+      const result = await service.verifyAndRefreshTokens(refreshToken);
+
+      // Assert
+      expect(mockJwtService.verify).toHaveBeenCalledWith(refreshToken, {
+        secret: 'test-refresh-secret-minimum-32-characters-long',
+      });
+      expect(result).toHaveProperty('accessToken', 'new-access-token');
+      expect(result).toHaveProperty('refreshToken', 'new-refresh-token');
+    });
+
+    it('should throw UnauthorizedException when token verification fails', async () => {
+      // Arrange
+      const refreshToken = 'tampered-token';
+      mockJwtService.verify.mockImplementation(() => {
+        throw new Error('invalid signature');
+      });
+
+      // Act & Assert
+      await expect(service.verifyAndRefreshTokens(refreshToken)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
   });
 });

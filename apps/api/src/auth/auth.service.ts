@@ -94,6 +94,24 @@ export class AuthService {
     await this._usersService.updateRefreshToken(userId, null);
   }
 
+  async verifyAndRefreshTokens(refreshToken: string) {
+    const jwtRefreshSecret = this._configService.get<string>('JWT_REFRESH_SECRET');
+    if (!jwtRefreshSecret) {
+      throw new Error('JWT_REFRESH_SECRET environment variable is required');
+    }
+
+    let payload: any;
+    try {
+      payload = this._jwtService.verify(refreshToken, {
+        secret: jwtRefreshSecret,
+      });
+    } catch {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+
+    return this.refreshTokens(payload.sub, refreshToken);
+  }
+
   async refreshTokens(userId: string, refreshToken: string) {
     const user = await this._usersService.findOne(userId);
 
@@ -148,12 +166,14 @@ export class AuthService {
       condominioId,
     };
 
-    const jwtSecret =
-      this._configService.get<string>('JWT_SECRET') ||
-      'default-secret-change-me';
-    const jwtRefreshSecret =
-      this._configService.get<string>('JWT_REFRESH_SECRET') ||
-      'default-refresh-secret-change-me';
+    const jwtSecret = this._configService.get<string>('JWT_SECRET');
+    if (!jwtSecret) {
+      throw new Error('JWT_SECRET environment variable is required');
+    }
+    const jwtRefreshSecret = this._configService.get<string>('JWT_REFRESH_SECRET');
+    if (!jwtRefreshSecret) {
+      throw new Error('JWT_REFRESH_SECRET environment variable is required');
+    }
 
     const [accessToken, refreshToken] = await Promise.all([
       this._jwtService.signAsync(payload, {
@@ -166,7 +186,7 @@ export class AuthService {
       }),
     ]);
 
-    const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+    const hashedRefreshToken = await bcrypt.hash(refreshToken, 12);
 
     return {
       accessToken,

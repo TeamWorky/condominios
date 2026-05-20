@@ -4,7 +4,6 @@ import {
   HttpCode,
   HttpStatus,
   Post,
-  UnauthorizedException,
   UseGuards,
   Version,
 } from '@nestjs/common';
@@ -15,7 +14,6 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { JwtService } from '@nestjs/jwt';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
@@ -27,10 +25,7 @@ import { Public } from '@condominios/common/decorators/public.decorator';
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private readonly _authService: AuthService,
-    private readonly _jwtService: JwtService,
-  ) {}
+  constructor(private readonly _authService: AuthService) {}
 
   @Public()
   @Post('register')
@@ -99,10 +94,6 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Tokens refreshed successfully' })
   @ApiResponse({ status: 401, description: 'Invalid refresh token' })
   async refreshTokens(@Body() refreshTokenDto: RefreshTokenDto) {
-    const decoded = this._jwtService.decode(refreshTokenDto.refreshToken) as any;
-    if (!decoded?.sub) {
-      throw new UnauthorizedException('Invalid refresh token');
-    }
-    return await this._authService.refreshTokens(decoded.sub, refreshTokenDto.refreshToken);
+    return await this._authService.verifyAndRefreshTokens(refreshTokenDto.refreshToken);
   }
 }
