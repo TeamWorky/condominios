@@ -72,6 +72,11 @@ export const envValidationSchema = Joi.object({
 
   // Application URL (for email links)
   APP_URL: Joi.string().default('http://localhost:3000'),
+
+  // Payku payment gateway
+  PAYKU_PUBLIC_TOKEN: Joi.string().optional().default(''),
+  PAYKU_PRIVATE_TOKEN: Joi.string().optional().default(''),
+  PAYKU_SANDBOX: Joi.string().valid('true', 'false').default('true'),
 }).options({
   allowUnknown: true, // Allow additional variables not in schema
   stripUnknown: true, // Remove unknown variables

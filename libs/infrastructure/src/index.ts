@@ -26,3 +26,10 @@ export { EmailService } from './email/email.service';
 export { EmailQueueService } from './email/email-queue.service';
 export { EmailProcessor } from './email/processors/email.processor';
 export { EmailTemplatesService } from './email/templates/email-templates.service';
+
+// Payku
+export { PaykuModule } from './payku/payku.module';
+export { PaykuService } from './payku/payku.service';
+export { PaykuSignatureService } from './payku/payku-signature.service';
+export { PaykuException } from './payku/payku.exception';
+export * from './payku/interfaces';
