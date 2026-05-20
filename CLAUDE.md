@@ -231,12 +231,22 @@ Use these slash commands for the SDD workflow:
 - **ResidentService** (`apps/web/src/app/features/residentes/services/resident.service.ts`): CRUD operations for residents scoped by unitId. `getResidentsByUnit(unitId, page, limit)` returns paginated residents. `toggleResidentStatus(id, isActive)` PATCHes via `updateResident`.
 - **Residentes Module** (`apps/web/src/app/features/residentes/`): Full CRUD for residents — list (with cascading Building→Unit filters, paginated table), create/edit (reactive form with personal data + residence data sections), detail view, activate/deactivate (with confirmation dialog). Reuses ConfirmDialogComponent from edificios module. DocumentType/DocumentNumber read-only in edit mode.
 
+## Infrastructure Services
+
+- **PaykuModule** (`libs/infrastructure/src/payku/payku.module.ts`): @Global NestJS module for Payku payment gateway integration. Uses `PAYKU_CONFIG` injection token via `useFactory` with ConfigService.
+- **PaykuService** (`libs/infrastructure/src/payku/payku.service.ts`): Typed HTTP client wrapping all Payku REST API endpoints — transactions, nullification (refunds), wallet, subscriptions, marketplace, mall, events, conciliation, and utilities. Uses `isOperational()` pattern for graceful degradation when tokens not configured. Bearer token auth + HMAC-SHA256 signatures for sensitive endpoints.
+- **PaykuSignatureService** (`libs/infrastructure/src/payku/payku-signature.service.ts`): HMAC-SHA256 signing service for Payku endpoints requiring signed requests (nullification, wallet, subscriptions, marketplace, mall). Sorts keys alphabetically, excludes objects/arrays, URL-encodes path.
+- **PaykuException** (`libs/infrastructure/src/payku/payku.exception.ts`): Typed exception extending HttpException with `paykuStatusCode` and `paykuMessage`. Default status: BAD_GATEWAY (502).
+
 ## Active Technologies
 - TypeScript 5.9, Node.js 24.x (001-add-mobile-app)
 - TypeScript 5.9, Node.js 24.11.1 + Angular 21, Angular Material 21, RxJS (002-buildings-crud)
 - Backend API REST existente (NestJS 11 + PostgreSQL) (002-buildings-crud)
 - PostgreSQL (TypeORM), Redis (cache) (003-residents-crud)
+- TypeScript 5.9, Node.js 24.11.1 + NestJS 11, axios (HTTP client, already installed) (005-payku-library)
+- None (infrastructure library — no database entities) (005-payku-library)
 
 ## Recent Changes
 - 001-add-mobile-app: Added TypeScript 5.9, Node.js 24.x
 - 002-buildings-crud: Added TypeScript 5.9, Node.js 24.11.1 + Angular 21, Angular Material 21, RxJS
+- 005-payku-library: Added PaykuModule, PaykuService, PaykuSignatureService, PaykuException in libs/infrastructure/src/payku/
