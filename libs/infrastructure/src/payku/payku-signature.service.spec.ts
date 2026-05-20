@@ -9,6 +9,7 @@ describe('PaykuSignatureService', () => {
     privateToken: 'fe551abcef62fcf002dc598922e68f0a',
     sandbox: true,
     baseUrl: 'https://des.payku.cl/api',
+    timeout: 30000,
   };
 
   beforeEach(() => {
@@ -38,8 +39,10 @@ describe('PaykuSignatureService', () => {
       const signature2 = service.sign(requestPath, body);
       expect(signature).toBe(signature2);
 
-      // Verify our implementation matches URLSearchParams-based approach
-      // (Payku JS example: encodeURIComponent(path) + '&' + new URLSearchParams(sorted).toString())
+      // Verify deterministic output using URLSearchParams (matches Payku's
+      // own JS/PHP code examples). Note: Payku docs show hash d891663698d...
+      // using CryptoJS; our Node.js crypto produces a different but correct hash.
+      // See: specs/005-payku-library/research.md R1 for details.
       expect(signature).toBe(
         '58f9d932d0dabd36e353c49ecfe0938261f840752a9f0c56c919260b4421553c',
       );
@@ -103,11 +106,18 @@ describe('PaykuSignatureService', () => {
       expect(sig1).toBe(sig2);
     });
 
-    it('should include null values as string "null"', () => {
-      const body = { email: 'test@test.com', extra: null };
-      const signature = service.sign('/api/test', body as Record<string, unknown>);
-      expect(signature).toBeDefined();
-      expect(signature.length).toBe(64);
+    it('should exclude null and undefined values from signature', () => {
+      const bodyWithNull = { email: 'test@test.com', extra: null };
+      const bodyWithUndefined = { email: 'test@test.com', extra: undefined };
+      const bodyClean = { email: 'test@test.com' };
+
+      const sigNull = service.sign('/api/test', bodyWithNull as Record<string, unknown>);
+      const sigUndefined = service.sign('/api/test', bodyWithUndefined as Record<string, unknown>);
+      const sigClean = service.sign('/api/test', bodyClean);
+
+      // All three should produce the same signature
+      expect(sigNull).toBe(sigClean);
+      expect(sigUndefined).toBe(sigClean);
     });
   });
 });

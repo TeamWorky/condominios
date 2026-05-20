@@ -3,4 +3,5 @@ export interface PaykuConfig {
   privateToken: string;
   sandbox: boolean;
   baseUrl: string;
+  timeout: number;
 }

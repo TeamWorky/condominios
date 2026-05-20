@@ -25,17 +25,22 @@ export class PaykuSignatureService {
     const sortedKeys = Object.keys(body).sort();
     const filteredParams: Record<string, string> = {};
 
+    // Exclude null, undefined, objects, and arrays from the signature.
+    // Uses URLSearchParams to match Payku's own JS/PHP code examples
+    // (http_build_query in PHP, new URLSearchParams in JS).
     for (const key of sortedKeys) {
       const value = body[key];
       if (
-        typeof value !== 'object' ||
-        value === null
+        value !== undefined &&
+        value !== null &&
+        typeof value !== 'object'
       ) {
         filteredParams[key] = String(value);
       }
     }
 
     const urlParams = new URLSearchParams(filteredParams).toString();
+
     const concat = encodedPath + '&' + urlParams;
 
     return crypto

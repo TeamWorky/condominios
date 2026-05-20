@@ -352,10 +352,9 @@ export class PaykuService {
     this.ensureOperational();
 
     const url = `${this.baseUrl}${path}`;
-    const headers =
-      options?.signed && options?.data
-        ? this.getSignedHeaders(path, options.data)
-        : this.getBearerHeaders();
+    const headers = options?.signed
+      ? this.getSignedHeaders(path, options.data ?? {})
+      : this.getBearerHeaders();
 
     const axiosConfig: AxiosRequestConfig = {
       method,
@@ -363,7 +362,7 @@ export class PaykuService {
       headers,
       data: options?.data,
       params: options?.params,
-      timeout: 30000,
+      timeout: this.config.timeout,
     };
 
     this.logger.debug(

@@ -21,6 +21,7 @@ import { PaykuService } from './payku.service';
           baseUrl: sandbox
             ? 'https://des.payku.cl/api'
             : 'https://app.payku.cl/api',
+          timeout: configService.get<number>('PAYKU_TIMEOUT', 30000),
         };
       },
       inject: [ConfigService],
@@ -28,6 +29,6 @@ import { PaykuService } from './payku.service';
     PaykuSignatureService,
     PaykuService,
   ],
-  exports: [PaykuService, PaykuSignatureService],
+  exports: [PaykuService],
 })
 export class PaykuModule {}

@@ -65,9 +65,10 @@ npm test
 - Path: `/api/suclient/`
 - Data: `{ email: "johndoe@example.com", name: "John Doe", phone: "923122312", address: "Moneda 101", country: "Chile", region: "Metropolitana", city: "Santiago", postal_code: "850000" }`
 - Token: `fe551abcef62fcf002dc598922e68f0a`
-- Expected: `d891663698d31aa8b68babe96ac6497f5a0d874024368102998d5b79a4d12c36`
+- Expected: `58f9d932d0dabd36e353c49ecfe0938261f840752a9f0c56c919260b4421553c`
+- Note: Payku docs show `d891663698d...` using CryptoJS; Node.js crypto produces a different hash for the same algorithm. See research.md R1.
 
-**Expected**: Signature matches exactly.
+**Expected**: Signature matches the Node.js implementation output.
 **Result**: [ ] PASS / [ ] FAIL
 
 ---

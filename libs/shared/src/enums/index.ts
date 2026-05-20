@@ -8,3 +8,4 @@ export { ReservationStatus } from './reservation-status.enum';
 export { ReservationType } from './reservation-type.enum';
 export { UnitStatus } from './unit-status.enum';
 export { UnitType } from './unit-type.enum';
+export { PaykuPaymentMethod } from './payku-payment-method.enum';

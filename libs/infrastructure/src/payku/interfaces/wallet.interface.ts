@@ -1,4 +1,4 @@
-export interface WalletPayoutRequest {
+export interface WalletTransferRequest {
   email: string;
   phone: string;
   subject: string;
@@ -14,33 +14,17 @@ export interface WalletPayoutRequest {
   additional_parameters?: Record<string, string>;
 }
 
-export interface WalletPayoutResponse {
+export interface WalletTransferResponse {
   status: string;
   id: string;
   message?: string;
 }
 
-export interface WalletWithdrawRequest {
-  email: string;
-  phone: string;
-  subject: string;
-  currency: string;
-  order: string;
-  amount: number;
-  accountbank_name: string;
-  accountbank_rut: string;
-  accountbank_sbif: string;
-  accountbank_type: string;
-  accountbank_num: string;
-  url_notify?: string;
-  additional_parameters?: Record<string, string>;
-}
+export interface WalletPayoutRequest extends WalletTransferRequest {}
+export interface WalletPayoutResponse extends WalletTransferResponse {}
 
-export interface WalletWithdrawResponse {
-  status: string;
-  id: string;
-  message?: string;
-}
+export interface WalletWithdrawRequest extends WalletTransferRequest {}
+export interface WalletWithdrawResponse extends WalletTransferResponse {}
 
 export interface WalletBalanceResponse {
   balance: number;

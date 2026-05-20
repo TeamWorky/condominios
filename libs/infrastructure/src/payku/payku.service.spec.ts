@@ -18,6 +18,7 @@ describe('PaykuService', () => {
     privateToken: 'test-private-token',
     sandbox: true,
     baseUrl: 'https://des.payku.cl/api',
+    timeout: 30000,
   };
 
   const emptyConfig: PaykuConfig = {
@@ -25,6 +26,7 @@ describe('PaykuService', () => {
     privateToken: '',
     sandbox: true,
     baseUrl: 'https://des.payku.cl/api',
+    timeout: 30000,
   };
 
   const mockLogger = {
