@@ -102,7 +102,7 @@ DELETE /api/v1/common-spaces/:id                      — Soft delete
 
 | # | Issue | Archivo | Fix |
 |---|-------|---------|-----|
-| 1 | Rate limiting auth | `apps/api/src/auth/auth.controller.ts` | Agregar `@Throttle(5, 60)` en login/register |
+| 1 | Rate limiting auth | `apps/api/src/auth/auth.controller.ts` | Agregar `@Throttle({ default: { limit: 5, ttl: 60000 } })` en login/register (throttler v6 syntax) |
 | 2 | Token blacklist | `apps/api/src/auth/auth.service.ts` | Redis blacklist, check en JwtStrategy |
 | 3 | Auth event logging | `apps/api/src/auth/auth.service.ts` | Winston logs para login/logout/failure/lockout |
 | 4 | Swagger guard | `apps/api/src/main.ts` | Deshabilitar en NODE_ENV=production |
@@ -113,7 +113,7 @@ DELETE /api/v1/common-spaces/:id                      — Soft delete
 
 ### Speckit commands
 ```bash
-/speckit.specify Security hardening for OWASP Top 10 compliance. Fix: auth rate limiting (5 req/min on login), Redis token blacklist on logout, auth event logging (Winston), Swagger disabled in production, CORS restricted in production, CSP enabled, account lockout after 5 failures, global JWT guard via APP_GUARD. All fixes in existing files, no new modules.
+/speckit.specify Security hardening for OWASP Top 10 compliance. Fix: auth rate limiting with @Throttle({ default: { limit: 5, ttl: 60000 } }) on login/register (throttler v6 syntax), Redis token blacklist on logout, auth event logging (Winston), Swagger disabled in production, CORS restricted in production, CSP enabled, account lockout after 5 failures, global JWT guard via APP_GUARD. All fixes in existing files, no new modules.
 ```
 
 ---
@@ -185,11 +185,11 @@ libs/common/src/interceptors/logging.interceptor.spec.ts
 ### Migraciones a verificar/crear
 1. **Payments table** — Indexes: (unitId, period), (status), (dueDate)
 2. **Common Spaces table** — Relacion con buildings
-3. **Reservations table** — Compound index: (commonSpaceId, date, startTime, endTime)
+3. **Reservations table** — Exclusion constraint (GIST) to prevent overlapping time slots: `(commonSpaceId WITH =, tsrange(startTime, endTime) WITH &&)`
 
 ### Speckit commands
 ```bash
-/speckit.specify Verify and create missing database migrations for Payments, Common Spaces, and Reservations tables. Add performance indexes. Verify existing entity definitions match migration schemas. Generate TypeORM migrations using npm run migration:generate.
+/speckit.specify Verify and create missing database migrations for Payments, Common Spaces, and Reservations tables. Add performance indexes for Payments (unitId+period, status, dueDate). Add GIST exclusion constraint for Reservations to prevent overlapping time slots (commonSpaceId WITH =, tsrange WITH &&). Verify existing entity definitions match migration schemas. Generate TypeORM migrations using npm run migration:generate.
 ```
 
 ---

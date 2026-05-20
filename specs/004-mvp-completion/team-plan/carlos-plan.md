@@ -187,7 +187,9 @@ apps/web/src/app/core/services/dashboard.service.spec.ts
 - `018-frontend-tests` — Tests de componentes existentes
 - `014-payments-frontend` — Puede preparar forms/UI, solo la integracion final necesita backend
 
-### Comando para ejecutar tests frontend
+### Comandos para ejecutar tests
 ```bash
-npx ng test --no-watch
+npm test          # Todos los tests (backend + frontend)
+npm run test:cov  # Con reporte de cobertura
+npx nx test web   # Solo tests del proyecto web (Nx)
 ```

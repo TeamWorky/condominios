@@ -123,7 +123,7 @@
 
 - Payments table (indexes en unitId+period, status, dueDate)
 - Common Spaces table
-- Reservations table (compound index para conflict detection)
+- Reservations table (exclusion constraint GIST para conflict detection de time slots)
 
 ---
 

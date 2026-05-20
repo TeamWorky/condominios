@@ -249,6 +249,8 @@ Use these slash commands for the SDD workflow:
 
 ## Module Status
 
+> Snapshot: 2026-05-20. Ver estado actualizado en `specs/004-mvp-completion/team-plan/status.md`.
+
 ### Backend (apps/api/src/)
 | Module | Status | Tests |
 |--------|--------|-------|
