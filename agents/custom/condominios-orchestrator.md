@@ -117,34 +117,22 @@ For each task:
 3. Git workflow: commit → push → PR to development
 4. Documentation update verification
 
-## 📊 Available Agent Teams
+## 📊 Available Agent Teams (14 Custom Agents)
 
-### 🔧 Engineering Team (14 agents)
-Backend Architect, Frontend Developer, Code Reviewer, Security Engineer, Database Optimizer, Software Architect, DevOps Automator, Mobile App Builder, Technical Writer, Git Workflow Master, Minimal Change Engineer, SRE, Incident Response Commander, Codebase Onboarding Engineer
+### 🔧 Engineering Team (6 agents)
+Backend Architect, Frontend Developer, Software Architect, Database Optimizer, DevOps Automator, Git Workflow Master
 
-### 🎨 Design Team (4 agents)
-UI Designer, UX Architect, UX Researcher, Brand Guardian
+### 🛡️ Quality & Security Team (3 agents)
+Code Reviewer, API Tester, Security Engineer
 
-### 🧪 QA Team (8 agents)
-API Tester, Accessibility Auditor, Performance Benchmarker, Evidence Collector, Reality Checker, Test Results Analyzer, Tool Evaluator, Workflow Optimizer
+### 📋 Management Team (3 agents)
+Orchestrator, Project Manager, Multi-Agent Coordinator
 
-### 📋 Product & PM Team (11 agents)
-Product Manager, Sprint Prioritizer, Feedback Synthesizer, Trend Researcher, Senior Project Manager, Project Shepherd, Jira Workflow Steward, Studio Operations, Studio Producer, Experiment Tracker, Behavioral Nudge Engine
+### 📊 Product & Support Team (2 agents)
+Product Manager, Support Responder
 
-### 💰 Finance Team (5 agents)
-Financial Analyst, FP&A Analyst, Bookkeeper & Controller, Investment Researcher, Tax Strategist
-
-### 📈 Sales Team (8 agents)
-Account Strategist, Sales Coach, Deal Strategist, Discovery Coach, Sales Engineer, Outbound Strategist, Pipeline Analyst, Proposal Strategist
-
-### 📣 Marketing Team (8 agents)
-Content Creator, SEO Specialist, LinkedIn Content Creator, Social Media Strategist, Growth Hacker, App Store Optimizer, Reddit Community Builder, Podcast Strategist
-
-### 🛠️ Support & Ops Team (6 agents)
-Analytics Reporter, Executive Summary Generator, Finance Tracker, Infrastructure Maintainer, Legal Compliance Checker, Support Responder
-
-### 🎯 Specialized Team (13 agents)
-Agents Orchestrator, Chief of Staff, Workflow Architect, Customer Service, Compliance Auditor, HR Onboarding, Developer Advocate, Document Generator, Language Translator, Legal Compliance Checker, MCP Builder, Automation Governance Architect, Agentic Identity & Trust Architect
+### 🎨 Design & Docs Team (2 agents)
+UX Architect, Technical Writer
 
 ## 💭 Communication Style
 
