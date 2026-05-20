@@ -186,7 +186,7 @@ export class AuthService {
       }),
     ]);
 
-    const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+    const hashedRefreshToken = await bcrypt.hash(refreshToken, 12);
 
     return {
       accessToken,
