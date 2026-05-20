@@ -5,31 +5,48 @@ export interface IResident {
   id: string;
   firstName: string;
   lastName: string;
-  email: string;
-  phone: string;
-  unitNumber: string;
-  residentType: ResidentType;
   documentType: DocumentType;
   documentNumber: string;
+  dateOfBirth: string;
+  phone?: string;
+  email?: string;
+  userId?: string;
+  unitId: string;
+  residentType: ResidentType;
+  moveInDate?: string;
+  moveOutDate?: string;
+  isPrimary: boolean;
+  relationship?: string;
   isActive: boolean;
-  moveInDate: Date;
-  moveOutDate?: Date;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface ICreateResidentDto {
   firstName: string;
   lastName: string;
-  email: string;
-  phone: string;
-  unitNumber: string;
-  residentType: ResidentType;
   documentType: DocumentType;
   documentNumber: string;
-  moveInDate: Date;
+  dateOfBirth: string;
+  phone?: string;
+  email?: string;
+  unitId: string;
+  residentType: ResidentType;
+  moveInDate?: string;
+  isPrimary?: boolean;
+  relationship?: string;
 }
 
-export interface IUpdateResidentDto extends Partial<ICreateResidentDto> {
-  id: string;
+export interface IUpdateResidentDto {
+  firstName?: string;
+  lastName?: string;
+  dateOfBirth?: string;
+  phone?: string;
+  email?: string;
+  residentType?: ResidentType;
+  moveInDate?: string;
+  moveOutDate?: string;
+  isPrimary?: boolean;
+  relationship?: string;
+  isActive?: boolean;
 }

@@ -5,7 +5,10 @@ import { Resident } from './entities/resident.entity';
 import { CreateResidentDto } from './dto/create-resident.dto';
 import { UpdateResidentDto } from './dto/update-resident.dto';
 import { PaginationDto } from '@condominios/common/dto/pagination.dto';
-import { NotFoundException } from '@condominios/common/exceptions/business.exception';
+import {
+  AlreadyExistsException,
+  NotFoundException,
+} from '@condominios/common/exceptions/business.exception';
 import { SoftDeleteRepositoryHelper } from '@condominios/common/repositories/base.repository';
 import { LoggerService } from '@condominios/infrastructure/logger/logger.service';
 import { RedisCacheService } from '@condominios/infrastructure/redis/redis-cache.service';
@@ -37,6 +40,22 @@ export class ResidentsService {
     // Verify unit exists
     await this.unitsService.findOne(createResidentDto.unitId);
 
+    // Check no active resident with same documentNumber exists
+    const existingResident = await this.residentRepository
+      .createQueryBuilder('resident')
+      .where('resident.documentNumber = :documentNumber', {
+        documentNumber: createResidentDto.documentNumber,
+      })
+      .andWhere('resident.isActive = :isActive', { isActive: true })
+      .andWhere('resident.deletedAt IS NULL')
+      .getOne();
+
+    if (existingResident) {
+      throw new AlreadyExistsException(
+        'Resident with this document number',
+      );
+    }
+
     const resident = this.residentRepository.create(createResidentDto);
     const savedResident = await this.residentRepository.save(resident);
 
@@ -66,9 +85,9 @@ export class ResidentsService {
         const queryBuilder = this.residentRepository
           .createQueryBuilder('resident')
           .leftJoinAndSelect('resident.user', 'user')
-          .where('resident.unit_id = :unitId', { unitId })
-          .orderBy('resident.is_primary', 'DESC')
-          .addOrderBy('resident.created_at', 'ASC')
+          .where('resident.unitId = :unitId', { unitId })
+          .orderBy('resident.isPrimary', 'DESC')
+          .addOrderBy('resident.createdAt', 'ASC')
           .skip((page - 1) * limit)
           .take(limit);
 

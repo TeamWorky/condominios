@@ -8,7 +8,7 @@ import { DashboardStats } from '../models/dashboard.models';
 
 const MAX_UNITS_FOR_RESIDENT_COUNT = 50;
 // TODO: Replace with a dedicated backend summary endpoint for condominiums with large unit counts
-const MAX_UNITS_PER_PAGE = 9999;
+const MAX_UNITS_PER_PAGE = 100;
 
 @Injectable({
   providedIn: 'root'

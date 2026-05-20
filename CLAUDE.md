@@ -59,12 +59,21 @@ Todo cambio que afecte endpoints DEBE incluir pruebas de los endpoints modificad
 
 **Todo feature DEBE pasar QA manual ANTES de crear el commit final y el PR. No se permite crear PRs sin haber validado manualmente la funcionalidad.**
 
+**BLOQUEANTE — Levantar servidores es OBLIGATORIO:**
+El QA manual requiere levantar el backend y frontend reales y probar la funcionalidad en el navegador. Este paso NO es opcional ni diferible. Si el agente (Claude) no puede levantar los servidores por limitaciones del entorno, DEBE:
+1. **DETENERSE antes del commit, push y PR** — no continuar con el flujo
+2. **Informar al usuario explicitamente** que el QA manual esta pendiente y es bloqueante
+3. **Esperar a que el usuario ejecute el QA manual** siguiendo el `quickstart.md` y reporte los resultados (PASS/FAIL por cada paso)
+4. **Solo despues de que el usuario confirme que TODOS los pasos pasaron**, proceder con commit, push y creacion del PR
+5. **NUNCA crear un PR con QA pendiente** — esto no es negociable, independientemente de que los tests automatizados pasen
+
 **Proceso obligatorio:**
 1. Levantar backend (`npm run start:api`) y frontend (`npm run start:web`)
-2. Ejecutar TODOS los pasos de validacion definidos en `quickstart.md` del feature
-3. Documentar el resultado de cada paso (PASS/FAIL)
-4. Si algun paso falla: corregir, re-ejecutar tests automatizados, y repetir QA manual
-5. Solo despues de que TODOS los pasos pasen, proceder con commit y PR
+2. Aplicar migraciones pendientes (`npm run migration:run`) si las hay
+3. Ejecutar TODOS los pasos de validacion definidos en `quickstart.md` del feature
+4. Documentar el resultado de cada paso (PASS/FAIL)
+5. Si algun paso falla: corregir, re-ejecutar tests automatizados, y repetir QA manual
+6. Solo despues de que TODOS los pasos pasen, proceder con commit y PR
 
 **Reglas:**
 - Si el feature tiene `quickstart.md`, TODOS sus pasos deben ejecutarse y pasar
@@ -72,6 +81,8 @@ Todo cambio que afecte endpoints DEBE incluir pruebas de los endpoints modificad
 - El QA manual es responsabilidad del implementador, no del reviewer
 - Marcar la tarea de QA manual como completada SOLO despues de ejecutar realmente los pasos
 - **NUNCA** marcar QA como completado sin haberlo ejecutado — esto es una violacion grave del workflow
+- **NUNCA** hacer push, crear PR, ni hacer commit final si el QA manual no se ha ejecutado y pasado
+- Tests automatizados pasando NO reemplaza el QA manual — ambos son requeridos
 
 ### Actualizacion de Documentacion (Obligatorio)
 
@@ -217,11 +228,14 @@ Use these slash commands for the SDD workflow:
 - **DashboardComponent** uses Angular Signals (`signal()`, `computed()`) for reactive state. Payment cards show "Proximamente" until backend is ready.
 - **BuildingService** (`apps/web/src/app/core/services/building.service.ts`): CRUD operations for buildings. `createBuilding(condominiumId, dto)` POSTs to `/condominiums/:condoId/buildings`. `toggleBuildingStatus(id, isActive)` PATCHes `/buildings/:id`.
 - **Edificios Module** (`apps/web/src/app/features/edificios/`): Full CRUD for buildings — list (paginated table), create/edit (reactive form), detail (with units), deactivate/activate (with confirmation dialog). No delete — buildings are deactivated via PATCH `isActive: false`.
+- **ResidentService** (`apps/web/src/app/features/residentes/services/resident.service.ts`): CRUD operations for residents scoped by unitId. `getResidentsByUnit(unitId, page, limit)` returns paginated residents. `toggleResidentStatus(id, isActive)` PATCHes via `updateResident`.
+- **Residentes Module** (`apps/web/src/app/features/residentes/`): Full CRUD for residents — list (with cascading Building→Unit filters, paginated table), create/edit (reactive form with personal data + residence data sections), detail view, activate/deactivate (with confirmation dialog). Reuses ConfirmDialogComponent from edificios module. DocumentType/DocumentNumber read-only in edit mode.
 
 ## Active Technologies
 - TypeScript 5.9, Node.js 24.x (001-add-mobile-app)
 - TypeScript 5.9, Node.js 24.11.1 + Angular 21, Angular Material 21, RxJS (002-buildings-crud)
 - Backend API REST existente (NestJS 11 + PostgreSQL) (002-buildings-crud)
+- PostgreSQL (TypeORM), Redis (cache) (003-residents-crud)
 
 ## Recent Changes
 - 001-add-mobile-app: Added TypeScript 5.9, Node.js 24.x
