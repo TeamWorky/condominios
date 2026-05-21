@@ -99,10 +99,11 @@ describe('PaymentsController', () => {
         total: 1,
       });
 
-      const result = await controller.findAllByCondominium('condo-1', {
-        page: 1,
-        limit: 10,
-      });
+      const result = await controller.findAllByCondominium(
+        'condo-1',
+        { condominioId: 'condo-1' },
+        { page: 1, limit: 10 },
+      );
 
       expect(mockService.findAllByCondominium).toHaveBeenCalledWith(
         'condo-1',
@@ -119,10 +120,11 @@ describe('PaymentsController', () => {
         total: 0,
       });
 
-      const result = await controller.findAllByCondominium('condo-1', {
-        page: 1,
-        limit: 10,
-      });
+      const result = await controller.findAllByCondominium(
+        'condo-1',
+        { condominioId: 'condo-1' },
+        { page: 1, limit: 10 },
+      );
 
       expect(result.data).toEqual([]);
       expect(result.meta.total).toBe(0);

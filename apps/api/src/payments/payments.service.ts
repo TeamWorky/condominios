@@ -272,7 +272,7 @@ export class PaymentsService {
     condominiumId: string,
   ): Promise<void> {
     const unit = await this.unitsService.findOne(unitId);
-    if (unit.building && unit.building.condominiumId !== condominiumId) {
+    if (!unit.building || unit.building.condominiumId !== condominiumId) {
       throw new NotFoundException('Unit');
     }
   }

@@ -66,16 +66,17 @@ export class PaymentsController {
   @Get('condominiums/:condoId/payments')
   @Version('1')
   @MinRole(Role.USER)
-  @ApiOperation({ summary: 'List all payments for a condominium (USER+)' })
-  @ApiParam({ name: 'condoId', description: 'Condominium ID', type: 'string' })
+  @ApiOperation({ summary: 'List all payments for the current condominium (USER+)' })
+  @ApiParam({ name: 'condoId', description: 'Condominium ID (ignored, JWT used instead)', type: 'string' })
   @ApiResponse({ status: 200, description: 'Payments retrieved successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async findAllByCondominium(
-    @Param('condoId') condoId: string,
+    @Param('condoId') _condoId: string,
+    @CurrentUser() user: { condominioId: string },
     @Query() pagination: PaginationDto,
   ) {
     const { data, total } = await this.paymentsService.findAllByCondominium(
-      condoId,
+      user.condominioId,
       pagination,
     );
     return ResponseUtil.paginated(
