@@ -1,5 +1,6 @@
 // Re-export from canonical location (@condominios/shared)
-export { PaykuPaymentMethod } from '@condominios/shared';
+import { PaykuPaymentMethod } from '@condominios/shared';
+export { PaykuPaymentMethod };
 
 export type PaykuTransactionStatus =
   | 'register'
