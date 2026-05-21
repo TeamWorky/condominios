@@ -292,6 +292,8 @@ Use these slash commands for the SDD workflow:
 - Angular 21, Angular Material 21, RxJS
 - NestJS 11, PostgreSQL (TypeORM), Redis
 - axios (HTTP client)
+- TypeScript 5.9, Node.js 24.x + NestJS 11, TypeORM 0.3.x, PostgreSQL, Redis (006-payments-backend)
+- PostgreSQL (TypeORM), Redis (cache) (006-payments-backend)
 
 ## Recent Changes
 - 001-add-mobile-app: Added TypeScript 5.9, Node.js 24.x
