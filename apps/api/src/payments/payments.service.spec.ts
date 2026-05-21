@@ -123,7 +123,7 @@ describe('PaymentsService', () => {
       mockRepository.create.mockReturnValue(mockPayment);
       mockRepository.save.mockResolvedValue(mockPayment);
 
-      const result = await service.create(createDto as any);
+      const result = await service.create(createDto as any, 'condo-1');
 
       expect(unitsService.findOne).toHaveBeenCalledWith('unit-1');
       expect(mockRepository.create).toHaveBeenCalledWith(createDto);
@@ -136,7 +136,7 @@ describe('PaymentsService', () => {
     it('should throw NotFoundException when unit does not exist', async () => {
       mockUnitsService.findOne.mockRejectedValue(new NotFoundException('Unit'));
 
-      await expect(service.create(createDto as any)).rejects.toThrow(
+      await expect(service.create(createDto as any, 'condo-1')).rejects.toThrow(
         NotFoundException,
       );
     });
@@ -146,7 +146,7 @@ describe('PaymentsService', () => {
       mockRepository.create.mockReturnValue(mockPayment);
       mockRepository.save.mockResolvedValue(mockPayment);
 
-      await service.create(createDto as any);
+      await service.create(createDto as any, 'condo-1');
 
       expect(mockLogger.log).toHaveBeenCalledWith(
         expect.stringContaining('Payment created'),
@@ -225,7 +225,7 @@ describe('PaymentsService', () => {
       const mockPayment = createMockPayment();
       mockQueryBuilder.getOne.mockResolvedValue(mockPayment);
 
-      const result = await service.findOne('payment-1');
+      const result = await service.findOne('payment-1', 'condo-1');
 
       expect(result).toEqual(mockPayment);
     });
@@ -233,12 +233,12 @@ describe('PaymentsService', () => {
     it('should throw NotFoundException when payment not found', async () => {
       mockQueryBuilder.getOne.mockResolvedValue(null);
 
-      await expect(service.findOne('invalid')).rejects.toThrow(
+      await expect(service.findOne('invalid', 'condo-1')).rejects.toThrow(
         NotFoundException,
       );
     });
 
-    it('should scope by condominium when condominiumId provided', async () => {
+    it('should scope by condominium', async () => {
       const mockPayment = createMockPayment();
       mockQueryBuilder.getOne.mockResolvedValue(mockPayment);
 

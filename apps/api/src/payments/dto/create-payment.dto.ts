@@ -51,9 +51,10 @@ export class CreatePaymentDto {
   @ApiPropertyOptional({ example: 'Monthly maintenance fee', description: 'Additional notes' })
   @IsString()
   @IsOptional()
+  @MaxLength(500)
   notes?: string;
 
-  @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000', description: 'Unit ID (set from URL param)' })
+  @ApiPropertyOptional({ example: '550e8400-e29b-41d4-a716-446655440000', description: 'Unit ID (set automatically from URL param)' })
   @IsUUID()
   @IsOptional()
   unitId?: string;

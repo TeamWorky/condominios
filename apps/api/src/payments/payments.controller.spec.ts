@@ -68,10 +68,15 @@ describe('PaymentsController', () => {
         dueDate: '2026-01-31',
       };
 
-      const result = await controller.create('unit-1', dto as any);
+      const result = await controller.create(
+        'unit-1',
+        dto as any,
+        { condominioId: 'condo-1' },
+      );
 
       expect(mockService.create).toHaveBeenCalledWith(
         expect.objectContaining({ unitId: 'unit-1', amount: 150000 }),
+        'condo-1',
       );
       expect(result).toHaveProperty('success', true);
       expect(result).toHaveProperty('data', mockPayment);
@@ -81,7 +86,7 @@ describe('PaymentsController', () => {
       mockService.create.mockRejectedValue(new NotFoundException('Unit'));
 
       await expect(
-        controller.create('invalid', { amount: 100, period: '2026-01', dueDate: '2026-01-31' } as any),
+        controller.create('invalid', { amount: 100, period: '2026-01', dueDate: '2026-01-31' } as any, { condominioId: 'condo-1' }),
       ).rejects.toThrow(NotFoundException);
     });
   });
@@ -134,7 +139,7 @@ describe('PaymentsController', () => {
 
       const result = await controller.findAllByUnit(
         'unit-1',
-        'condo-1',
+        { condominioId: 'condo-1' },
         1,
         10,
       );
@@ -153,16 +158,16 @@ describe('PaymentsController', () => {
       const mockPayment = createMockPayment();
       mockService.findOne.mockResolvedValue(mockPayment);
 
-      const result = await controller.findOne('payment-1');
+      const result = await controller.findOne('payment-1', { condominioId: 'condo-1' });
 
-      expect(mockService.findOne).toHaveBeenCalledWith('payment-1');
+      expect(mockService.findOne).toHaveBeenCalledWith('payment-1', 'condo-1');
       expect(result).toHaveProperty('data', mockPayment);
     });
 
     it('should propagate NotFoundException', async () => {
       mockService.findOne.mockRejectedValue(new NotFoundException('Payment'));
 
-      await expect(controller.findOne('invalid')).rejects.toThrow(
+      await expect(controller.findOne('invalid', { condominioId: 'condo-1' })).rejects.toThrow(
         NotFoundException,
       );
     });
@@ -176,7 +181,7 @@ describe('PaymentsController', () => {
       const result = await controller.update(
         'payment-1',
         { notes: 'Updated' } as any,
-        'condo-1',
+        { condominioId: 'condo-1' },
       );
 
       expect(mockService.update).toHaveBeenCalledWith(
@@ -193,7 +198,7 @@ describe('PaymentsController', () => {
       );
 
       await expect(
-        controller.update('payment-1', { amount: 200000 } as any, 'condo-1'),
+        controller.update('payment-1', { amount: 200000 } as any, { condominioId: 'condo-1' }),
       ).rejects.toThrow(BusinessException);
     });
   });
@@ -210,7 +215,7 @@ describe('PaymentsController', () => {
           paymentMethod: PaymentMethod.TRANSFER,
           reference: 'TRX-001',
         },
-        'condo-1',
+        { condominioId: 'condo-1' },
       );
 
       expect(mockService.changeStatus).toHaveBeenCalledWith(
@@ -230,7 +235,7 @@ describe('PaymentsController', () => {
         controller.changeStatus(
           'payment-1',
           { status: PaymentStatus.PENDING },
-          'condo-1',
+          { condominioId: 'condo-1' },
         ),
       ).rejects.toThrow(BusinessException);
     });
@@ -240,7 +245,7 @@ describe('PaymentsController', () => {
     it('should soft delete a payment', async () => {
       mockService.remove.mockResolvedValue(undefined);
 
-      await controller.remove('payment-1', 'condo-1');
+      await controller.remove('payment-1', { condominioId: 'condo-1' });
 
       expect(mockService.remove).toHaveBeenCalledWith('payment-1', 'condo-1');
     });
@@ -251,7 +256,7 @@ describe('PaymentsController', () => {
       );
 
       await expect(
-        controller.remove('payment-1', 'condo-1'),
+        controller.remove('payment-1', { condominioId: 'condo-1' }),
       ).rejects.toThrow(BusinessException);
     });
   });

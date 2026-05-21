@@ -1,4 +1,11 @@
-import { IsEnum, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsDateString,
+  MaxLength,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { PaymentStatus } from '@condominios/shared/enums/payment-status.enum';
 import { PaymentMethod } from '@condominios/shared/enums/payment-method.enum';
@@ -30,4 +37,12 @@ export class ChangeStatusDto {
   @IsOptional()
   @MaxLength(255)
   reference?: string;
+
+  @ApiPropertyOptional({
+    example: '2026-01-15',
+    description: 'Custom paid date (defaults to current date if not provided)',
+  })
+  @IsDateString()
+  @IsOptional()
+  paidDate?: string;
 }

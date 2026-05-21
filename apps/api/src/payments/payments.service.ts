@@ -43,7 +43,8 @@ const CACHE_KEYS = {
     `payments:condo:${condoId}:${page}:${limit}`,
   paymentsByUnit: (unitId: string, page: number, limit: number) =>
     `payments:unit:${unitId}:${page}:${limit}`,
-  paymentListPattern: () => 'payments:*',
+  paymentListPatternByCondo: (condoId: string) => `payments:condo:${condoId}:*`,
+  paymentListPatternByUnit: (unitId: string) => `payments:unit:${unitId}:*`,
 };
 
 @Injectable()
@@ -56,14 +57,20 @@ export class PaymentsService {
     private readonly cache: RedisCacheService,
   ) {}
 
-  async create(createPaymentDto: CreatePaymentDto): Promise<Payment> {
-    // Verify unit exists
-    await this.unitsService.findOne(createPaymentDto.unitId!);
+  async create(
+    createPaymentDto: CreatePaymentDto,
+    condominiumId: string,
+  ): Promise<Payment> {
+    // Verify unit exists and belongs to the condominium
+    await this.validateUnitBelongsToCondominium(
+      createPaymentDto.unitId!,
+      condominiumId,
+    );
 
     const payment = this.paymentRepository.create(createPaymentDto);
     const savedPayment = await this.paymentRepository.save(payment);
 
-    await this.cache.invalidatePattern(CACHE_KEYS.paymentListPattern());
+    await this.invalidatePaymentCache(savedPayment.id, condominiumId);
 
     this.logger.log(
       `Payment created: ${savedPayment.id}`,
@@ -124,8 +131,8 @@ export class PaymentsService {
       async () => {
         const queryBuilder = this.paymentRepository
           .createQueryBuilder('payment')
-          .leftJoinAndSelect('payment.unit', 'unit')
-          .leftJoin('unit.building', 'building')
+          .innerJoinAndSelect('payment.unit', 'unit')
+          .innerJoin('unit.building', 'building')
           .addSelect(['building.id', 'building.name'])
           .where('payment.unitId = :unitId', { unitId })
           .orderBy('payment.dueDate', 'DESC')
@@ -140,20 +147,16 @@ export class PaymentsService {
     );
   }
 
-  async findOne(id: string, condominiumId?: string): Promise<Payment> {
+  async findOne(id: string, condominiumId: string): Promise<Payment> {
     const queryBuilder = this.paymentRepository
       .createQueryBuilder('payment')
-      .leftJoinAndSelect('payment.unit', 'unit')
-      .leftJoin('unit.building', 'building')
+      .innerJoinAndSelect('payment.unit', 'unit')
+      .innerJoin('unit.building', 'building')
       .addSelect(['building.id', 'building.name'])
+      .innerJoin('building.condominium', 'condominium')
       .leftJoinAndSelect('payment.resident', 'resident')
-      .where('payment.id = :id', { id });
-
-    if (condominiumId) {
-      queryBuilder
-        .innerJoin('building.condominium', 'condominium')
-        .andWhere('condominium.id = :condominiumId', { condominiumId });
-    }
+      .where('payment.id = :id', { id })
+      .andWhere('condominium.id = :condominiumId', { condominiumId });
 
     const payment = await queryBuilder.getOne();
 
@@ -184,7 +187,7 @@ export class PaymentsService {
     Object.assign(payment, updatePaymentDto);
     const updatedPayment = await this.paymentRepository.save(payment);
 
-    await this.invalidatePaymentCache(updatedPayment.id);
+    await this.invalidatePaymentCache(updatedPayment.id, condominiumId);
 
     this.logger.log(
       `Payment updated: ${id}`,
@@ -209,11 +212,16 @@ export class PaymentsService {
       );
     }
 
+    // Capture original status before mutation for logging
+    const previousStatus = payment.status;
+
     payment.status = changeStatusDto.status;
 
-    // Auto-set paidDate when marking as PAID
+    // Auto-set paidDate when marking as PAID (allow custom date via DTO)
     if (changeStatusDto.status === PaymentStatus.PAID) {
-      payment.paidDate = new Date();
+      payment.paidDate = changeStatusDto.paidDate
+        ? new Date(changeStatusDto.paidDate)
+        : new Date();
     }
 
     // Update payment method and reference if provided
@@ -226,14 +234,14 @@ export class PaymentsService {
 
     const updatedPayment = await this.paymentRepository.save(payment);
 
-    await this.invalidatePaymentCache(updatedPayment.id);
+    await this.invalidatePaymentCache(updatedPayment.id, condominiumId);
 
     this.logger.log(
       `Payment status changed: ${id} → ${changeStatusDto.status}`,
       PaymentsService.name,
       {
         paymentId: id,
-        from: payment.status,
+        from: previousStatus,
         to: changeStatusDto.status,
       },
     );
@@ -250,7 +258,7 @@ export class PaymentsService {
 
     await this.paymentRepository.softDelete(id);
 
-    await this.invalidatePaymentCache(id);
+    await this.invalidatePaymentCache(id, condominiumId);
 
     this.logger.log(
       `Payment soft deleted: ${id}`,
@@ -263,17 +271,33 @@ export class PaymentsService {
     unitId: string,
     condominiumId: string,
   ): Promise<void> {
-    if (!condominiumId) return;
     const unit = await this.unitsService.findOne(unitId);
     if (unit.building && unit.building.condominiumId !== condominiumId) {
       throw new NotFoundException('Unit');
     }
   }
 
-  private async invalidatePaymentCache(id: string): Promise<void> {
-    await Promise.all([
+  private async invalidatePaymentCache(
+    id: string,
+    condominiumId?: string,
+  ): Promise<void> {
+    const invalidations: Promise<void>[] = [
       this.cache.invalidate(CACHE_KEYS.payment(id)),
-      this.cache.invalidatePattern(CACHE_KEYS.paymentListPattern()),
-    ]);
+    ];
+
+    if (condominiumId) {
+      invalidations.push(
+        this.cache.invalidatePattern(
+          CACHE_KEYS.paymentListPatternByCondo(condominiumId),
+        ),
+      );
+    }
+
+    // Also invalidate unit-level caches (we don't always know the unitId here)
+    invalidations.push(
+      this.cache.invalidatePattern('payments:unit:*'),
+    );
+
+    await Promise.all(invalidations);
   }
 }

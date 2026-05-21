@@ -29,6 +29,7 @@ import { SUCCESS_MESSAGES } from '@condominios/common/constants/app.constants';
 import { JwtAuthGuard } from '@condominios/common/guards/jwt-auth.guard';
 import { MinRoleGuard } from '@condominios/common/guards/min-role.guard';
 import { MinRole } from '@condominios/common/decorators/min-role.decorator';
+import { CurrentUser } from '@condominios/common/decorators/current-user.decorator';
 import { Role } from '@condominios/shared/enums/role.enum';
 
 @ApiTags('Payments')
@@ -52,9 +53,13 @@ export class PaymentsController {
   async create(
     @Param('unitId') unitId: string,
     @Body() createPaymentDto: CreatePaymentDto,
+    @CurrentUser() user: { condominioId: string },
   ) {
     createPaymentDto.unitId = unitId;
-    const payment = await this.paymentsService.create(createPaymentDto);
+    const payment = await this.paymentsService.create(
+      createPaymentDto,
+      user.condominioId,
+    );
     return ResponseUtil.success(payment, SUCCESS_MESSAGES.CREATED);
   }
 
@@ -91,14 +96,14 @@ export class PaymentsController {
   @ApiResponse({ status: 404, description: 'Unit not found' })
   async findAllByUnit(
     @Param('unitId') unitId: string,
-    @Query('condoId') condoId: string,
+    @CurrentUser() user: { condominioId: string },
     @Query('page') page?: number,
     @Query('limit') limit?: number,
   ) {
     const pagination: PaginationDto = { page: page || 1, limit: limit || 10 };
     const { data, total } = await this.paymentsService.findAllByUnit(
       unitId,
-      condoId,
+      user.condominioId,
       pagination,
     );
     return ResponseUtil.paginated(
@@ -117,8 +122,11 @@ export class PaymentsController {
   @ApiResponse({ status: 200, description: 'Payment retrieved successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Payment not found' })
-  async findOne(@Param('id') id: string) {
-    const payment = await this.paymentsService.findOne(id);
+  async findOne(
+    @Param('id') id: string,
+    @CurrentUser() user: { condominioId: string },
+  ) {
+    const payment = await this.paymentsService.findOne(id, user.condominioId);
     return ResponseUtil.success(payment);
   }
 
@@ -135,12 +143,12 @@ export class PaymentsController {
   async update(
     @Param('id') id: string,
     @Body() updatePaymentDto: UpdatePaymentDto,
-    @Query('condoId') condoId: string,
+    @CurrentUser() user: { condominioId: string },
   ) {
     const payment = await this.paymentsService.update(
       id,
       updatePaymentDto,
-      condoId,
+      user.condominioId,
     );
     return ResponseUtil.success(payment, SUCCESS_MESSAGES.UPDATED);
   }
@@ -158,12 +166,12 @@ export class PaymentsController {
   async changeStatus(
     @Param('id') id: string,
     @Body() changeStatusDto: ChangeStatusDto,
-    @Query('condoId') condoId: string,
+    @CurrentUser() user: { condominioId: string },
   ) {
     const payment = await this.paymentsService.changeStatus(
       id,
       changeStatusDto,
-      condoId,
+      user.condominioId,
     );
     return ResponseUtil.success(payment, SUCCESS_MESSAGES.UPDATED);
   }
@@ -181,8 +189,8 @@ export class PaymentsController {
   @ApiResponse({ status: 404, description: 'Payment not found' })
   async remove(
     @Param('id') id: string,
-    @Query('condoId') condoId: string,
+    @CurrentUser() user: { condominioId: string },
   ) {
-    await this.paymentsService.remove(id, condoId);
+    await this.paymentsService.remove(id, user.condominioId);
   }
 }
