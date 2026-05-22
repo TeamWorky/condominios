@@ -307,6 +307,17 @@ export class PaymentsService {
       );
     }
 
+    if (payment.paykuTransactionId) {
+      try {
+        await this.paykuService.deleteTransaction(payment.paykuTransactionId);
+      } catch {
+        this.logger.warn(
+          `Failed to cancel previous Payku transaction ${payment.paykuTransactionId}`,
+          PaymentsService.name,
+        );
+      }
+    }
+
     const unitName = payment.unit?.number || payment.unitId;
     const subject = `Common expenses - Unit ${unitName} - ${payment.period}`;
 
@@ -350,18 +361,10 @@ export class PaymentsService {
       { transactionId: payload.transaction_id, order: payload.order },
     );
 
-    let payment: Payment | null;
-    try {
-      payment = await this.paymentRepository.findOne({
-        where: { id: payload.order },
-      });
-    } catch {
-      this.logger.warn(
-        `Webhook: invalid order ID ${payload.order}`,
-        PaymentsService.name,
-      );
-      return;
-    }
+    const payment = await this.paymentRepository.findOne({
+      where: { id: payload.order },
+      relations: ['unit', 'unit.building'],
+    });
 
     if (!payment) {
       this.logger.warn(
@@ -391,6 +394,15 @@ export class PaymentsService {
       payload.transaction_id,
     );
 
+    if (transaction.order !== payment.id) {
+      this.logger.error(
+        `Webhook: order mismatch — payment ${payment.id} but transaction order is ${transaction.order}`,
+        undefined,
+        PaymentsService.name,
+      );
+      return;
+    }
+
     if (transaction.gateway_response?.status !== 'success') {
       this.logger.warn(
         `Webhook: transaction ${payload.transaction_id} not successful (${transaction.gateway_response?.status})`,
@@ -418,7 +430,8 @@ export class PaymentsService {
     payment.paykuTransactionId = payload.transaction_id;
     await this.paymentRepository.save(payment);
 
-    await this.invalidatePaymentCache(payment.id);
+    const condominiumId = payment.unit?.building?.condominiumId;
+    await this.invalidatePaymentCache(payment.id, condominiumId);
 
     this.logger.log(
       `Webhook: payment ${payment.id} confirmed as PAID`,

@@ -83,6 +83,7 @@ describe('PaymentsService', () => {
       amount: '150000',
       gateway_response: { status: 'success', message: 'Pago exitoso' },
     }),
+    deleteTransaction: jest.fn().mockResolvedValue(undefined),
   };
 
   const mockConfigService = {
@@ -625,13 +626,29 @@ describe('PaymentsService', () => {
       });
     });
 
-    it('should replace existing Payku transaction on re-initiation', async () => {
+    it('should cancel old transaction and create new one on re-initiation', async () => {
       const mockPayment = createMockPayment({ paykuTransactionId: 'old-txn' } as any);
       mockQueryBuilder.getOne.mockResolvedValue(mockPayment);
       mockRepository.save.mockResolvedValue(mockPayment);
 
       const result = await service.initiatePayment('payment-1', 'condo-1', 'user@test.com');
 
+      expect(mockPaykuService.deleteTransaction).toHaveBeenCalledWith('old-txn');
+      expect(result.paykuTransactionId).toBe('payku-txn-123');
+    });
+
+    it('should proceed even if cancelling old transaction fails', async () => {
+      const mockPayment = createMockPayment({ paykuTransactionId: 'old-txn' } as any);
+      mockQueryBuilder.getOne.mockResolvedValue(mockPayment);
+      mockRepository.save.mockResolvedValue(mockPayment);
+      mockPaykuService.deleteTransaction.mockRejectedValueOnce(new Error('Network error'));
+
+      const result = await service.initiatePayment('payment-1', 'condo-1', 'user@test.com');
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to cancel previous Payku transaction'),
+        expect.any(String),
+      );
       expect(result.paykuTransactionId).toBe('payku-txn-123');
     });
 
@@ -655,12 +672,18 @@ describe('PaymentsService', () => {
     };
 
     it('should update payment to PAID on success webhook', async () => {
-      const mockPayment = createMockPayment();
+      const mockPayment = createMockPayment({
+        unit: { building: { condominiumId: 'condo-1' } } as any,
+      });
       mockRepository.findOne = jest.fn().mockResolvedValue(mockPayment);
       mockRepository.save.mockResolvedValue(mockPayment);
 
       await service.handleWebhook(successPayload);
 
+      expect(mockRepository.findOne).toHaveBeenCalledWith({
+        where: { id: 'payment-1' },
+        relations: ['unit', 'unit.building'],
+      });
       expect(mockRepository.save).toHaveBeenCalledWith(
         expect.objectContaining({
           status: PaymentStatus.PAID,
@@ -704,11 +727,33 @@ describe('PaymentsService', () => {
       mockPaykuService.isOperational.mockReturnValue(true);
     });
 
+    it('should skip on order mismatch and log error', async () => {
+      const mockPayment = createMockPayment();
+      mockRepository.findOne = jest.fn().mockResolvedValue(mockPayment);
+      mockPaykuService.getTransaction.mockResolvedValueOnce({
+        status: 'success',
+        id: 'payku-txn-123',
+        order: 'different-payment-id',
+        amount: '150000',
+        gateway_response: { status: 'success', message: 'Ok' },
+      });
+
+      await service.handleWebhook(successPayload);
+
+      expect(mockRepository.save).not.toHaveBeenCalled();
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining('order mismatch'),
+        undefined,
+        expect.any(String),
+      );
+    });
+
     it('should skip if gateway status is not success', async () => {
       const mockPayment = createMockPayment();
       mockRepository.findOne = jest.fn().mockResolvedValue(mockPayment);
       mockPaykuService.getTransaction.mockResolvedValueOnce({
         status: 'rejected',
+        order: 'payment-1',
         amount: '150000',
         gateway_response: { status: 'rejected', message: 'Rechazado' },
       });
@@ -728,6 +773,7 @@ describe('PaymentsService', () => {
       mockRepository.findOne = jest.fn().mockResolvedValue(mockPayment);
       mockPaykuService.getTransaction.mockResolvedValueOnce({
         status: 'success',
+        order: 'payment-1',
         amount: '99999',
         gateway_response: { status: 'success', message: 'Ok' },
       });
