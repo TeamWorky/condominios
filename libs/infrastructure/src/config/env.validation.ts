@@ -77,6 +77,8 @@ export const envValidationSchema = Joi.object({
   PAYKU_PUBLIC_TOKEN: Joi.string().optional().default(''),
   PAYKU_PRIVATE_TOKEN: Joi.string().optional().default(''),
   PAYKU_SANDBOX: Joi.string().valid('true', 'false').default('true'),
+  PAYKU_RETURN_URL: Joi.string().optional().default(''),
+  PAYKU_NOTIFY_URL: Joi.string().optional().default(''),
 }).options({
   allowUnknown: true, // Allow additional variables not in schema
   stripUnknown: true, // Remove unknown variables

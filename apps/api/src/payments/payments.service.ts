@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Payment } from './entities/payment.entity';
@@ -12,8 +13,12 @@ import {
 } from '@condominios/common/exceptions/business.exception';
 import { LoggerService } from '@condominios/infrastructure/logger/logger.service';
 import { RedisCacheService } from '@condominios/infrastructure/redis/redis-cache.service';
+import { PaykuService } from '@condominios/infrastructure/payku/payku.service';
+import { PaykuWebhookPayload } from '@condominios/infrastructure/payku/interfaces/webhook.interface';
 import { UnitsService } from '../units/units.service';
 import { PaymentStatus } from '@condominios/shared/enums/payment-status.enum';
+import { PaymentMethod } from '@condominios/shared/enums/payment-method.enum';
+import { PaykuPaymentMethod } from '@condominios/shared/enums/payku-payment-method.enum';
 
 const VALID_TRANSITIONS: Record<PaymentStatus, PaymentStatus[]> = {
   [PaymentStatus.PENDING]: [
@@ -55,6 +60,8 @@ export class PaymentsService {
     private readonly unitsService: UnitsService,
     private readonly logger: LoggerService,
     private readonly cache: RedisCacheService,
+    private readonly paykuService: PaykuService,
+    private readonly configService: ConfigService,
   ) {}
 
   async create(
@@ -265,6 +272,199 @@ export class PaymentsService {
       PaymentsService.name,
       { paymentId: id },
     );
+  }
+
+  async initiatePayment(
+    id: string,
+    condominiumId: string,
+    userEmail: string,
+  ): Promise<{ paymentId: string; paykuTransactionId: string; paymentUrl: string }> {
+    const payment = await this.findOne(id, condominiumId);
+
+    if (
+      payment.status !== PaymentStatus.PENDING &&
+      payment.status !== PaymentStatus.OVERDUE
+    ) {
+      throw new BusinessException(
+        `Cannot initiate payment for a payment with status ${payment.status}`,
+      );
+    }
+
+    if (!this.paykuService.isOperational()) {
+      throw new BusinessException(
+        'Payment gateway is not available',
+        HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+
+    const returnUrl = this.configService.get<string>('PAYKU_RETURN_URL', '');
+    const notifyUrl = this.configService.get<string>('PAYKU_NOTIFY_URL', '');
+
+    if (!returnUrl || !notifyUrl) {
+      throw new BusinessException(
+        'Payment gateway URLs are not configured',
+        HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+
+    const unitName = payment.unit?.number || payment.unitId;
+    const subject = `Common expenses - Unit ${unitName} - ${payment.period}`;
+
+    const response = await this.paykuService.createTransaction({
+      email: userEmail,
+      order: payment.id,
+      subject,
+      amount: Number(payment.amount),
+      currency: 'CLP',
+      payment: PaykuPaymentMethod.ALL,
+      urlreturn: returnUrl,
+      urlnotify: notifyUrl,
+    });
+
+    payment.paykuTransactionId = response.id;
+    await this.paymentRepository.save(payment);
+
+    await this.invalidatePaymentCache(payment.id, condominiumId);
+
+    this.logger.log(
+      `Payment initiated via Payku: ${payment.id}`,
+      PaymentsService.name,
+      {
+        paymentId: payment.id,
+        paykuTransactionId: response.id,
+        amount: payment.amount,
+      },
+    );
+
+    return {
+      paymentId: payment.id,
+      paykuTransactionId: response.id,
+      paymentUrl: response.url,
+    };
+  }
+
+  async handleWebhook(payload: PaykuWebhookPayload): Promise<void> {
+    this.logger.log(
+      `Webhook received: order=${payload.order} status=${payload.status}`,
+      PaymentsService.name,
+      { transactionId: payload.transaction_id, order: payload.order },
+    );
+
+    let payment: Payment | null;
+    try {
+      payment = await this.paymentRepository.findOne({
+        where: { id: payload.order },
+      });
+    } catch {
+      this.logger.warn(
+        `Webhook: invalid order ID ${payload.order}`,
+        PaymentsService.name,
+      );
+      return;
+    }
+
+    if (!payment) {
+      this.logger.warn(
+        `Webhook: payment not found for order ${payload.order}`,
+        PaymentsService.name,
+      );
+      return;
+    }
+
+    if (payment.status === PaymentStatus.PAID) {
+      this.logger.log(
+        `Webhook: payment ${payment.id} already PAID, skipping`,
+        PaymentsService.name,
+      );
+      return;
+    }
+
+    if (!this.paykuService.isOperational()) {
+      this.logger.warn(
+        'Webhook: Payku service not configured, cannot verify transaction',
+        PaymentsService.name,
+      );
+      return;
+    }
+
+    const transaction = await this.paykuService.getTransaction(
+      payload.transaction_id,
+    );
+
+    if (transaction.gateway_response?.status !== 'success') {
+      this.logger.warn(
+        `Webhook: transaction ${payload.transaction_id} not successful (${transaction.gateway_response?.status})`,
+        PaymentsService.name,
+        { paymentId: payment.id, paykuStatus: transaction.gateway_response?.status },
+      );
+      return;
+    }
+
+    const paykuAmount = Number(transaction.amount);
+    const paymentAmount = Number(payment.amount);
+    if (paykuAmount !== paymentAmount) {
+      this.logger.error(
+        `Webhook: amount mismatch for payment ${payment.id} — expected ${paymentAmount}, got ${paykuAmount}`,
+        undefined,
+        PaymentsService.name,
+      );
+      return;
+    }
+
+    payment.status = PaymentStatus.PAID;
+    payment.paidDate = new Date();
+    payment.paymentMethod = PaymentMethod.ONLINE;
+    payment.reference = payload.transaction_id;
+    payment.paykuTransactionId = payload.transaction_id;
+    await this.paymentRepository.save(payment);
+
+    await this.invalidatePaymentCache(payment.id);
+
+    this.logger.log(
+      `Webhook: payment ${payment.id} confirmed as PAID`,
+      PaymentsService.name,
+      {
+        paymentId: payment.id,
+        transactionId: payload.transaction_id,
+        amount: paymentAmount,
+      },
+    );
+  }
+
+  async getPaykuStatus(
+    id: string,
+    condominiumId: string,
+  ): Promise<{
+    paymentId: string;
+    paykuTransactionId: string;
+    paykuStatus: string;
+    paykuDetails: unknown;
+  }> {
+    const payment = await this.findOne(id, condominiumId);
+
+    if (!payment.paykuTransactionId) {
+      throw new BusinessException(
+        'No Payku transaction exists for this payment',
+      );
+    }
+
+    if (!this.paykuService.isOperational()) {
+      throw new BusinessException(
+        'Payment gateway is not available',
+        HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+
+    const details = await this.paykuService.getTransaction(
+      payment.paykuTransactionId,
+    );
+
+    return {
+      paymentId: payment.id,
+      paykuTransactionId: payment.paykuTransactionId,
+      paykuStatus: details.gateway_response?.status || details.status,
+      paykuDetails: details,
+    };
   }
 
   private async validateUnitBelongsToCondominium(

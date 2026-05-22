@@ -6,7 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ValidationPipe } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { RedisModule, HealthModule, LoggerModule, QueueModule, EmailModule } from '@condominios/infrastructure';
+import { RedisModule, HealthModule, LoggerModule, QueueModule, EmailModule, PaykuModule } from '@condominios/infrastructure';
 import { envValidationSchema } from '@condominios/infrastructure/config/env.validation';
 import { HttpExceptionFilter, TransformInterceptor, LoggingInterceptor, TimeoutInterceptor, RequestIdMiddleware } from '@condominios/common';
 import { UsersModule } from './users/users.module';
@@ -56,6 +56,7 @@ import { PaymentsModule } from './payments/payments.module';
     RedisModule,
     QueueModule,
     EmailModule,
+    PaykuModule,
     HealthModule,
     UsersModule,
     AuthModule,

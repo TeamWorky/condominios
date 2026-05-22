@@ -54,6 +54,9 @@ export class Payment {
   @Column({ type: 'text', nullable: true })
   notes: string;
 
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  paykuTransactionId: string;
+
   // Relación con Unit
   @ManyToOne(() => Unit, (unit) => unit.payments, {
     onDelete: 'CASCADE',

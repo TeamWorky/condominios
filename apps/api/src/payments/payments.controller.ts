@@ -177,6 +177,49 @@ export class PaymentsController {
     return ResponseUtil.success(payment, SUCCESS_MESSAGES.UPDATED);
   }
 
+  @Post('payments/:id/initiate')
+  @Version('1')
+  @MinRole(Role.ADMIN)
+  @ApiOperation({ summary: 'Initiate online payment via Payku (ADMIN+)' })
+  @ApiParam({ name: 'id', description: 'Payment ID', type: 'string' })
+  @ApiResponse({ status: 200, description: 'Payment initiated, URL returned' })
+  @ApiResponse({ status: 400, description: 'Invalid payment status for initiation' })
+  @ApiResponse({ status: 404, description: 'Payment not found' })
+  @ApiResponse({ status: 502, description: 'Payku API error' })
+  @ApiResponse({ status: 503, description: 'Payment gateway not configured' })
+  async initiate(
+    @Param('id') id: string,
+    @CurrentUser() user: { condominioId: string; email: string },
+  ) {
+    const result = await this.paymentsService.initiatePayment(
+      id,
+      user.condominioId,
+      user.email,
+    );
+    return ResponseUtil.success(result, SUCCESS_MESSAGES.UPDATED);
+  }
+
+  @Get('payments/:id/payku-status')
+  @Version('1')
+  @MinRole(Role.ADMIN)
+  @ApiOperation({ summary: 'Check Payku transaction status (ADMIN+)' })
+  @ApiParam({ name: 'id', description: 'Payment ID', type: 'string' })
+  @ApiResponse({ status: 200, description: 'Payku transaction details returned' })
+  @ApiResponse({ status: 400, description: 'No Payku transaction for this payment' })
+  @ApiResponse({ status: 404, description: 'Payment not found' })
+  @ApiResponse({ status: 502, description: 'Payku API error' })
+  @ApiResponse({ status: 503, description: 'Payment gateway not configured' })
+  async getPaykuStatus(
+    @Param('id') id: string,
+    @CurrentUser() user: { condominioId: string },
+  ) {
+    const result = await this.paymentsService.getPaykuStatus(
+      id,
+      user.condominioId,
+    );
+    return ResponseUtil.success(result);
+  }
+
   @Delete('payments/:id')
   @Version('1')
   @MinRole(Role.ADMIN)
