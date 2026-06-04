@@ -1,6 +1,7 @@
 import { IsString, IsIn, IsUUID, Length } from 'class-validator';
+import { PaykuWebhookPayload } from '@condominios/infrastructure/payku/interfaces/webhook.interface';
 
-export class PaykuWebhookDto {
+export class PaykuWebhookDto implements PaykuWebhookPayload {
   @IsString()
   @Length(1, 255)
   transaction_id: string;

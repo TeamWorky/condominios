@@ -694,6 +694,20 @@ describe('PaymentsService', () => {
       );
     });
 
+    it('should invalidate condo- and unit-scoped caches (not the global unit pattern)', async () => {
+      const mockPayment = createMockPayment({
+        unit: { building: { condominiumId: 'condo-1' } } as any,
+      });
+      mockRepository.findOne = jest.fn().mockResolvedValue(mockPayment);
+      mockRepository.save.mockResolvedValue(mockPayment);
+
+      await service.handleWebhook(successPayload);
+
+      expect(cache.invalidatePattern).toHaveBeenCalledWith('payments:condo:condo-1:*');
+      expect(cache.invalidatePattern).toHaveBeenCalledWith('payments:unit:unit-1:*');
+      expect(cache.invalidatePattern).not.toHaveBeenCalledWith('payments:unit:*');
+    });
+
     it('should skip if payment not found', async () => {
       mockRepository.findOne = jest.fn().mockResolvedValue(null);
 

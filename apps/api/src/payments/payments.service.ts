@@ -77,7 +77,11 @@ export class PaymentsService {
     const payment = this.paymentRepository.create(createPaymentDto);
     const savedPayment = await this.paymentRepository.save(payment);
 
-    await this.invalidatePaymentCache(savedPayment.id, condominiumId);
+    await this.invalidatePaymentCache(
+      savedPayment.id,
+      condominiumId,
+      savedPayment.unitId,
+    );
 
     this.logger.log(
       `Payment created: ${savedPayment.id}`,
@@ -194,7 +198,11 @@ export class PaymentsService {
     Object.assign(payment, updatePaymentDto);
     const updatedPayment = await this.paymentRepository.save(payment);
 
-    await this.invalidatePaymentCache(updatedPayment.id, condominiumId);
+    await this.invalidatePaymentCache(
+      updatedPayment.id,
+      condominiumId,
+      updatedPayment.unitId,
+    );
 
     this.logger.log(
       `Payment updated: ${id}`,
@@ -241,7 +249,11 @@ export class PaymentsService {
 
     const updatedPayment = await this.paymentRepository.save(payment);
 
-    await this.invalidatePaymentCache(updatedPayment.id, condominiumId);
+    await this.invalidatePaymentCache(
+      updatedPayment.id,
+      condominiumId,
+      updatedPayment.unitId,
+    );
 
     this.logger.log(
       `Payment status changed: ${id} → ${changeStatusDto.status}`,
@@ -265,7 +277,7 @@ export class PaymentsService {
 
     await this.paymentRepository.softDelete(id);
 
-    await this.invalidatePaymentCache(id, condominiumId);
+    await this.invalidatePaymentCache(id, condominiumId, payment.unitId);
 
     this.logger.log(
       `Payment soft deleted: ${id}`,
@@ -335,7 +347,7 @@ export class PaymentsService {
     payment.paykuTransactionId = response.id;
     await this.paymentRepository.save(payment);
 
-    await this.invalidatePaymentCache(payment.id, condominiumId);
+    await this.invalidatePaymentCache(payment.id, condominiumId, payment.unitId);
 
     this.logger.log(
       `Payment initiated via Payku: ${payment.id}`,
@@ -431,7 +443,11 @@ export class PaymentsService {
     await this.paymentRepository.save(payment);
 
     const condominiumId = payment.unit?.building?.condominiumId;
-    await this.invalidatePaymentCache(payment.id, condominiumId);
+    await this.invalidatePaymentCache(
+      payment.id,
+      condominiumId,
+      payment.unitId,
+    );
 
     this.logger.log(
       `Webhook: payment ${payment.id} confirmed as PAID`,
@@ -493,6 +509,7 @@ export class PaymentsService {
   private async invalidatePaymentCache(
     id: string,
     condominiumId?: string,
+    unitId?: string,
   ): Promise<void> {
     const invalidations: Promise<void>[] = [
       this.cache.invalidate(CACHE_KEYS.payment(id)),
@@ -506,9 +523,14 @@ export class PaymentsService {
       );
     }
 
-    // Also invalidate unit-level caches (we don't always know the unitId here)
+    // Scope unit-level invalidation to the affected unit when known, so we
+    // don't drop cached payment lists for unrelated units/condominiums.
     invalidations.push(
-      this.cache.invalidatePattern('payments:unit:*'),
+      this.cache.invalidatePattern(
+        unitId
+          ? CACHE_KEYS.paymentListPatternByUnit(unitId)
+          : 'payments:unit:*',
+      ),
     );
 
     await Promise.all(invalidations);
