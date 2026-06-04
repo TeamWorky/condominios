@@ -37,6 +37,8 @@ describe('PaymentsController', () => {
     update: jest.fn(),
     changeStatus: jest.fn(),
     remove: jest.fn(),
+    initiatePayment: jest.fn(),
+    getPaykuStatus: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -240,6 +242,95 @@ describe('PaymentsController', () => {
           { condominioId: 'condo-1' },
         ),
       ).rejects.toThrow(BusinessException);
+    });
+  });
+
+  describe('initiate', () => {
+    it('should initiate payment and return Payku URL', async () => {
+      const initiateResult = {
+        paymentId: 'payment-1',
+        paykuTransactionId: 'payku-txn-123',
+        paymentUrl: 'https://des.payku.cl/gateway/payku-txn-123',
+      };
+      mockService.initiatePayment.mockResolvedValue(initiateResult);
+
+      const result = await controller.initiate(
+        'payment-1',
+        { condominioId: 'condo-1', email: 'user@test.com' },
+      );
+
+      expect(mockService.initiatePayment).toHaveBeenCalledWith(
+        'payment-1',
+        'condo-1',
+        'user@test.com',
+      );
+      expect(result).toHaveProperty('data', initiateResult);
+    });
+
+    it('should propagate BusinessException for invalid status', async () => {
+      mockService.initiatePayment.mockRejectedValue(
+        new BusinessException('Cannot initiate payment for a payment with status PAID'),
+      );
+
+      await expect(
+        controller.initiate('payment-1', { condominioId: 'condo-1', email: 'user@test.com' }),
+      ).rejects.toThrow(BusinessException);
+    });
+
+    it('should propagate BusinessException when Payku not operational', async () => {
+      mockService.initiatePayment.mockRejectedValue(
+        new BusinessException('Payment gateway is not available'),
+      );
+
+      await expect(
+        controller.initiate('payment-1', { condominioId: 'condo-1', email: 'user@test.com' }),
+      ).rejects.toThrow(BusinessException);
+    });
+
+    it('should propagate NotFoundException for invalid payment', async () => {
+      mockService.initiatePayment.mockRejectedValue(new NotFoundException('Payment'));
+
+      await expect(
+        controller.initiate('invalid', { condominioId: 'condo-1', email: 'user@test.com' }),
+      ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('getPaykuStatus', () => {
+    it('should return Payku transaction details', async () => {
+      const statusResult = {
+        paymentId: 'payment-1',
+        paykuTransactionId: 'payku-txn-123',
+        paykuStatus: 'success',
+        paykuDetails: { status: 'success', amount: '150000' },
+      };
+      mockService.getPaykuStatus.mockResolvedValue(statusResult);
+
+      const result = await controller.getPaykuStatus(
+        'payment-1',
+        { condominioId: 'condo-1' },
+      );
+
+      expect(mockService.getPaykuStatus).toHaveBeenCalledWith('payment-1', 'condo-1');
+      expect(result).toHaveProperty('data', statusResult);
+    });
+
+    it('should propagate BusinessException when no Payku transaction', async () => {
+      mockService.getPaykuStatus.mockRejectedValue(
+        new BusinessException('No Payku transaction exists for this payment'),
+      );
+
+      await expect(
+        controller.getPaykuStatus('payment-1', { condominioId: 'condo-1' }),
+      ).rejects.toThrow(BusinessException);
+    });
+
+    it('should propagate NotFoundException for invalid payment', async () => {
+      mockService.getPaykuStatus.mockRejectedValue(new NotFoundException('Payment'));
+
+      await expect(
+        controller.getPaykuStatus('invalid', { condominioId: 'condo-1' }),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 

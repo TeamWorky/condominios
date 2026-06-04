@@ -260,7 +260,7 @@ Use these slash commands for the SDD workflow:
 | Buildings | COMPLETE | ❌ Missing |
 | Units | COMPLETE | ❌ Missing |
 | Residents | COMPLETE | ✅ |
-| Payments | STUB (entity only) | ❌ |
+| Payments | COMPLETE (CRUD + Payku integration) | ✅ |
 | Common Spaces | STUB (entity only) | ❌ |
 | Reservations | STUB (entity only) | ❌ |
 
@@ -294,9 +294,12 @@ Use these slash commands for the SDD workflow:
 - axios (HTTP client)
 - TypeScript 5.9, Node.js 24.x + NestJS 11, TypeORM 0.3.x, PostgreSQL, Redis (006-payments-backend)
 - PostgreSQL (TypeORM), Redis (cache) (006-payments-backend)
+- TypeScript 5.9, Node.js 24.11.1 + NestJS 11.0.1, TypeORM 0.3.28, PostgreSQL, Redis, axios (via PaykuService) (007-payku-integration)
 
 ## Recent Changes
 - 001-add-mobile-app: Added TypeScript 5.9, Node.js 24.x
 - 002-buildings-crud: Full CRUD buildings module (backend + frontend)
 - 003-residents-crud: Full CRUD residents module (backend + frontend)
 - 005-payku-library: PaykuModule, PaykuService, PaykuSignatureService, PaykuException
+- 006-payments-backend: Payments CRUD module with 7 REST endpoints, full test coverage
+- 007-payku-integration: Payku payment gateway integration — initiate, webhook, status check endpoints

@@ -10,6 +10,8 @@ import {
   BusinessException,
 } from '@condominios/common/exceptions/business.exception';
 import { UnitsService } from '../units/units.service';
+import { PaykuService } from '@condominios/infrastructure/payku/payku.service';
+import { ConfigService } from '@nestjs/config';
 import { PaymentStatus } from '@condominios/shared/enums/payment-status.enum';
 import { PaymentMethod } from '@condominios/shared/enums/payment-method.enum';
 
@@ -39,6 +41,7 @@ describe('PaymentsService', () => {
     create: jest.fn(),
     save: jest.fn(),
     softDelete: jest.fn(),
+    findOne: jest.fn(),
     createQueryBuilder: jest.fn(() => mockQueryBuilder),
   };
 
@@ -66,6 +69,33 @@ describe('PaymentsService', () => {
     }),
   };
 
+  const mockPaykuService = {
+    isOperational: jest.fn().mockReturnValue(true),
+    createTransaction: jest.fn().mockResolvedValue({
+      status: 'ok',
+      id: 'payku-txn-123',
+      url: 'https://des.payku.cl/gateway/payku-txn-123',
+    }),
+    getTransaction: jest.fn().mockResolvedValue({
+      status: 'success',
+      id: 'payku-txn-123',
+      order: 'payment-1',
+      amount: '150000',
+      gateway_response: { status: 'success', message: 'Pago exitoso' },
+    }),
+    deleteTransaction: jest.fn().mockResolvedValue(undefined),
+  };
+
+  const mockConfigService = {
+    get: jest.fn((key: string, defaultValue?: string) => {
+      const config: Record<string, string> = {
+        PAYKU_RETURN_URL: 'http://localhost:4200/payments/result',
+        PAYKU_NOTIFY_URL: 'http://localhost:3000/api/v1/payments/webhook/payku',
+      };
+      return config[key] || defaultValue || '';
+    }),
+  };
+
   const createMockPayment = (overrides?: Partial<Payment>): Payment => {
     const payment = new Payment();
     payment.id = overrides?.id || 'payment-1';
@@ -77,8 +107,12 @@ describe('PaymentsService', () => {
     payment.paymentMethod = overrides?.paymentMethod || null;
     payment.reference = overrides?.reference || null;
     payment.notes = overrides?.notes || null;
+    payment.paykuTransactionId = overrides?.paykuTransactionId || null;
     payment.unitId = overrides?.unitId || 'unit-1';
     payment.residentId = overrides?.residentId || null;
+    if (overrides?.unit) {
+      payment.unit = overrides.unit;
+    }
     return payment;
   };
 
@@ -97,6 +131,8 @@ describe('PaymentsService', () => {
         { provide: RedisCacheService, useValue: mockCache },
         { provide: LoggerService, useValue: mockLogger },
         { provide: UnitsService, useValue: mockUnitsService },
+        { provide: PaykuService, useValue: mockPaykuService },
+        { provide: ConfigService, useValue: mockConfigService },
       ],
     }).compile();
 
@@ -497,6 +533,315 @@ describe('PaymentsService', () => {
       await service.remove('payment-1', 'condo-1');
 
       expect(mockRepository.softDelete).toHaveBeenCalledWith('payment-1');
+    });
+  });
+
+  describe('initiatePayment', () => {
+    it('should initiate payment for PENDING status', async () => {
+      const mockPayment = createMockPayment({ unit: { number: '101' } as any });
+      mockQueryBuilder.getOne.mockResolvedValue(mockPayment);
+      mockRepository.save.mockResolvedValue(mockPayment);
+
+      const result = await service.initiatePayment('payment-1', 'condo-1', 'user@test.com');
+
+      expect(mockPaykuService.createTransaction).toHaveBeenCalledWith(
+        expect.objectContaining({
+          email: 'user@test.com',
+          order: 'payment-1',
+          amount: 150000,
+          currency: 'CLP',
+        }),
+      );
+      expect(result).toHaveProperty('paymentUrl', 'https://des.payku.cl/gateway/payku-txn-123');
+      expect(result).toHaveProperty('paykuTransactionId', 'payku-txn-123');
+      expect(mockRepository.save).toHaveBeenCalledWith(
+        expect.objectContaining({ paykuTransactionId: 'payku-txn-123' }),
+      );
+    });
+
+    it('should initiate payment for OVERDUE status', async () => {
+      const mockPayment = createMockPayment({ status: PaymentStatus.OVERDUE });
+      mockQueryBuilder.getOne.mockResolvedValue(mockPayment);
+      mockRepository.save.mockResolvedValue(mockPayment);
+
+      const result = await service.initiatePayment('payment-1', 'condo-1', 'user@test.com');
+
+      expect(result).toHaveProperty('paymentUrl');
+    });
+
+    it('should reject initiation for PAID status', async () => {
+      const mockPayment = createMockPayment({ status: PaymentStatus.PAID });
+      mockQueryBuilder.getOne.mockResolvedValue(mockPayment);
+
+      await expect(
+        service.initiatePayment('payment-1', 'condo-1', 'user@test.com'),
+      ).rejects.toThrow(BusinessException);
+    });
+
+    it('should reject initiation for CANCELLED status', async () => {
+      const mockPayment = createMockPayment({ status: PaymentStatus.CANCELLED });
+      mockQueryBuilder.getOne.mockResolvedValue(mockPayment);
+
+      await expect(
+        service.initiatePayment('payment-1', 'condo-1', 'user@test.com'),
+      ).rejects.toThrow(BusinessException);
+    });
+
+    it('should reject initiation for PARTIAL status', async () => {
+      const mockPayment = createMockPayment({ status: PaymentStatus.PARTIAL });
+      mockQueryBuilder.getOne.mockResolvedValue(mockPayment);
+
+      await expect(
+        service.initiatePayment('payment-1', 'condo-1', 'user@test.com'),
+      ).rejects.toThrow(BusinessException);
+    });
+
+    it('should throw when Payku is not operational', async () => {
+      const mockPayment = createMockPayment();
+      mockQueryBuilder.getOne.mockResolvedValue(mockPayment);
+      mockPaykuService.isOperational.mockReturnValue(false);
+
+      await expect(
+        service.initiatePayment('payment-1', 'condo-1', 'user@test.com'),
+      ).rejects.toThrow(BusinessException);
+
+      mockPaykuService.isOperational.mockReturnValue(true);
+    });
+
+    it('should throw when return/notify URLs are not configured', async () => {
+      const mockPayment = createMockPayment();
+      mockQueryBuilder.getOne.mockResolvedValue(mockPayment);
+      mockConfigService.get.mockReturnValue('');
+
+      await expect(
+        service.initiatePayment('payment-1', 'condo-1', 'user@test.com'),
+      ).rejects.toThrow(BusinessException);
+
+      mockConfigService.get.mockImplementation((key: string, defaultValue?: string) => {
+        const config: Record<string, string> = {
+          PAYKU_RETURN_URL: 'http://localhost:4200/payments/result',
+          PAYKU_NOTIFY_URL: 'http://localhost:3000/api/v1/payments/webhook/payku',
+        };
+        return config[key] || defaultValue || '';
+      });
+    });
+
+    it('should cancel old transaction and create new one on re-initiation', async () => {
+      const mockPayment = createMockPayment({ paykuTransactionId: 'old-txn' } as any);
+      mockQueryBuilder.getOne.mockResolvedValue(mockPayment);
+      mockRepository.save.mockResolvedValue(mockPayment);
+
+      const result = await service.initiatePayment('payment-1', 'condo-1', 'user@test.com');
+
+      expect(mockPaykuService.deleteTransaction).toHaveBeenCalledWith('old-txn');
+      expect(result.paykuTransactionId).toBe('payku-txn-123');
+    });
+
+    it('should proceed even if cancelling old transaction fails', async () => {
+      const mockPayment = createMockPayment({ paykuTransactionId: 'old-txn' } as any);
+      mockQueryBuilder.getOne.mockResolvedValue(mockPayment);
+      mockRepository.save.mockResolvedValue(mockPayment);
+      mockPaykuService.deleteTransaction.mockRejectedValueOnce(new Error('Network error'));
+
+      const result = await service.initiatePayment('payment-1', 'condo-1', 'user@test.com');
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to cancel previous Payku transaction'),
+        expect.any(String),
+      );
+      expect(result.paykuTransactionId).toBe('payku-txn-123');
+    });
+
+    it('should propagate NotFoundException when payment not found', async () => {
+      mockQueryBuilder.getOne.mockResolvedValue(null);
+
+      await expect(
+        service.initiatePayment('invalid', 'condo-1', 'user@test.com'),
+      ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('handleWebhook', () => {
+    const successPayload = {
+      transaction_id: 'payku-txn-123',
+      payment_key: 'key',
+      transaction_key: 'tkey',
+      verification_key: 'vkey',
+      order: 'payment-1',
+      status: 'success' as const,
+    };
+
+    it('should update payment to PAID on success webhook', async () => {
+      const mockPayment = createMockPayment({
+        unit: { building: { condominiumId: 'condo-1' } } as any,
+      });
+      mockRepository.findOne = jest.fn().mockResolvedValue(mockPayment);
+      mockRepository.save.mockResolvedValue(mockPayment);
+
+      await service.handleWebhook(successPayload);
+
+      expect(mockRepository.findOne).toHaveBeenCalledWith({
+        where: { id: 'payment-1' },
+        relations: ['unit', 'unit.building'],
+      });
+      expect(mockRepository.save).toHaveBeenCalledWith(
+        expect.objectContaining({
+          status: PaymentStatus.PAID,
+          paymentMethod: PaymentMethod.ONLINE,
+          paidDate: expect.any(Date),
+          reference: 'payku-txn-123',
+        }),
+      );
+    });
+
+    it('should invalidate condo- and unit-scoped caches (not the global unit pattern)', async () => {
+      const mockPayment = createMockPayment({
+        unit: { building: { condominiumId: 'condo-1' } } as any,
+      });
+      mockRepository.findOne = jest.fn().mockResolvedValue(mockPayment);
+      mockRepository.save.mockResolvedValue(mockPayment);
+
+      await service.handleWebhook(successPayload);
+
+      expect(cache.invalidatePattern).toHaveBeenCalledWith('payments:condo:condo-1:*');
+      expect(cache.invalidatePattern).toHaveBeenCalledWith('payments:unit:unit-1:*');
+      expect(cache.invalidatePattern).not.toHaveBeenCalledWith('payments:unit:*');
+    });
+
+    it('should skip if payment not found', async () => {
+      mockRepository.findOne = jest.fn().mockResolvedValue(null);
+
+      await service.handleWebhook(successPayload);
+
+      expect(mockRepository.save).not.toHaveBeenCalled();
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('payment not found'),
+        expect.any(String),
+      );
+    });
+
+    it('should skip if payment already PAID (idempotent)', async () => {
+      const paidPayment = createMockPayment({ status: PaymentStatus.PAID });
+      mockRepository.findOne = jest.fn().mockResolvedValue(paidPayment);
+
+      await service.handleWebhook(successPayload);
+
+      expect(mockPaykuService.getTransaction).not.toHaveBeenCalled();
+      expect(mockRepository.save).not.toHaveBeenCalled();
+    });
+
+    it('should skip if Payku not operational', async () => {
+      const mockPayment = createMockPayment();
+      mockRepository.findOne = jest.fn().mockResolvedValue(mockPayment);
+      mockPaykuService.isOperational.mockReturnValue(false);
+
+      await service.handleWebhook(successPayload);
+
+      expect(mockRepository.save).not.toHaveBeenCalled();
+      mockPaykuService.isOperational.mockReturnValue(true);
+    });
+
+    it('should skip on order mismatch and log error', async () => {
+      const mockPayment = createMockPayment();
+      mockRepository.findOne = jest.fn().mockResolvedValue(mockPayment);
+      mockPaykuService.getTransaction.mockResolvedValueOnce({
+        status: 'success',
+        id: 'payku-txn-123',
+        order: 'different-payment-id',
+        amount: '150000',
+        gateway_response: { status: 'success', message: 'Ok' },
+      });
+
+      await service.handleWebhook(successPayload);
+
+      expect(mockRepository.save).not.toHaveBeenCalled();
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining('order mismatch'),
+        undefined,
+        expect.any(String),
+      );
+    });
+
+    it('should skip if gateway status is not success', async () => {
+      const mockPayment = createMockPayment();
+      mockRepository.findOne = jest.fn().mockResolvedValue(mockPayment);
+      mockPaykuService.getTransaction.mockResolvedValueOnce({
+        status: 'rejected',
+        order: 'payment-1',
+        amount: '150000',
+        gateway_response: { status: 'rejected', message: 'Rechazado' },
+      });
+
+      await service.handleWebhook(successPayload);
+
+      expect(mockRepository.save).not.toHaveBeenCalled();
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('not successful'),
+        expect.any(String),
+        expect.any(Object),
+      );
+    });
+
+    it('should skip on amount mismatch and log error', async () => {
+      const mockPayment = createMockPayment({ amount: 150000 });
+      mockRepository.findOne = jest.fn().mockResolvedValue(mockPayment);
+      mockPaykuService.getTransaction.mockResolvedValueOnce({
+        status: 'success',
+        order: 'payment-1',
+        amount: '99999',
+        gateway_response: { status: 'success', message: 'Ok' },
+      });
+
+      await service.handleWebhook(successPayload);
+
+      expect(mockRepository.save).not.toHaveBeenCalled();
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining('amount mismatch'),
+        undefined,
+        expect.any(String),
+      );
+    });
+  });
+
+  describe('getPaykuStatus', () => {
+    it('should return Payku transaction details', async () => {
+      const mockPayment = createMockPayment({ paykuTransactionId: 'payku-txn-123' } as any);
+      mockQueryBuilder.getOne.mockResolvedValue(mockPayment);
+
+      const result = await service.getPaykuStatus('payment-1', 'condo-1');
+
+      expect(mockPaykuService.getTransaction).toHaveBeenCalledWith('payku-txn-123');
+      expect(result).toHaveProperty('paykuStatus', 'success');
+      expect(result).toHaveProperty('paykuDetails');
+    });
+
+    it('should throw when payment has no Payku transaction', async () => {
+      const mockPayment = createMockPayment();
+      mockQueryBuilder.getOne.mockResolvedValue(mockPayment);
+
+      await expect(
+        service.getPaykuStatus('payment-1', 'condo-1'),
+      ).rejects.toThrow(BusinessException);
+    });
+
+    it('should throw when Payku is not operational', async () => {
+      const mockPayment = createMockPayment({ paykuTransactionId: 'payku-txn-123' } as any);
+      mockQueryBuilder.getOne.mockResolvedValue(mockPayment);
+      mockPaykuService.isOperational.mockReturnValue(false);
+
+      await expect(
+        service.getPaykuStatus('payment-1', 'condo-1'),
+      ).rejects.toThrow(BusinessException);
+
+      mockPaykuService.isOperational.mockReturnValue(true);
+    });
+
+    it('should propagate NotFoundException when payment not found', async () => {
+      mockQueryBuilder.getOne.mockResolvedValue(null);
+
+      await expect(
+        service.getPaykuStatus('invalid', 'condo-1'),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 });
